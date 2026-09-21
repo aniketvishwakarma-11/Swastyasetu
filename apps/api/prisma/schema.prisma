@@ -1,0 +1,277 @@
+// Prisma Schema for SwasthyaSetu / MediVault
+// Database: PostgreSQL
+// Source of Truth: SwasthyaSetu_MediVault_AI_Agent_Project_Spec.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PHC_USER
+  CLINICIAN
+  REFERRAL_COORDINATOR
+  ADMIN
+}
+
+enum FacilityType {
+  PHC
+  DISTRICT_HOSPITAL
+  PRIVATE_CLINIC
+}
+
+enum ReferralUrgency {
+  ROUTINE
+  URGENT
+  EMERGENCY
+}
+
+enum ReferralStatus {
+  DRAFT
+  VALIDATED
+  QUEUED
+  SYNCING
+  SENT
+  RECEIVED
+  IDENTITY_PENDING
+  IDENTITY_CONFIRMED
+  CONSULTED
+  DISCHARGE_PROCESSING
+  DOCUMENT_REVIEW
+  CARE_RECORD_UPDATED
+  FOLLOW_UP_DUE
+  FOLLOW_UP_COMPLETED
+  SYNC_FAILED
+  CONFLICT
+}
+
+enum SyncStatus {
+  PENDING
+  SYNCING
+  SYNCED
+  FAILED
+  CONFLICT
+}
+
+enum IdentityMatchStatus {
+  PENDING_REVIEW
+  CONFIRMED
+  REJECTED
+}
+
+enum FieldReviewStatus {
+  AUTO_ACCEPTED
+  NEEDS_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum FollowUpStatus {
+  SCHEDULED
+  OVERDUE
+  COMPLETED
+  CANCELLED
+}
+
+// ----------------------------------------------------
+// System Users & Facilities
+// ----------------------------------------------------
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         UserRole  @default(PHC_USER)
+  facilityId   String?
+  facility     Facility? @relation(fields: [facilityId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  createdReferrals Referral[] @relation("ReferralCreatedBy")
+  reviewedMatches  IdentityMatch[]
+  reviewedFields   ClinicalField[]
+}
+
+model Facility {
+  id        String       @id @default(uuid())
+  code      String       @unique // e.g. PHC-KHED, DIST-HOSP
+  name      String
+  type      FacilityType
+  district  String
+  state     String
+  phone     String?
+  createdAt DateTime     @default(now())
+
+  users                User[]
+  outgoingReferrals    Referral[] @relation("SourceFacility")
+  incomingReferrals    Referral[] @relation("DestinationFacility")
+}
+
+// ----------------------------------------------------
+// Core Domain Models (Spec Section 12)
+// ----------------------------------------------------
+
+model Patient {
+  id        String   @id @default(uuid())
+  localId   String?  // Client-side generated ID for offline resilience
+  name      String
+  age       Int
+  gender    String   // Male, Female, Other
+  phone     String?
+  village   String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  referrals           Referral[]
+  documents           ClinicalDocument[]
+  followUps           FollowUp[]
+  incomingMatches     IdentityMatch[] @relation("IncomingPatient")
+  candidateMatches    IdentityMatch[] @relation("CandidatePatient")
+
+  @@index([name])
+  @@index([village])
+  @@index([phone])
+}
+
+model Referral {
+  id                    String          @id @default(uuid())
+  referralNumber        String          @unique // e.g. RF-1024
+  patientId             String
+  patient               Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  sourceFacilityId      String
+  sourceFacility        Facility        @relation("SourceFacility", fields: [sourceFacilityId], references: [id])
+  destinationFacilityId String
+  destinationFacility   Facility        @relation("DestinationFacility", fields: [destinationFacilityId], references: [id])
+  urgency               ReferralUrgency @default(ROUTINE)
+  reason                String
+  clinicalSummary       String          @db.Text
+  status                ReferralStatus  @default(SENT)
+  createdById           String?
+  createdBy             User?           @relation("ReferralCreatedBy", fields: [createdById], references: [id])
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  identityMatches   IdentityMatch[]
+  clinicalDocuments ClinicalDocument[]
+  followUps         FollowUp[]
+
+  @@index([status])
+  @@index([urgency])
+  @@index([referralNumber])
+}
+
+model SyncEvent {
+  id         String     @id @default(uuid())
+  eventId    String     @unique // Client generated EVT-01J... for idempotency
+  entityType String     // PATIENT, REFERRAL, CLINICAL_DOCUMENT, etc.
+  entityId   String
+  operation  String     // CREATE, UPDATE, DELETE
+  payload    Json       // Complete event payload
+  status     SyncStatus @default(PENDING)
+  retryCount Int        @default(0)
+  lastError  String?    @db.Text
+  createdAt  DateTime   @default(now())
+  syncedAt   DateTime?
+
+  @@index([eventId])
+  @@index([status])
+}
+
+model IdentityMatch {
+  id                 String              @id @default(uuid())
+  referralId         String
+  referral           Referral            @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  incomingPatientId  String
+  incomingPatient    Patient             @relation("IncomingPatient", fields: [incomingPatientId], references: [id])
+  candidatePatientId String
+  candidatePatient   Patient             @relation("CandidatePatient", fields: [candidatePatientId], references: [id])
+  score              Float               // 0.00 to 1.00 composite score
+  fieldScores        Json                // Detailed scores breakdown (name, phone, village, age)
+  status             IdentityMatchStatus @default(PENDING_REVIEW)
+  reviewedById       String?
+  reviewedBy         User?               @relation(fields: [reviewedById], references: [id])
+  reviewedAt         DateTime?
+  createdAt          DateTime            @default(now())
+
+  @@index([referralId])
+  @@index([status])
+}
+
+model ClinicalDocument {
+  id               String   @id @default(uuid())
+  patientId        String
+  patient          Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  referralId       String?
+  referral         Referral? @relation(fields: [referralId], references: [id])
+  documentType     String   // DISCHARGE_SUMMARY, PRESCRIPTION, LAB_REPORT
+  originalFileUrl  String
+  ocrText          String?  @db.Text
+  processingStatus String   @default("UPLOADED") // UPLOADED, PROCESSING, PROCESSED, FAILED
+  createdAt        DateTime @default(now())
+
+  extractedFields  ClinicalField[]
+
+  @@index([patientId])
+}
+
+model ClinicalField {
+  id              String            @id @default(uuid())
+  documentId      String
+  document        ClinicalDocument  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  fieldName       String            // diagnosis, medicine, dosage, frequency, duration
+  rawValue        String            @db.Text
+  normalizedValue String?           @db.Text
+  confidence      Float             // 0.00 to 1.00
+  reviewStatus    FieldReviewStatus @default(NEEDS_REVIEW)
+  reviewedValue   String?           @db.Text
+  reviewedById    String?
+  reviewedBy      User?             @relation(fields: [reviewedById], references: [id])
+  reviewedAt      DateTime?
+  createdAt       DateTime          @default(now())
+
+  @@index([documentId])
+  @@index([reviewStatus])
+}
+
+model FollowUp {
+  id               String         @id @default(uuid())
+  patientId        String
+  patient          Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  referralId       String?
+  referral         Referral?      @relation(fields: [referralId], references: [id])
+  dueAt            DateTime
+  purpose          String
+  assignedProvider String
+  status           FollowUpStatus @default(SCHEDULED)
+  completedAt      DateTime?
+  notes            String?        @db.Text
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([patientId])
+  @@index([dueAt])
+  @@index([status])
+}
+
+model AuditEvent {
+  id         String   @id @default(uuid())
+  eventId    String   @unique
+  actorId    String
+  actorRole  String
+  facilityId String?
+  eventType  String   // REFERRAL_CREATED, IDENTITY_CONFIRMED, FIELD_REVIEWED, etc.
+  entityType String
+  entityId   String
+  metadata   Json?
+  timestamp  DateTime @default(now())
+
+  @@index([eventId])
+  @@index([entityType, entityId])
+  @@index([timestamp])
+}
