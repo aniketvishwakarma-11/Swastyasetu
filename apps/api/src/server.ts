@@ -1,11 +1,18 @@
+import path from 'path';
+import dotenv from 'dotenv';
+
+// Load .env from monorepo root FIRST — before Prisma client is initialized
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../../.env') }); // fallback
+
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import authRoutes from './modules/auth/auth.routes';
 import facilitiesRoutes from './modules/facilities/facilities.routes';
 import rbacTestRoutes from './modules/test/rbac-test.routes';
-
-dotenv.config({ path: '../../.env' });
+import referralsRoutes from './modules/referrals/referrals.routes';
+import syncRoutes from './modules/sync/sync.routes';
+import identityRoutes from './modules/identity/identity.routes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,6 +35,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Mounted Modular Routers
 app.use('/api/auth', authRoutes);
 app.use('/api/facilities', facilitiesRoutes);
+app.use('/api/referrals', referralsRoutes);
+app.use('/api/sync', syncRoutes);
+app.use('/api/identity', identityRoutes);
 app.use('/api/test', rbacTestRoutes);
 
 // Root information
