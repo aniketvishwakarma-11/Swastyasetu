@@ -4,13 +4,13 @@
   "description": "Backend REST API and Sync Gateway for SwasthyaSetu",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only -r dotenv/config src/server.ts dotenv_config_path=../../.env",
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
     "prisma:studio": "prisma studio",
-    "db:seed": "ts-node-dev src/seed.ts"
+    "db:seed": "ts-node-dev -r dotenv/config src/seed.ts dotenv_config_path=../../.env"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",

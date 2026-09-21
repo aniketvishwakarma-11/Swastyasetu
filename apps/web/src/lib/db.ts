@@ -1,27 +1,35 @@
 import Dexie, { Table } from 'dexie';
-import type { Referral, SyncEvent, Patient, Facility } from '@swastyasetu/shared';
+import { Patient, Referral, SyncEvent } from '@swastyasetu/shared';
 
-export interface LocalReferral extends Referral {
-  localSyncStatus: 'QUEUED' | 'SYNCING' | 'SYNCED' | 'FAILED';
-  lastAttemptAt?: string;
-  errorMessage?: string;
+export interface LocalReferral extends Omit<Referral, 'id'> {
+  id?: string;
+  localId: string;
+  syncStatus: 'QUEUED' | 'SYNCING' | 'SYNCED' | 'FAILED';
+  lastSyncedAt?: string;
+}
+
+export interface LocalPatient extends Omit<Patient, 'id'> {
+  id?: string;
+  localId: string;
+}
+
+export interface LocalSyncEvent extends SyncEvent {
+  localId?: string;
 }
 
 export class SwasthyaSetuDatabase extends Dexie {
   referrals!: Table<LocalReferral, string>;
-  syncQueue!: Table<SyncEvent, string>;
-  patients!: Table<Patient, string>;
-  facilities!: Table<Facility, string>;
+  patients!: Table<LocalPatient, string>;
+  syncQueue!: Table<LocalSyncEvent, string>;
 
   constructor() {
-    super('SwasthyaSetuOfflineDB');
+    super('SwasthyaSetuDB');
     this.version(1).stores({
-      referrals: 'id, referralNumber, patientId, status, localSyncStatus, createdAt',
-      syncQueue: 'id, eventId, entityType, entityId, status, createdAt',
-      patients: 'id, name, phone, village, localId',
-      facilities: 'id, code, type',
+      referrals: 'localId, referralNumber, urgency, status, syncStatus, createdAt',
+      patients: 'localId, name, phone, village',
+      syncQueue: 'eventId, entityType, entityId, status, createdAt',
     });
   }
 }
 
-export const db = new SwasthyaSetuDatabase();
+export const localDb = new SwasthyaSetuDatabase();
