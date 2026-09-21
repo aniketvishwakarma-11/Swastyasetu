@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center space-x-1.5">
               <span className="text-base font-bold text-slate-900 leading-tight">SwasthyaSetu</span>
               <span className="text-[10px] font-semibold text-teal-700 px-1.5 py-0.2 bg-teal-50 border border-teal-200 rounded">
-                MediVault
+                Continuity Layer
               </span>
             </div>
             {user?.facility ? (

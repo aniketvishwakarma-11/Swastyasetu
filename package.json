@@ -2,7 +2,7 @@
   "name": "swastyasetu-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "SwasthyaSetu / MediVault - Offline-first healthcare continuity layer",
+  "description": "SwasthyaSetu - Offline-first healthcare continuity layer",
   "workspaces": [
     "packages/*",
     "apps/*"

@@ -1,6 +1,5 @@
-// Prisma Schema for SwasthyaSetu / MediVault
+// Prisma Schema for SwasthyaSetu
 // Database: PostgreSQL
-// Source of Truth: SwasthyaSetu_MediVault_AI_Agent_Project_Spec.md
 
 generator client {
   provider = "prisma-client-js"

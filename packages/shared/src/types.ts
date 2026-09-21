@@ -1,6 +1,5 @@
 /**
- * SwasthyaSetu / MediVault Shared Domain Types
- * Source of Truth: SwasthyaSetu_MediVault_AI_Agent_Project_Spec.md
+ * SwasthyaSetu Shared Domain Types
  */
 
 export type UserRole = 'PHC_USER' | 'CLINICIAN' | 'REFERRAL_COORDINATOR' | 'ADMIN';

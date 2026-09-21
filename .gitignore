@@ -12,10 +12,16 @@ out/
 .turbo/
 .cache/
 
-# Environment files (never commit secrets)
+# Environment files & Secret Credentials (never commit secrets)
 .env
 .env.*
 !.env.example
+client_secret*.json
+*client_secret*
+*credentials*.json
+*.secret.json
+*service-account*.json
+gcp-key*.json
 
 # Logs
 npm-debug.log*

@@ -1,6 +1,6 @@
 # SwasthyaSetu Project Rules & Directives for AI Agents
 
-Welcome to the SwasthyaSetu (MediVault) repository. All AI agents and developers modifying code in this repository MUST adhere to these rules:
+Welcome to the SwasthyaSetu repository. All AI agents and developers modifying code in this repository MUST adhere to these rules:
 
 ## 1. UI/UX Design System & Theme Directives
 - **Zero "Vibe-Coding"**: Do NOT introduce neon glows, unnecessary gradients, dark-mode gaming aesthetics, or playful chatbot decorations. This is a mission-critical healthcare operations tool for frontline doctors and district clinicians.

@@ -1,5 +1,5 @@
 /**
- * SwasthyaSetu / MediVault Shared Constants & Configurations
+ * SwasthyaSetu Shared Constants & Configurations
  */
 
 // Implementation default weights for multi-field fuzzy identity scoring

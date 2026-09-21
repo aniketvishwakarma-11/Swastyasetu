@@ -1,4 +1,4 @@
-# SwasthyaSetu (MediVault) UI/UX Design System & Theme Specification
+# SwasthyaSetu UI/UX Design System & Theme Specification
 
 > **Design Directive**: A clean, high-density, professional healthcare operations interface. 
 > **Zero "vibe-coded" clutter**: No flashy neon gradients, no extraneous animations, no dark-mode gamer aesthetics, and no chatbot fluff. Every element must serve clarity, clinical trust, and operational speed.

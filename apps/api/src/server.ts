@@ -33,7 +33,7 @@ app.use('/api/test', rbacTestRoutes);
 // Root information
 app.get('/', (_req: Request, res: Response) => {
   res.json({
-    name: 'SwasthyaSetu / MediVault API',
+    name: 'SwasthyaSetu API',
     version: '1.0.0',
     description: 'Offline-first healthcare continuity layer API with Supabase PostgreSQL and RBAC',
     endpoints: {

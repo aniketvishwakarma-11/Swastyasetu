@@ -1,4 +1,4 @@
-# Technical Architecture & Stack Plan: SwasthyaSetu (MediVault)
+# Technical Architecture & Stack Plan: SwasthyaSetu
 
 An offline-first healthcare continuity layer connecting Primary Health Centres (PHC), District Hospitals, and follow-up providers across low-connectivity environments.
 

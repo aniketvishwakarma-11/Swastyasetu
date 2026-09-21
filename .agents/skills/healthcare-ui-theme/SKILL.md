@@ -1,11 +1,11 @@
 ---
 name: healthcare-ui-theme
-description: Standardized UI/UX design system and minimal healthcare color theme for SwasthyaSetu (MediVault). Use whenever designing or implementing user interfaces, components, forms, badges, modals, timelines, or review screens to ensure consistent, clinical, professional, and non-vibe-coded styling across the platform.
+description: Standardized UI/UX design system and minimal healthcare color theme for SwasthyaSetu. Use whenever designing or implementing user interfaces, components, forms, badges, modals, timelines, or review screens to ensure consistent, clinical, professional, and non-vibe-coded styling across the platform.
 ---
 
 # SwasthyaSetu Healthcare UI/UX Skill & Theme Reference
 
-This skill guides any AI agent or developer building frontend UI components for the SwasthyaSetu / MediVault project.
+This skill guides any AI agent or developer building frontend UI components for the SwasthyaSetu project.
 
 ## Core Directives
 1. **Never "Vibe-Code"**: No neon glow effects, no gradients for gradients' sake, no dark-mode gamer aesthetics, no playful chatbot decorations.
