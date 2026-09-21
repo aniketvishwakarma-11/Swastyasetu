@@ -1,6 +1,9 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRoutes from './modules/auth/auth.routes';
+import facilitiesRoutes from './modules/facilities/facilities.routes';
+import rbacTestRoutes from './modules/test/rbac-test.routes';
 
 dotenv.config({ path: '../../.env' });
 
@@ -22,12 +25,23 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
+// Mounted Modular Routers
+app.use('/api/auth', authRoutes);
+app.use('/api/facilities', facilitiesRoutes);
+app.use('/api/test', rbacTestRoutes);
+
 // Root information
 app.get('/', (_req: Request, res: Response) => {
   res.json({
     name: 'SwasthyaSetu / MediVault API',
     version: '1.0.0',
-    description: 'Offline-first healthcare continuity layer API',
+    description: 'Offline-first healthcare continuity layer API with Supabase PostgreSQL and RBAC',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      facilities: '/api/facilities',
+      rbacTests: '/api/test',
+    },
   });
 });
 
