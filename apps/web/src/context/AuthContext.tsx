@@ -199,6 +199,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('swastyasetu_auth_token');
     setToken(null);
     setUser(null);
+    import('../lib/supabaseClient').then(({ supabase }) => {
+      supabase.auth.signOut().catch(() => {});
+    });
   };
 
   return (

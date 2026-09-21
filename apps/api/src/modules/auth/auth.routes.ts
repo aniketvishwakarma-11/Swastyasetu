@@ -258,7 +258,7 @@ router.post('/oauth-sync', async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const cleanEmail = email.toLowerCase();
+    const cleanEmail = email.toLowerCase().trim();
 
     let user = await prisma.user.findUnique({
       where: { email: cleanEmail },
