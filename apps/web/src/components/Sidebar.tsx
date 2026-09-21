@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FeatureBlueprintModal, FeatureBlueprint } from './FeatureBlueprintModal';
@@ -56,22 +56,8 @@ export const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
 
-  // Active role view: default to current user's role, but allow switching to inspect other roles
-  const [selectedRole, setSelectedRole] = useState<'PHC_USER' | 'CLINICIAN' | 'REFERRAL_COORDINATOR' | 'ADMIN'>(
-    user?.role === 'CLINICIAN'
-      ? 'CLINICIAN'
-      : user?.role === 'REFERRAL_COORDINATOR'
-      ? 'REFERRAL_COORDINATOR'
-      : user?.role === 'ADMIN'
-      ? 'ADMIN'
-      : 'PHC_USER'
-  );
-
-  useEffect(() => {
-    if (user?.role) {
-      setSelectedRole(user.role);
-    }
-  }, [user?.role]);
+  // Active role is strictly locked to the authenticated user's role
+  const activeRole = user?.role || 'PHC_USER';
 
   // Complete Role-Specific Feature Configurations (Built + Planned for each role)
   const roleConfigs: Record<string, RoleConfig> = {
@@ -779,7 +765,7 @@ export const Sidebar: React.FC = () => {
     },
   };
 
-  const currentConfig = roleConfigs[selectedRole] || roleConfigs.PHC_USER;
+  const currentConfig = roleConfigs[activeRole] || roleConfigs.PHC_USER;
 
   const handleNavClick = (item: NavItem) => {
     if (item.status === 'BUILT' && item.route) {
@@ -832,47 +818,9 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
 
-        {/* Role Selector Tabs (Allows previewing workflows across all 4 roles) */}
-        {!isCollapsed ? (
-          <div className="px-3 pt-3 pb-2 border-b border-slate-100 bg-slate-50/50">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 px-1 flex items-center justify-between">
-              <span>ACTIVE ROLE WORKFLOW</span>
-              <span className="text-[9px] text-teal-700 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200">
-                {currentConfig.shortLabel}
-              </span>
-            </div>
-            <div className="grid grid-cols-4 gap-1 p-1 bg-slate-200/60 rounded-xl text-[10px] font-bold">
-              {(['PHC_USER', 'CLINICIAN', 'REFERRAL_COORDINATOR', 'ADMIN'] as const).map((rKey) => {
-                const cfg = roleConfigs[rKey];
-                const isSelected = selectedRole === rKey;
-                return (
-                  <button
-                    key={rKey}
-                    onClick={() => setSelectedRole(rKey)}
-                    className={`py-1 text-center rounded-lg transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-white text-teal-800 shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                    title={cfg.fullTitle}
-                  >
-                    {cfg.shortLabel}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <div className="py-2 border-b border-slate-100 flex justify-center">
-            <span className="text-[9px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
-              {currentConfig.shortLabel}
-            </span>
-          </div>
-        )}
-
-        {/* Section Heading */}
+        {/* Section Heading (Matches Reference Screenshot) */}
         {!isCollapsed && (
-          <div className="px-5 pt-3 pb-1 flex items-center justify-between">
+          <div className="px-6 pt-5 pb-2">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
               {currentConfig.sectionHeader}
             </span>
