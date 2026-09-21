@@ -243,4 +243,79 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
   }
 });
 
+/**
+ * POST /api/auth/oauth-sync
+ * Synchronize Google OAuth login with database user and issue system JWT
+ */
+router.post('/oauth-sync', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, name } = req.body;
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_EMAIL', message: 'Email is required for OAuth synchronization' },
+      });
+      return;
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
+    let user = await prisma.user.findUnique({
+      where: { email: cleanEmail },
+      include: {
+        facility: {
+          select: { id: true, code: true, name: true, type: true, district: true },
+        },
+      },
+    });
+
+    if (!user) {
+      // Auto-provision user if logging in via Google for the first time
+      const defaultFacility = await prisma.facility.findFirst({
+        where: { type: 'PHC' },
+      });
+
+      const defaultPasswordHash = await bcrypt.hash(`OAuth-${Date.now()}-${Math.random()}`, 10);
+
+      user = await prisma.user.create({
+        data: {
+          name: name || cleanEmail.split('@')[0],
+          email: cleanEmail,
+          passwordHash: defaultPasswordHash,
+          role: UserRole.PHC_USER, // default frontline staff role
+          facilityId: defaultFacility?.id || null,
+        },
+        include: {
+          facility: {
+            select: { id: true, code: true, name: true, type: true, district: true },
+          },
+        },
+      });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.name },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const { passwordHash: _, ...safeUser } = user;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user: safeUser,
+        token,
+      },
+      message: 'OAuth session synchronized successfully',
+    });
+  } catch (error: any) {
+    console.error('[OAuth Sync Error]', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'OAUTH_SYNC_FAILED', message: error.message || 'Failed to sync OAuth user' },
+    });
+  }
+});
+
 export default router;
