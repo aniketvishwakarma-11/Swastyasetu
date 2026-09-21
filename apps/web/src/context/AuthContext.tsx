@@ -55,28 +55,96 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(localStorage.getItem('swastyasetu_auth_token'));
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Validate session on mount
+  const handleOAuthSync = async (email: string, name?: string) => {
+    try {
+      const res = await apiRequest<{ user: UserProfile; token: string }>('/auth/oauth-sync', {
+        method: 'POST',
+        body: JSON.stringify({ email, name }),
+      });
+
+      if (res.success && res.data) {
+        localStorage.setItem('swastyasetu_auth_token', res.data.token);
+        setToken(res.data.token);
+        setUser(res.data.user);
+        return true;
+      }
+    } catch (err) {
+      console.error('[OAuth Sync Failed]', err);
+    }
+    return false;
+  };
+
+  // Validate session on mount and handle Supabase OAuth return
   useEffect(() => {
-    async function loadUser() {
-      const storedToken = localStorage.getItem('swastyasetu_auth_token');
-      if (!storedToken) {
-        setIsLoading(false);
-        return;
+    let isMounted = true;
+
+    async function initAuth() {
+      // 1. Check if Supabase has an active session from Google OAuth
+      try {
+        const { supabase } = await import('../lib/supabaseClient');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          const ok = await handleOAuthSync(
+            session.user.email,
+            session.user.user_metadata?.full_name || session.user.email
+          );
+          if (ok && isMounted) {
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('[Supabase OAuth Detection Error]', err);
       }
 
-      const res = await apiRequest<UserProfile>('/auth/me');
-      if (res.success && res.data) {
-        setUser(res.data);
-      } else {
-        // Invalid or expired token
-        localStorage.removeItem('swastyasetu_auth_token');
-        setToken(null);
-        setUser(null);
+      // 2. Check existing local storage JWT
+      const storedToken = localStorage.getItem('swastyasetu_auth_token');
+      if (storedToken) {
+        const res = await apiRequest<UserProfile>('/auth/me');
+        if (isMounted) {
+          if (res.success && res.data) {
+            setUser(res.data);
+          } else {
+            localStorage.removeItem('swastyasetu_auth_token');
+            setToken(null);
+            setUser(null);
+          }
+        }
       }
-      setIsLoading(false);
+
+      if (isMounted) {
+        setIsLoading(false);
+      }
     }
 
-    loadUser();
+    initAuth();
+
+    // 3. Listen to Supabase Auth state changes (triggers on OAuth redirect)
+    let unsubscribe = () => {};
+    import('../lib/supabaseClient').then(({ supabase }) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user?.email) {
+          await handleOAuthSync(
+            session.user.email,
+            session.user.user_metadata?.full_name || session.user.email
+          );
+          if (isMounted) setIsLoading(false);
+        } else if (event === 'SIGNED_OUT') {
+          if (isMounted) {
+            localStorage.removeItem('swastyasetu_auth_token');
+            setToken(null);
+            setUser(null);
+            setIsLoading(false);
+          }
+        }
+      });
+      unsubscribe = () => subscription.unsubscribe();
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
