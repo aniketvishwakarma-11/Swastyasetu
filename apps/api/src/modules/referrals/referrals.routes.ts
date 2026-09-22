@@ -122,7 +122,7 @@ router.get('/:id', requireAuth, async (req: Request, res: Response): Promise<voi
  * Helper to generate collision-resistant clinical referral number: e.g. RF-8204
  */
 function generateReferralNumber(): string {
-  const randomDigits = Math.floor(1000 + Math.random() * 9000);
+  const randomDigits = Math.floor(100000 + Math.random() * 900000);
   return `RF-${randomDigits}`;
 }
 
@@ -174,69 +174,75 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
     }
 
     // Prisma Transaction to ensure atomic patient + referral + audit event creation
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Create or Find Patient
-      let patientRecord;
-      if (patient.id) {
-        patientRecord = await tx.patient.findUnique({ where: { id: patient.id } });
-      }
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // 1. Create or Find Patient
+        let patientRecord;
+        if (patient.id) {
+          patientRecord = await tx.patient.findUnique({ where: { id: patient.id } });
+        }
 
-      if (!patientRecord) {
-        patientRecord = await tx.patient.create({
+        if (!patientRecord) {
+          patientRecord = await tx.patient.create({
+            data: {
+              localId: patient.localId || `LOC-${randomUUID().slice(0, 8)}`,
+              name: patient.name.trim(),
+              age: Number(patient.age) || 0,
+              gender: patient.gender || 'Other',
+              phone: patient.phone?.trim() || null,
+              village: patient.village?.trim() || 'Unknown',
+              address: patient.address?.trim() || null,
+            },
+          });
+        }
+
+        // 2. Create Referral
+        const newReferral = await tx.referral.create({
           data: {
-            localId: patient.localId || `LOC-${randomUUID().slice(0, 8)}`,
-            name: patient.name.trim(),
-            age: Number(patient.age) || 0,
-            gender: patient.gender || 'Other',
-            phone: patient.phone?.trim() || null,
-            village: patient.village?.trim() || 'Unknown',
-            address: patient.address?.trim() || null,
+            referralNumber,
+            patientId: patientRecord.id,
+            sourceFacilityId,
+            destinationFacilityId,
+            urgency: urgency as ReferralUrgency,
+            reason: reason.trim(),
+            clinicalSummary: clinicalSummary.trim(),
+            status: ReferralStatus.SENT,
+            createdById: req.user?.id,
+          },
+          include: {
+            patient: true,
+            sourceFacility: true,
+            destinationFacility: true,
           },
         });
-      }
 
-      // 2. Create Referral
-      const newReferral = await tx.referral.create({
-        data: {
-          referralNumber,
-          patientId: patientRecord.id,
-          sourceFacilityId,
-          destinationFacilityId,
-          urgency: urgency as ReferralUrgency,
-          reason: reason.trim(),
-          clinicalSummary: clinicalSummary.trim(),
-          status: ReferralStatus.SENT,
-          createdById: req.user?.id,
-        },
-        include: {
-          patient: true,
-          sourceFacility: true,
-          destinationFacility: true,
-        },
-      });
-
-      // 3. Log AuditEvent (Hard Clinical Safety Rule 4: Auditability)
-      const auditEventId = clientEventId || `EVT-${randomUUID()}`;
-      await tx.auditEvent.create({
-        data: {
-          eventId: auditEventId,
-          actorId: req.user!.id,
-          actorRole: req.user!.role,
-          facilityId: sourceFacilityId,
-          eventType: 'REFERRAL_CREATED',
-          entityType: 'REFERRAL',
-          entityId: newReferral.id,
-          metadata: {
-            referralNumber: newReferral.referralNumber,
-            urgency: newReferral.urgency,
-            destinationFacilityId,
-            patientName: patientRecord.name,
+        // 3. Log AuditEvent (Hard Clinical Safety Rule 4: Auditability)
+        const auditEventId = clientEventId || `EVT-${randomUUID()}`;
+        await tx.auditEvent.create({
+          data: {
+            eventId: auditEventId,
+            actorId: req.user!.id,
+            actorRole: req.user!.role,
+            facilityId: sourceFacilityId,
+            eventType: 'REFERRAL_CREATED',
+            entityType: 'REFERRAL',
+            entityId: newReferral.id,
+            metadata: {
+              referralNumber: newReferral.referralNumber,
+              urgency: newReferral.urgency,
+              destinationFacilityId,
+              patientName: patientRecord.name,
+            },
           },
-        },
-      });
+        });
 
-      return newReferral;
-    });
+        return newReferral;
+      },
+      {
+        maxWait: 15000,
+        timeout: 30000,
+      }
+    );
 
     res.status(201).json({
       success: true,

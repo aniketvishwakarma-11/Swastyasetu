@@ -161,56 +161,62 @@ router.post(
         return;
       }
 
-      const result = await prisma.$transaction(async (tx) => {
-        // 1. Update match record if matchId provided
-        let matchRecord = null;
-        if (matchId) {
-          matchRecord = await tx.identityMatch.update({
-            where: { id: matchId },
+      const result = await prisma.$transaction(
+        async (tx) => {
+          // 1. Update match record if matchId provided
+          let matchRecord = null;
+          if (matchId) {
+            matchRecord = await tx.identityMatch.update({
+              where: { id: matchId },
+              data: {
+                status: IdentityMatchStatus.CONFIRMED,
+                reviewedById: req.user!.id,
+                reviewedAt: new Date(),
+              },
+            });
+          }
+
+          // 2. Update referral record: status -> IDENTITY_CONFIRMED & link to canonical patient
+          const updatedReferral = await tx.referral.update({
+            where: { id: referralId },
             data: {
-              status: IdentityMatchStatus.CONFIRMED,
-              reviewedById: req.user!.id,
-              reviewedAt: new Date(),
+              status: ReferralStatus.IDENTITY_CONFIRMED,
+              patientId: canonicalPatientId,
+            },
+            include: {
+              patient: true,
+              sourceFacility: true,
             },
           });
-        }
 
-        // 2. Update referral record: status -> IDENTITY_CONFIRMED & link to canonical patient
-        const updatedReferral = await tx.referral.update({
-          where: { id: referralId },
-          data: {
-            status: ReferralStatus.IDENTITY_CONFIRMED,
-            patientId: canonicalPatientId,
-          },
-          include: {
-            patient: true,
-            sourceFacility: true,
-          },
-        });
-
-        // 3. Log AuditEvent (Hard Clinical Safety Rule 4: Auditability)
-        await tx.auditEvent.create({
-          data: {
-            eventId: `EVT-${randomUUID()}`,
-            actorId: req.user!.id,
-            actorRole: req.user!.role,
-            facilityId: req.user!.facilityId,
-            eventType: 'IDENTITY_CONFIRMED',
-            entityType: 'PATIENT',
-            entityId: canonicalPatientId,
-            metadata: {
-              referralId,
-              referralNumber: updatedReferral.referralNumber,
-              matchId,
-              clinicianName: req.user!.name,
-              confirmedPatientName: updatedReferral.patient.name,
-              notes: notes || 'Clinician confirmed patient identity match.',
+          // 3. Log AuditEvent (Hard Clinical Safety Rule 4: Auditability)
+          await tx.auditEvent.create({
+            data: {
+              eventId: `EVT-${randomUUID()}`,
+              actorId: req.user!.id,
+              actorRole: req.user!.role,
+              facilityId: req.user!.facilityId,
+              eventType: 'IDENTITY_CONFIRMED',
+              entityType: 'PATIENT',
+              entityId: canonicalPatientId,
+              metadata: {
+                referralId,
+                referralNumber: updatedReferral.referralNumber,
+                matchId,
+                clinicianName: req.user!.name,
+                confirmedPatientName: updatedReferral.patient.name,
+                notes: notes || 'Clinician confirmed patient identity match.',
+              },
             },
-          },
-        });
+          });
 
-        return updatedReferral;
-      });
+          return updatedReferral;
+        },
+        {
+          maxWait: 15000,
+          timeout: 30000,
+        }
+      );
 
       res.status(200).json({
         success: true,
@@ -247,42 +253,48 @@ router.post(
         return;
       }
 
-      await prisma.$transaction(async (tx) => {
-        if (matchId) {
-          await tx.identityMatch.update({
-            where: { id: matchId },
+      await prisma.$transaction(
+        async (tx) => {
+          if (matchId) {
+            await tx.identityMatch.update({
+              where: { id: matchId },
+              data: {
+                status: IdentityMatchStatus.REJECTED,
+                reviewedById: req.user!.id,
+                reviewedAt: new Date(),
+              },
+            });
+          }
+
+          // Referral status updated to RECEIVED (registered as new patient)
+          await tx.referral.update({
+            where: { id: referralId },
+            data: { status: ReferralStatus.RECEIVED },
+          });
+
+          // Log AuditEvent
+          await tx.auditEvent.create({
             data: {
-              status: IdentityMatchStatus.REJECTED,
-              reviewedById: req.user!.id,
-              reviewedAt: new Date(),
+              eventId: `EVT-${randomUUID()}`,
+              actorId: req.user!.id,
+              actorRole: req.user!.role,
+              facilityId: req.user!.facilityId,
+              eventType: 'IDENTITY_REJECTED_REGISTERED_NEW',
+              entityType: 'REFERRAL',
+              entityId: referralId,
+              metadata: {
+                matchId,
+                clinicianName: req.user!.name,
+                notes: notes || 'Clinician rejected candidate match; patient registered as distinct new record.',
+              },
             },
           });
+        },
+        {
+          maxWait: 15000,
+          timeout: 30000,
         }
-
-        // Referral status updated to RECEIVED (registered as new patient)
-        await tx.referral.update({
-          where: { id: referralId },
-          data: { status: ReferralStatus.RECEIVED },
-        });
-
-        // Log AuditEvent
-        await tx.auditEvent.create({
-          data: {
-            eventId: `EVT-${randomUUID()}`,
-            actorId: req.user!.id,
-            actorRole: req.user!.role,
-            facilityId: req.user!.facilityId,
-            eventType: 'IDENTITY_REJECTED_REGISTERED_NEW',
-            entityType: 'REFERRAL',
-            entityId: referralId,
-            metadata: {
-              matchId,
-              clinicianName: req.user!.name,
-              notes: notes || 'Clinician rejected candidate match; patient registered as distinct new record.',
-            },
-          },
-        });
-      });
+      );
 
       res.status(200).json({
         success: true,

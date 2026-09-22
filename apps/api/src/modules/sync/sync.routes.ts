@@ -62,91 +62,97 @@ router.post('/events', requireAuth, async (req: Request, res: Response): Promise
       }
 
       try {
-        await prisma.$transaction(async (tx) => {
-          let targetEntityId = evt.entityId;
+        await prisma.$transaction(
+          async (tx) => {
+            let targetEntityId = evt.entityId;
 
-          if (evt.entityType === 'REFERRAL' && evt.operation === 'CREATE') {
-            const { patient, destinationFacilityId, urgency, reason, clinicalSummary, sourceFacilityId: providedSourceFacilityId } = evt.payload;
-            const sourceFacilityId = providedSourceFacilityId || req.user?.facilityId;
+            if (evt.entityType === 'REFERRAL' && evt.operation === 'CREATE') {
+              const { patient, destinationFacilityId, urgency, reason, clinicalSummary, sourceFacilityId: providedSourceFacilityId } = evt.payload;
+              const sourceFacilityId = providedSourceFacilityId || req.user?.facilityId;
 
-            // 1. Resolve or Create Patient
-            let patientRecord = await tx.patient.create({
-              data: {
-                localId: patient.localId || `LOC-${randomUUID().slice(0, 8)}`,
-                name: patient.name?.trim() || 'Unknown',
-                age: Number(patient.age) || 0,
-                gender: patient.gender || 'Other',
-                phone: patient.phone?.trim() || null,
-                village: patient.village?.trim() || 'Unknown',
-                address: patient.address?.trim() || null,
-              },
-            });
-
-            // 2. Generate referral number
-            const referralNumber = `RF-${Math.floor(1000 + Math.random() * 9000)}`;
-
-            // 3. Create Referral
-            const newReferral = await tx.referral.create({
-              data: {
-                referralNumber,
-                patientId: patientRecord.id,
-                sourceFacilityId: sourceFacilityId!,
-                destinationFacilityId,
-                urgency: (urgency as ReferralUrgency) || ReferralUrgency.ROUTINE,
-                reason: reason || 'Offline Referral',
-                clinicalSummary: clinicalSummary || '',
-                status: ReferralStatus.SENT,
-                createdById: req.user?.id,
-              },
-            });
-
-            targetEntityId = newReferral.id;
-
-            // 4. Log AuditEvent
-            await tx.auditEvent.create({
-              data: {
-                eventId: `AUD-${evt.eventId}`,
-                actorId: req.user!.id,
-                actorRole: req.user!.role,
-                facilityId: sourceFacilityId,
-                eventType: 'REFERRAL_SYNCED_FROM_OFFLINE',
-                entityType: 'REFERRAL',
-                entityId: newReferral.id,
-                metadata: {
-                  referralNumber,
-                  urgency: newReferral.urgency,
-                  clientEventId: evt.eventId,
+              // 1. Resolve or Create Patient
+              let patientRecord = await tx.patient.create({
+                data: {
+                  localId: patient.localId || `LOC-${randomUUID().slice(0, 8)}`,
+                  name: patient.name?.trim() || 'Unknown',
+                  age: Number(patient.age) || 0,
+                  gender: patient.gender || 'Other',
+                  phone: patient.phone?.trim() || null,
+                  village: patient.village?.trim() || 'Unknown',
+                  address: patient.address?.trim() || null,
                 },
+              });
+
+              // 2. Generate referral number
+              const referralNumber = `RF-${Math.floor(100000 + Math.random() * 900000)}`;
+
+              // 3. Create Referral
+              const newReferral = await tx.referral.create({
+                data: {
+                  referralNumber,
+                  patientId: patientRecord.id,
+                  sourceFacilityId: sourceFacilityId!,
+                  destinationFacilityId,
+                  urgency: (urgency as ReferralUrgency) || ReferralUrgency.ROUTINE,
+                  reason: reason || 'Offline Referral',
+                  clinicalSummary: clinicalSummary || '',
+                  status: ReferralStatus.SENT,
+                  createdById: req.user?.id,
+                },
+              });
+
+              targetEntityId = newReferral.id;
+
+              // 4. Log AuditEvent
+              await tx.auditEvent.create({
+                data: {
+                  eventId: `AUD-${evt.eventId}`,
+                  actorId: req.user!.id,
+                  actorRole: req.user!.role,
+                  facilityId: sourceFacilityId,
+                  eventType: 'REFERRAL_SYNCED_FROM_OFFLINE',
+                  entityType: 'REFERRAL',
+                  entityId: newReferral.id,
+                  metadata: {
+                    referralNumber,
+                    urgency: newReferral.urgency,
+                    clientEventId: evt.eventId,
+                  },
+                },
+              });
+            }
+
+            // Record or update the SyncEvent row
+            await tx.syncEvent.upsert({
+              where: { eventId: evt.eventId },
+              create: {
+                eventId: evt.eventId,
+                entityType: evt.entityType,
+                entityId: targetEntityId,
+                operation: evt.operation,
+                payload: evt.payload,
+                status: SyncStatus.SYNCED,
+                syncedAt: new Date(),
+              },
+              update: {
+                status: SyncStatus.SYNCED,
+                syncedAt: new Date(),
+                entityId: targetEntityId,
               },
             });
-          }
 
-          // Record or update the SyncEvent row
-          await tx.syncEvent.upsert({
-            where: { eventId: evt.eventId },
-            create: {
+            results.push({
               eventId: evt.eventId,
-              entityType: evt.entityType,
-              entityId: targetEntityId,
-              operation: evt.operation,
-              payload: evt.payload,
               status: SyncStatus.SYNCED,
-              syncedAt: new Date(),
-            },
-            update: {
-              status: SyncStatus.SYNCED,
-              syncedAt: new Date(),
+              duplicate: false,
               entityId: targetEntityId,
-            },
-          });
-
-          results.push({
-            eventId: evt.eventId,
-            status: SyncStatus.SYNCED,
-            duplicate: false,
-            entityId: targetEntityId,
-          });
-        });
+            });
+          },
+          {
+            maxWait: 15000,
+            timeout: 30000,
+          }
+        );
       } catch (err: any) {
         console.error(`[Sync Failed for event ${evt.eventId}]`, err);
 
