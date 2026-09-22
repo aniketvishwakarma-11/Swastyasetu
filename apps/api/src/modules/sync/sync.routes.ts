@@ -1,8 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../../db';
 import { requireAuth } from '../../middleware/auth.middleware';
-import { SyncStatus, ReferralUrgency, ReferralStatus } from '@prisma/client';
+import { SyncStatus, ReferralUrgency, ReferralStatus, FacilityType } from '@prisma/client';
 import { randomUUID } from 'crypto';
+import { resolveFacilityId } from '../referrals/referrals.routes';
 
 const router = Router();
 
@@ -67,8 +68,9 @@ router.post('/events', requireAuth, async (req: Request, res: Response): Promise
             let targetEntityId = evt.entityId;
 
             if (evt.entityType === 'REFERRAL' && evt.operation === 'CREATE') {
-              const { patient, destinationFacilityId, urgency, reason, clinicalSummary, sourceFacilityId: providedSourceFacilityId } = evt.payload;
-              const sourceFacilityId = providedSourceFacilityId || req.user?.facilityId;
+              const { patient, destinationFacilityId: rawDestinationFacilityId, urgency, reason, clinicalSummary, sourceFacilityId: providedSourceFacilityId } = evt.payload;
+              const sourceFacilityId = await resolveFacilityId(providedSourceFacilityId || req.user?.facilityId, FacilityType.PHC);
+              const destinationFacilityId = await resolveFacilityId(rawDestinationFacilityId, FacilityType.DISTRICT_HOSPITAL);
 
               // 1. Resolve or Create Patient
               let patientRecord = await tx.patient.create({
@@ -91,7 +93,7 @@ router.post('/events', requireAuth, async (req: Request, res: Response): Promise
                 data: {
                   referralNumber,
                   patientId: patientRecord.id,
-                  sourceFacilityId: sourceFacilityId!,
+                  sourceFacilityId,
                   destinationFacilityId,
                   urgency: (urgency as ReferralUrgency) || ReferralUrgency.ROUTINE,
                   reason: reason || 'Offline Referral',
