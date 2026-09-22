@@ -124,8 +124,12 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
       formData.append('documentType', 'PRESCRIPTION');
 
       // Direct multipart fetch using api base
-      const token = localStorage.getItem('swasthya_token');
-      const response = await fetch('http://localhost:5000/api/documents/extract', {
+      const token =
+        localStorage.getItem('swastyasetu_auth_token') ||
+        localStorage.getItem('token') ||
+        localStorage.getItem('auth_token') ||
+        localStorage.getItem('swasthya_token');
+      const response = await fetch('/api/documents/extract', {
         method: 'POST',
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

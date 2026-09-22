@@ -6,7 +6,11 @@ export async function apiRequest<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const token = localStorage.getItem('swastyasetu_auth_token');
+  const token =
+    localStorage.getItem('swastyasetu_auth_token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('auth_token') ||
+    localStorage.getItem('swasthya_token');
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
