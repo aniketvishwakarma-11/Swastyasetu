@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { IdentityReconciliationModal } from './IdentityReconciliationModal';
+import { DocumentOcrModal } from './DocumentOcrModal';
 import {
   Building,
   ShieldCheck,
@@ -14,6 +15,7 @@ import {
   UserCheck,
   Stethoscope,
   Check,
+  ScanLine,
 } from 'lucide-react';
 
 export const HospitalDashboard: React.FC = () => {
@@ -29,6 +31,15 @@ export const HospitalDashboard: React.FC = () => {
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+
+  // Document OCR modal state
+  const [isOcrModalOpen, setIsOcrModalOpen] = useState(false);
+  const [ocrTarget, setOcrTarget] = useState<{
+    patientId: string;
+    patientName: string;
+    patientAbha?: string;
+    referralId?: string;
+  } | null>(null);
 
   // RBAC test states
   const [testResult, setTestResult] = useState<string | null>(null);
@@ -171,6 +182,32 @@ export const HospitalDashboard: React.FC = () => {
     }
   };
 
+  const handleOpenOcrScanner = (ref?: any) => {
+    if (ref) {
+      setOcrTarget({
+        patientId: ref.patientId || ref.patient?.id || 'demo-patient',
+        patientName: ref.patient?.name || 'Ramesh Yadav',
+        patientAbha: ref.patient?.abhaId || '91-4829-1029-4401',
+        referralId: ref.id,
+      });
+    } else if (referrals.length > 0) {
+      const first = referrals[0];
+      setOcrTarget({
+        patientId: first.patientId || first.patient?.id || 'demo-patient',
+        patientName: first.patient?.name || 'Ramesh Yadav',
+        patientAbha: first.patient?.abhaId || '91-4829-1029-4401',
+        referralId: first.id,
+      });
+    } else {
+      setOcrTarget({
+        patientId: 'demo-patient-stemi',
+        patientName: 'Ramesh Yadav',
+        patientAbha: '91-4829-1029-4401',
+      });
+    }
+    setIsOcrModalOpen(true);
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Banner */}
@@ -192,7 +229,14 @@ export const HospitalDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-wrap gap-2">
+          <button
+            onClick={() => handleOpenOcrScanner()}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+          >
+            <ScanLine className="w-3.5 h-3.5" />
+            <span>AI Document &amp; Prescription OCR</span>
+          </button>
           <button
             onClick={testClinicianRbac}
             className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-lg text-xs font-medium transition-colors border border-teal-200"
@@ -426,19 +470,29 @@ export const HospitalDashboard: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {!isConfirmed ? (
+                        <div className="flex items-center justify-end space-x-2">
                           <button
-                            onClick={() => handleOpenReview(ref)}
-                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-md text-[11px] font-semibold transition-colors cursor-pointer"
+                            onClick={() => handleOpenOcrScanner(ref)}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-md text-[11px] font-semibold transition-colors border border-teal-200 cursor-pointer"
+                            title="Scan clinical document or prescription for this patient"
                           >
-                            <span>Verify Identity</span>
+                            <ScanLine className="w-3 h-3 text-teal-600" />
+                            <span>Scan Doc / Rx</span>
                           </button>
-                        ) : (
-                          <span className="inline-flex items-center space-x-1 text-emerald-700 font-semibold text-[11px]">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>Linked</span>
-                          </span>
-                        )}
+                          {!isConfirmed ? (
+                            <button
+                              onClick={() => handleOpenReview(ref)}
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-md text-[11px] font-semibold transition-colors cursor-pointer"
+                            >
+                              <span>Verify Identity</span>
+                            </button>
+                          ) : (
+                            <span className="inline-flex items-center space-x-1 text-emerald-700 font-semibold text-[11px]">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Linked</span>
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -460,6 +514,22 @@ export const HospitalDashboard: React.FC = () => {
           loadHospitalData();
         }}
       />
+
+      {/* Split-Screen AI Document & Prescription OCR Modal */}
+      {ocrTarget && (
+        <DocumentOcrModal
+          isOpen={isOcrModalOpen}
+          onClose={() => setIsOcrModalOpen(false)}
+          patientId={ocrTarget.patientId}
+          patientName={ocrTarget.patientName}
+          patientAbha={ocrTarget.patientAbha}
+          referralId={ocrTarget.referralId}
+          onSuccess={() => {
+            setActionSuccessMsg('Clinical document OCR verified and committed to patient care record!');
+            loadHospitalData();
+          }}
+        />
+      )}
     </div>
   );
 };

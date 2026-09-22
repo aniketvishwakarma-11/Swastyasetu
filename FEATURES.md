@@ -47,9 +47,8 @@ This document serves as the master tracking registry for all built, in-progress,
 | 🟢 | **Hospital Intake Cockpit** | Central real-time dashboard displaying incoming emergency transfers, unverified candidate count, and hospital volume stats. | `GET /api/referrals`<br>`GET /api/identity/evaluate/:id` |
 | 🟢 | **Emergency Triage Stream** | Live incoming stream prioritizing cases by urgency tier (`EMERGENCY` rose pulse, `URGENT` amber, `ROUTINE` slate). | `GET /api/referrals?urgency=EMERGENCY` |
 | 🟢 | **Fuzzy Patient Identity Reconciliation** | Weighted multi-attribute candidate matcher (Name 35%, Phone 25%, Village 15%, Age 10%) detecting duplicate or existing registry records. | RapidFuzz / Levenshtein Engine<br>`GET /api/identity/evaluate/:id` |
-| 🟢 | **Side-by-Side Clinician Confirmation Modal** | **Hard Rule 2 Enforced:** 50/50 split comparison screen displaying field match pills. Requires explicit clinician sign-off; never silently merges. | `POST /api/identity/confirm`<br>`POST /api/identity/reject` |
-| 🟡 | **AI Clinical Document & Prescription OCR Scanner** | **(P0 — Failure Point B)** Uploads handwritten discharge summaries or prescription slips. Digitizes diagnosis and medicines with visual field confidence pills ($\ge 90\%$ emerald, $<90\%$ amber). | Vision OCR Microservice<br>`POST /api/documents/extract` |
-| 🟡 | **Split-Screen Interactive Document Verifier** | **Hard Rule 1 Enforced:** Document scan on left, editable extracted fields on right. Doctor can correct uncertain dosages before committing to patient record. | `POST /api/documents/confirm-fields` |
+| 🟢 | **AI Clinical Document & Prescription OCR Scanner** | **(P0 — Failure Point B)** Uploads handwritten discharge summaries or prescription slips. Digitizes diagnosis and medicines with visual field confidence pills ($\ge 90\%$ emerald, $<90\%$ amber). Powered by Hugging Face Space `Aniketvis11/medivault-ocr` & local file storage. | `POST /api/documents/extract`<br>`GET /api/documents/patient/:id` |
+| 🟢 | **Split-Screen Interactive Document Verifier** | **Hard Rule 1 Enforced:** Document scan on left (zoom/pan/rotate), editable extracted fields on right. Doctor can correct uncertain dosages before committing to patient record. Hard Rule 4 audit logged. | `POST /api/documents/:id/confirm-fields` |
 | 🟡 | **Master Care Continuity Timeline (EHR)** | **(P1 — The Demo Climax)** Vertical chronological track displaying the complete multi-facility journey: *PHC Referral $\to$ Sync $\to$ Hospital Arrival $\to$ Identity Verified $\to$ Discharge $\to$ Follow-Up*. | `GET /api/patients/:id/timeline`<br>`AuditEvent` stream |
 | ⚪ | **Structured Discharge Summary Generator** | Standardized discharge handoff generator capturing discharge vitals, take-home medicines, and auto-scheduling a follow-up alert at the patient's village PHC. | `POST /api/discharge-summaries` |
 
@@ -94,8 +93,8 @@ Use this sequence during the final judging demo to showcase end-to-end system co
 | **4** | System | Reconnect Wi-Fi $\to$ 15s Heartbeat auto-syncs queued referral to PostgreSQL idempotently with zero duplicates. | 🟢 **BUILT** |
 | **5** | Hospital Clinician | Doctor logs into `/hospital` $\to$ Referral appears immediately in **Hospital Triage Queue** with red alert. | 🟢 **BUILT** |
 | **6** | Hospital Clinician | **Fuzzy Identity Engine** flags 94% similarity with registry record `Ramesh Kumar` $\to$ Doctor reviews side-by-side and explicitly confirms identity (**Rule 2**). | 🟢 **BUILT** |
-| **7** | Hospital Specialist | Uploads handwritten discharge summary $\to$ **AI Vision OCR** extracts diagnosis and medicines with confidence pills (**Rule 1**). | 🟡 **NEXT** |
-| **8** | Hospital Specialist | Doctor uses **Split-Screen Reviewer** to inspect original scan and verify uncertain dosage ($61\%$ confidence). | 🟡 **NEXT** |
+| **7** | Hospital Specialist | Uploads handwritten discharge summary $\to$ **AI Vision OCR** extracts diagnosis and medicines with confidence pills (**Rule 1**). | 🟢 **BUILT** |
+| **8** | Hospital Specialist | Doctor uses **Split-Screen Reviewer** to inspect original scan and verify uncertain dosage ($61\%$ confidence). | 🟢 **BUILT** |
 | **9** | Clinician / Patient | Opens **Master Care Continuity Timeline** displaying the full vertical track from village PHC to hospital discharge. | 🟡 **NEXT** |
 | **10** | Frontline CHO | Patient returns home $\to$ Local PHC receives return alert $\to$ CHO completes follow-up visit $\to$ **LOOP CLOSED!** | 🟡 **NEXT** |
 

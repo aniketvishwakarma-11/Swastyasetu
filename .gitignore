@@ -77,5 +77,6 @@ desktop.ini
 
 # File Uploads & Local Media Assets
 uploads/
+!apps/api/uploads/samples/
 temp/
 tmp/
