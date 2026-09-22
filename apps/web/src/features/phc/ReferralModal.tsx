@@ -50,13 +50,12 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
         const dh = res.data.find((f: any) => f.type === 'DISTRICT_HOSPITAL');
         if (dh) setDestinationFacilityId(dh.id);
         else if (res.data.length > 0) setDestinationFacilityId(res.data[0].id);
-      } else {
         // Fallback demo facilities if offline / API unreachable
         setFacilities([
-          { id: 'fac-aundh-dh', name: 'Aundh District Hospital, Pune', type: 'DISTRICT_HOSPITAL', district: 'Pune' },
-          { id: 'fac-sassoon-gh', name: 'Sassoon General Hospital, Pune', type: 'DISTRICT_HOSPITAL', district: 'Pune' },
+          { id: '4bc1557c-065a-4d59-921d-34af559e2e54', name: 'Aundh District Hospital, Pune', type: 'DISTRICT_HOSPITAL', district: 'Pune' },
+          { id: '7bc00d00-e0f3-4f8d-b0f3-31f99d33f1aa', name: 'Sanjivani Community Clinic, Pune', type: 'PRIVATE_CLINIC', district: 'Pune' },
         ]);
-        setDestinationFacilityId('fac-aundh-dh');
+        setDestinationFacilityId('4bc1557c-065a-4d59-921d-34af559e2e54');
       }
     }
 
@@ -110,7 +109,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
         phone: phone.trim() || undefined,
         village: village.trim(),
       },
-      sourceFacilityId: user?.facilityId || 'PHC-KHED',
+      sourceFacilityId: user?.facilityId || '8ffa5608-7ed5-4853-9eb9-c06f995ce560',
       destinationFacilityId,
       urgency,
       reason: reason.trim(),

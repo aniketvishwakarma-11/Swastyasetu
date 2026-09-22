@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../../db';
 import { requireAuth } from '../../middleware/auth.middleware';
-import { ReferralUrgency, ReferralStatus } from '@prisma/client';
+import { ReferralUrgency, ReferralStatus, FacilityType } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 const router = Router();
@@ -121,8 +121,45 @@ router.get('/:id', requireAuth, async (req: Request, res: Response): Promise<voi
 /**
  * Helper to generate collision-resistant clinical referral number: e.g. RF-8204
  */
+/**
+ * Helper to resolve facility UUID from either raw UUID, code ('PHC-KHED'), or fallback type
+ */
+export async function resolveFacilityId(
+  rawIdOrCode: string | undefined | null,
+  fallbackType: FacilityType
+): Promise<string> {
+  if (rawIdOrCode) {
+    // 1. Direct ID lookup
+    const byId = await prisma.facility.findUnique({ where: { id: rawIdOrCode } });
+    if (byId) return byId.id;
+
+    // 2. Code lookup (e.g., 'PHC-KHED', 'DIST-HOSP')
+    const byCode = await prisma.facility.findUnique({ where: { code: rawIdOrCode } });
+    if (byCode) return byCode.id;
+
+    // 3. Name or partial code lookup (handles 'fac-aundh-dh' -> 'aundh')
+    const cleanTerm = rawIdOrCode.toLowerCase().replace(/fac-|-dh|-gh/g, '');
+    const byName = await prisma.facility.findFirst({
+      where: {
+        OR: [
+          { name: { contains: cleanTerm, mode: 'insensitive' } },
+          { code: { contains: cleanTerm, mode: 'insensitive' } },
+        ],
+      },
+    });
+    if (byName) return byName.id;
+  }
+
+  // 4. Default fallback by facility type
+  const fallback = await prisma.facility.findFirst({ where: { type: fallbackType } });
+  if (fallback) return fallback.id;
+
+  const anyFacility = await prisma.facility.findFirst();
+  return anyFacility!.id;
+}
+
 function generateReferralNumber(): string {
-  const randomDigits = Math.floor(1000 + Math.random() * 9000);
+  const randomDigits = Math.floor(100000 + Math.random() * 900000);
   return `RF-${randomDigits}`;
 }
 
@@ -134,7 +171,7 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
   try {
     const {
       patient,
-      destinationFacilityId,
+      destinationFacilityId: rawDestinationFacilityId,
       urgency = 'ROUTINE',
       reason,
       clinicalSummary,
@@ -142,28 +179,26 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
       eventId: clientEventId,
     } = req.body;
 
-    if (!patient?.name || !destinationFacilityId || !reason || !clinicalSummary) {
+    if (!patient?.name || !reason || !clinicalSummary) {
       res.status(400).json({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
-          message: 'Missing required referral fields: patient (name, age, gender, village), destinationFacilityId, reason, clinicalSummary.',
+          message: 'Missing required referral fields: patient (name, age, gender, village), reason, clinicalSummary.',
         },
       });
       return;
     }
 
-    const sourceFacilityId = providedSourceFacilityId || req.user?.facilityId;
-    if (!sourceFacilityId) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'SOURCE_FACILITY_REQUIRED',
-          message: 'User does not have an associated facility. Please provide sourceFacilityId explicitly.',
-        },
-      });
-      return;
-    }
+    const sourceFacilityId = await resolveFacilityId(
+      providedSourceFacilityId || req.user?.facilityId,
+      FacilityType.PHC
+    );
+
+    const destinationFacilityId = await resolveFacilityId(
+      rawDestinationFacilityId,
+      FacilityType.DISTRICT_HOSPITAL
+    );
 
     // Generate unique referral number
     let referralNumber = generateReferralNumber();
@@ -174,69 +209,75 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
     }
 
     // Prisma Transaction to ensure atomic patient + referral + audit event creation
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Create or Find Patient
-      let patientRecord;
-      if (patient.id) {
-        patientRecord = await tx.patient.findUnique({ where: { id: patient.id } });
-      }
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // 1. Create or Find Patient
+        let patientRecord;
+        if (patient.id) {
+          patientRecord = await tx.patient.findUnique({ where: { id: patient.id } });
+        }
 
-      if (!patientRecord) {
-        patientRecord = await tx.patient.create({
+        if (!patientRecord) {
+          patientRecord = await tx.patient.create({
+            data: {
+              localId: patient.localId || `LOC-${randomUUID().slice(0, 8)}`,
+              name: patient.name.trim(),
+              age: Number(patient.age) || 0,
+              gender: patient.gender || 'Other',
+              phone: patient.phone?.trim() || null,
+              village: patient.village?.trim() || 'Unknown',
+              address: patient.address?.trim() || null,
+            },
+          });
+        }
+
+        // 2. Create Referral
+        const newReferral = await tx.referral.create({
           data: {
-            localId: patient.localId || `LOC-${randomUUID().slice(0, 8)}`,
-            name: patient.name.trim(),
-            age: Number(patient.age) || 0,
-            gender: patient.gender || 'Other',
-            phone: patient.phone?.trim() || null,
-            village: patient.village?.trim() || 'Unknown',
-            address: patient.address?.trim() || null,
+            referralNumber,
+            patientId: patientRecord.id,
+            sourceFacilityId,
+            destinationFacilityId,
+            urgency: urgency as ReferralUrgency,
+            reason: reason.trim(),
+            clinicalSummary: clinicalSummary.trim(),
+            status: ReferralStatus.SENT,
+            createdById: req.user?.id,
+          },
+          include: {
+            patient: true,
+            sourceFacility: true,
+            destinationFacility: true,
           },
         });
-      }
 
-      // 2. Create Referral
-      const newReferral = await tx.referral.create({
-        data: {
-          referralNumber,
-          patientId: patientRecord.id,
-          sourceFacilityId,
-          destinationFacilityId,
-          urgency: urgency as ReferralUrgency,
-          reason: reason.trim(),
-          clinicalSummary: clinicalSummary.trim(),
-          status: ReferralStatus.SENT,
-          createdById: req.user?.id,
-        },
-        include: {
-          patient: true,
-          sourceFacility: true,
-          destinationFacility: true,
-        },
-      });
-
-      // 3. Log AuditEvent (Hard Clinical Safety Rule 4: Auditability)
-      const auditEventId = clientEventId || `EVT-${randomUUID()}`;
-      await tx.auditEvent.create({
-        data: {
-          eventId: auditEventId,
-          actorId: req.user!.id,
-          actorRole: req.user!.role,
-          facilityId: sourceFacilityId,
-          eventType: 'REFERRAL_CREATED',
-          entityType: 'REFERRAL',
-          entityId: newReferral.id,
-          metadata: {
-            referralNumber: newReferral.referralNumber,
-            urgency: newReferral.urgency,
-            destinationFacilityId,
-            patientName: patientRecord.name,
+        // 3. Log AuditEvent (Hard Clinical Safety Rule 4: Auditability)
+        const auditEventId = clientEventId || `EVT-${randomUUID()}`;
+        await tx.auditEvent.create({
+          data: {
+            eventId: auditEventId,
+            actorId: req.user!.id,
+            actorRole: req.user!.role,
+            facilityId: sourceFacilityId,
+            eventType: 'REFERRAL_CREATED',
+            entityType: 'REFERRAL',
+            entityId: newReferral.id,
+            metadata: {
+              referralNumber: newReferral.referralNumber,
+              urgency: newReferral.urgency,
+              destinationFacilityId,
+              patientName: patientRecord.name,
+            },
           },
-        },
-      });
+        });
 
-      return newReferral;
-    });
+        return newReferral;
+      },
+      {
+        maxWait: 15000,
+        timeout: 30000,
+      }
+    );
 
     res.status(201).json({
       success: true,

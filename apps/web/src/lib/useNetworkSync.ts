@@ -36,8 +36,8 @@ export function useNetworkSync() {
         body: JSON.stringify({ events: queuedEvents }),
       });
 
-      const responseEvents = (res as any).events;
-      if (res.success && Array.isArray(responseEvents)) {
+      const responseEvents = (res as any).events || (res as any).data?.events;
+      if (Array.isArray(responseEvents)) {
         for (const evtResult of responseEvents) {
           if (evtResult.status === 'SYNCED') {
             // Remove from queue
