@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
-import { Sidebar } from './components/Sidebar';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { HomeRedirect } from './features/HomeRedirect';
 import { LoginView } from './features/auth/LoginView';
@@ -33,19 +32,14 @@ function AppLayout() {
     );
   }
 
-  // Authenticated Portal View (Matches User Reference Screenshot)
+  // Authenticated Portal View (Full-Width Workspace - Sidebar Removed)
   return (
-    <div className="min-h-screen flex bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white overflow-hidden">
-      {/* 1. Full-Height Collapsible Left Sidebar */}
-      <Sidebar />
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white">
+      {/* Top Header with Global Search, Navigation & User Controls */}
+      <Navbar />
 
-      {/* 2. Main Content Viewport */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Top Header with Global Search & Notification Controls */}
-        <Navbar />
-
-        {/* Scrollable Dashboard View */}
-        <main className="flex-1 overflow-y-auto">
+      {/* Main Content Viewport */}
+      <main className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="/" element={<HomeRedirect />} />
 
@@ -88,7 +82,6 @@ function AppLayout() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
-      </div>
     </div>
   );
 }

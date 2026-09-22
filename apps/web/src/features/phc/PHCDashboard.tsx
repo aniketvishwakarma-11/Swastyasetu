@@ -4,6 +4,8 @@ import { apiRequest } from '../../lib/api';
 import { localDb, LocalReferral } from '../../lib/db';
 import { useNetworkSync } from '../../lib/useNetworkSync';
 import { ReferralModal } from './ReferralModal';
+import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
+import { PHC_BLUEPRINTS } from '../../lib/featureBlueprints';
 import { formatFallbackSMS } from '@swastyasetu/shared';
 import {
   Stethoscope,
@@ -21,6 +23,8 @@ import {
   Copy,
   Check,
   X,
+  HeartPulse,
+  CalendarCheck,
 } from 'lucide-react';
 
 export const PHCDashboard: React.FC = () => {
@@ -28,6 +32,7 @@ export const PHCDashboard: React.FC = () => {
   const { isOnline, isSyncing, pendingCount, syncNow, refreshPendingCount } = useNetworkSync();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
   const [referrals, setReferrals] = useState<any[]>([]);
   const [loadingReferrals, setLoadingReferrals] = useState(false);
   const [selectedSmsReferral, setSelectedSmsReferral] = useState<any | null>(null);
@@ -122,27 +127,60 @@ export const PHCDashboard: React.FC = () => {
         </div>
 
         {/* Network & Action Controls */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 flex-wrap gap-2">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>+ Create Digital Referral</span>
+          </button>
+
+          <button
+            onClick={syncNow}
+            disabled={isSyncing}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-teal-800 border border-teal-200 hover:bg-teal-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>Sync Queue {pendingCount > 0 && `(${pendingCount})`}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveBlueprint(PHC_BLUEPRINTS.vitals)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <HeartPulse className="w-3.5 h-3.5 text-rose-500" />
+            <span>Rapid Vitals &amp; EWS</span>
+          </button>
+
+          <button
+            onClick={() => setActiveBlueprint(PHC_BLUEPRINTS.followup)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <CalendarCheck className="w-3.5 h-3.5 text-teal-600" />
+            <span>Follow-Up Tracker</span>
+          </button>
+
           <div
-            className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+            className={`inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${
               isOnline
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                 : 'bg-amber-50 text-amber-800 border-amber-200'
             }`}
           >
             {isOnline ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
-            <span>{isOnline ? 'Online (Connected)' : 'Offline Mode'}</span>
+            <span>{isOnline ? 'Online' : 'Offline'}</span>
           </div>
 
           <button
             onClick={testRbacAccess}
-            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors border border-slate-300"
+            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors border border-slate-300"
           >
             Verify RBAC
           </button>
           <button
             onClick={testForbiddenAccess}
-            className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-medium transition-colors border border-rose-200"
+            className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-medium transition-colors border border-rose-200"
           >
             Test Admin Block
           </button>
@@ -459,6 +497,12 @@ export const PHCDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Feature Blueprint Modal */}
+      <FeatureBlueprintModal
+        blueprint={activeBlueprint}
+        onClose={() => setActiveBlueprint(null)}
+      />
     </div>
   );
 };

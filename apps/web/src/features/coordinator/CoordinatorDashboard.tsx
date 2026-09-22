@@ -1,12 +1,25 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
-import { Network, CheckCircle2, AlertCircle, ArrowRightLeft, Clock } from 'lucide-react';
+import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
+import { COORDINATOR_BLUEPRINTS } from '../../lib/featureBlueprints';
+import {
+  Network,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRightLeft,
+  Clock,
+  Layers,
+  Building2,
+  FileSpreadsheet,
+  BarChart3,
+} from 'lucide-react';
 
 export const CoordinatorDashboard: React.FC = () => {
   const { user } = useAuth();
   const [testResult, setTestResult] = useState<string | null>(null);
   const [testStatus, setTestStatus] = useState<'success' | 'error' | null>(null);
+  const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
 
   const testCoordinatorRbac = async () => {
     setTestResult('Testing RBAC access against /api/test/coordinator-only...');
@@ -22,7 +35,8 @@ export const CoordinatorDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Banner & Feature Action Buttons */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold">
             <Network className="w-6 h-6" />
@@ -35,17 +49,51 @@ export const CoordinatorDashboard: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Triage & Coordination Staff: <span className="font-semibold text-slate-700">{user?.name}</span>
+              Triage &amp; Coordination Staff: <span className="font-semibold text-slate-700">{user?.name}</span>
             </p>
           </div>
         </div>
 
-        <button
-          onClick={testCoordinatorRbac}
-          className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors border border-blue-200"
-        >
-          Verify Coordinator RBAC
-        </button>
+        <div className="flex items-center space-x-2 flex-wrap gap-2">
+          <button
+            onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.kanban)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Transfer Kanban</span>
+          </button>
+
+          <button
+            onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.readiness)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <Building2 className="w-3.5 h-3.5 text-blue-600" />
+            <span>Bed &amp; ICU Readiness</span>
+          </button>
+
+          <button
+            onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.ambulanceSlip)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-teal-600" />
+            <span>108 Transport Slip</span>
+          </button>
+
+          <button
+            onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.metrics)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <BarChart3 className="w-3.5 h-3.5 text-amber-600" />
+            <span>Transit Analytics</span>
+          </button>
+
+          <button
+            onClick={testCoordinatorRbac}
+            className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors border border-blue-200"
+          >
+            Verify RBAC
+          </button>
+        </div>
       </div>
 
       {testResult && (
@@ -73,19 +121,27 @@ export const CoordinatorDashboard: React.FC = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2 mb-3">
             <Clock className="w-4 h-4 text-amber-600" />
-            <span>Queued / Pending Transfers</span>
+            <span>Awaiting Ambulance</span>
           </h2>
-          <div className="text-2xl font-extrabold text-slate-900 mb-1">2</div>
-          <p className="text-xs text-slate-500">Transfers awaiting bed availability</p>
+          <p className="text-xs text-slate-500 mb-4">
+            Referrals confirmed by primary medical officer awaiting 108 ambulance dispatch.
+          </p>
+          <div className="p-3 bg-slate-50 rounded-xl text-center text-xs text-slate-400 border border-dashed border-slate-200">
+            Queue clear. No pending transfers.
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2 mb-3">
-            <ArrowRightLeft className="w-4 h-4 text-teal-600" />
-            <span>Active En-Route Patients</span>
+            <ArrowRightLeft className="w-4 h-4 text-blue-600" />
+            <span>In-Transit Active Transfers</span>
           </h2>
-          <div className="text-2xl font-extrabold text-slate-900 mb-1">1</div>
-          <p className="text-xs text-slate-500">Ramesh Yadav (PHC Khed → Aundh)</p>
+          <p className="text-xs text-slate-500 mb-4">
+            Patients currently en-route between PHC centres and secondary/tertiary hospitals.
+          </p>
+          <div className="p-3 bg-slate-50 rounded-xl text-center text-xs text-slate-400 border border-dashed border-slate-200">
+            0 active ambulances tracked
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
@@ -93,10 +149,20 @@ export const CoordinatorDashboard: React.FC = () => {
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>Completed Handoffs</span>
           </h2>
-          <div className="text-2xl font-extrabold text-slate-900 mb-1">14</div>
-          <p className="text-xs text-slate-500">Care continuity closed loops</p>
+          <p className="text-xs text-slate-500 mb-4">
+            Patients admitted at destination facility with confirmed handoff receipt.
+          </p>
+          <div className="p-3 bg-slate-50 rounded-xl text-center text-xs text-slate-400 border border-dashed border-slate-200">
+            Handoff registry up-to-date
+          </div>
         </div>
       </div>
+
+      {/* Feature Blueprint Modal */}
+      <FeatureBlueprintModal
+        blueprint={activeBlueprint}
+        onClose={() => setActiveBlueprint(null)}
+      />
     </div>
   );
 };

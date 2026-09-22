@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { IdentityReconciliationModal } from './IdentityReconciliationModal';
 import { DocumentOcrModal } from './DocumentOcrModal';
+import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
+import { HOSPITAL_BLUEPRINTS } from '../../lib/featureBlueprints';
 import {
   Building,
   ShieldCheck,
@@ -16,6 +18,7 @@ import {
   Stethoscope,
   Check,
   ScanLine,
+  FileText,
 } from 'lucide-react';
 
 export const HospitalDashboard: React.FC = () => {
@@ -40,6 +43,9 @@ export const HospitalDashboard: React.FC = () => {
     patientAbha?: string;
     referralId?: string;
   } | null>(null);
+
+  // Feature blueprint modal state
+  const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
 
   // RBAC test states
   const [testResult, setTestResult] = useState<string | null>(null);
@@ -237,17 +243,42 @@ export const HospitalDashboard: React.FC = () => {
             <ScanLine className="w-3.5 h-3.5" />
             <span>AI Document &amp; Prescription OCR</span>
           </button>
+
+          <button
+            onClick={() => setActiveBlueprint(HOSPITAL_BLUEPRINTS.timeline)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <Clock className="w-3.5 h-3.5 text-teal-600" />
+            <span>Care Continuity Timeline</span>
+          </button>
+
+          <button
+            onClick={() => setActiveBlueprint(HOSPITAL_BLUEPRINTS.consultation)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <Stethoscope className="w-3.5 h-3.5 text-blue-600" />
+            <span>Consultation &amp; Intake</span>
+          </button>
+
+          <button
+            onClick={() => setActiveBlueprint(HOSPITAL_BLUEPRINTS.discharge)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Discharge Summary</span>
+          </button>
+
           <button
             onClick={testClinicianRbac}
-            className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-lg text-xs font-medium transition-colors border border-teal-200"
+            className="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-lg text-xs font-medium transition-colors border border-teal-200"
           >
-            Verify Clinician RBAC
+            Verify RBAC
           </button>
           <button
             onClick={testForbiddenPHC}
-            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors border border-slate-300"
+            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors border border-slate-300"
           >
-            Test Forbidden PHC Route
+            Test PHC Route
           </button>
         </div>
       </div>
@@ -530,6 +561,12 @@ export const HospitalDashboard: React.FC = () => {
           }}
         />
       )}
+
+      {/* Feature Blueprint Modal */}
+      <FeatureBlueprintModal
+        blueprint={activeBlueprint}
+        onClose={() => setActiveBlueprint(null)}
+      />
     </div>
   );
 };
