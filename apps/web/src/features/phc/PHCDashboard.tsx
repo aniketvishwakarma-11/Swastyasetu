@@ -244,13 +244,12 @@ export const PHCDashboard: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] border font-bold ${
-                            isEmergency
+                          className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] border font-bold ${isEmergency
                               ? 'bg-rose-50 text-rose-700 border-rose-300'
                               : isUrgent
-                              ? 'bg-amber-50 text-amber-800 border-amber-300'
-                              : 'bg-slate-100 text-slate-700 border-slate-200'
-                          }`}
+                                ? 'bg-amber-50 text-amber-800 border-amber-300'
+                                : 'bg-slate-100 text-slate-700 border-slate-200'
+                            }`}
                         >
                           {isEmergency && <ShieldAlert className="w-3 h-3 text-rose-600" aria-hidden="true" />}
                           <span>{ref.urgency}</span>
@@ -258,16 +257,14 @@ export const PHCDashboard: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] border font-semibold ${
-                            isSynced
+                          className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] border font-semibold ${isSynced
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : 'bg-amber-50 text-amber-800 border-amber-200'
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isSynced ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
-                            }`}
+                            className={`w-1.5 h-1.5 rounded-full ${isSynced ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
+                              }`}
                             aria-hidden="true"
                           />
                           <span>{ref.syncStatus || ref.status}</span>
@@ -341,11 +338,10 @@ export const PHCDashboard: React.FC = () => {
             {/* RBAC result alert — identical markup, unchanged */}
             {testResult && (
               <div
-                className={`p-4 rounded-xl border text-xs flex items-start space-x-3 ${
-                  testStatus === 'success'
+                className={`p-4 rounded-xl border text-xs flex items-start space-x-3 ${testStatus === 'success'
                     ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                     : 'bg-amber-50 border-amber-200 text-amber-800'
-                }`}
+                  }`}
               >
                 {testStatus === 'success' ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" aria-hidden="true" />

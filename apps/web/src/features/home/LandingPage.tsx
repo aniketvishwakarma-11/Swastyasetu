@@ -9,7 +9,6 @@ import {
   Send,
   Stethoscope,
   Building,
-  Network,
   ShieldCheck,
   CheckCircle2,
   Clock,
@@ -406,7 +405,7 @@ export const LandingPage: React.FC = () => (
           {
             icon: <ShieldCheck className="w-4 h-4 text-teal-600" />,
             title: 'Role-Based Access Control',
-            body: 'JWT RBAC enforces permissions for PHC_USER, CLINICIAN, REFERRAL_COORDINATOR, and ADMIN across all API endpoints.',
+            body: 'JWT RBAC enforces permissions for PHC_USER, CLINICIAN, and ADMIN across all API endpoints.',
             badge: 'live' as StatusBadge,
           },
           {
@@ -477,11 +476,11 @@ export const LandingPage: React.FC = () => (
       <SectionLabel>Roles</SectionLabel>
       <SectionTitle>Who uses SwasthyaSetu.</SectionTitle>
       <p className="text-slate-500 text-sm mb-10 max-w-xl leading-relaxed">
-        Four roles are implemented and testable in the demo. Each has its own
+        Three roles are implemented and testable in the demo. Each has its own
         protected dashboard and RBAC-enforced access controls.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           {
             icon: <Stethoscope className="w-5 h-5 text-teal-700" />,
@@ -500,15 +499,6 @@ export const LandingPage: React.FC = () => (
             iconBg: 'bg-purple-100',
             description:
               'Receives incoming referrals at the hospital dashboard. Identity reconciliation and discharge document review are in development for this role.',
-          },
-          {
-            icon: <Network className="w-5 h-5 text-blue-700" />,
-            role: 'REFERRAL_COORDINATOR',
-            title: 'Referral Coordinator',
-            color: 'border-blue-200 bg-blue-50',
-            iconBg: 'bg-blue-100',
-            description:
-              'Monitors inter-facility transfer status and tracks active patients moving between PHC and district hospital.',
           },
           {
             icon: <ShieldCheck className="w-5 h-5 text-slate-700" />,
