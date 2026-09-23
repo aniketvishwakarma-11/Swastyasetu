@@ -5,9 +5,9 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r dotenv/config src/server.ts dotenv_config_path=../../.env",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
-    "prisma:generate": "npx prisma generate",
+    "prisma:generate": "prisma generate",
     "prisma:migrate": "npx prisma migrate dev --schema=prisma/schema.prisma",
     "prisma:studio": "npx prisma studio",
     "db:seed": "ts-node-dev -r dotenv/config src/seed.ts dotenv_config_path=../../.env"
