@@ -28,62 +28,62 @@ export const PublicHeader: React.FC = () => {
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         {/* Brand */}
-        <Link to="/" className="flex items-center space-x-3 group cursor-pointer">
-          <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-sm shadow-teal-600/20 group-hover:bg-teal-700 transition-colors">
-            <Activity className="w-5 h-5" />
+        <Link to="/" className="flex items-center space-x-2.5 group cursor-pointer">
+          <div className="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center shadow-xs group-hover:bg-teal-700 transition-colors">
+            <Activity className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-base font-bold text-slate-900 tracking-tight">SwasthyaSetu</span>
-            <span className="hidden sm:inline ml-2.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-md px-2 py-0.5">
+            <span className="text-sm font-bold text-slate-900 tracking-tight">SwasthyaSetu</span>
+            <span className="hidden sm:inline ml-2 text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.5">
               Continuity Layer
             </span>
           </div>
         </Link>
 
         {/* Section links (desktop) */}
-        <nav className="hidden md:flex items-center space-x-2 text-sm font-semibold text-slate-600" aria-label="Page sections">
+        <nav className="hidden md:flex items-center space-x-1 text-xs font-semibold text-slate-600" aria-label="Page sections">
           <a
             href="#how-it-works"
             onClick={(e) => scrollToSection(e, 'how-it-works')}
-            className="px-3.5 py-2 rounded-lg hover:bg-slate-50 hover:text-teal-700 transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-lg hover:bg-slate-50 hover:text-teal-700 transition-colors cursor-pointer"
           >
             How it Works
           </a>
           <a
             href="#capabilities"
             onClick={(e) => scrollToSection(e, 'capabilities')}
-            className="px-3.5 py-2 rounded-lg hover:bg-slate-50 hover:text-teal-700 transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-lg hover:bg-slate-50 hover:text-teal-700 transition-colors cursor-pointer"
           >
             Capabilities
           </a>
           <a
             href="#roles"
             onClick={(e) => scrollToSection(e, 'roles')}
-            className="px-3.5 py-2 rounded-lg hover:bg-slate-50 hover:text-teal-700 transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-lg hover:bg-slate-50 hover:text-teal-700 transition-colors cursor-pointer"
           >
             Roles
           </a>
         </nav>
 
         {/* Auth / Dashboard CTAs & Mobile Hamburger */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-2">
           {user ? (
             <>
               <Link
                 to={dashboardRoute}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-xl hover:bg-teal-700 transition-colors shadow-sm cursor-pointer"
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-xs cursor-pointer"
               >
-                <LayoutDashboard className="w-4 h-4" aria-hidden="true" />
+                <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Dashboard</span>
               </Link>
               <button
                 onClick={logout}
-                className="flex items-center space-x-1.5 px-3.5 py-2 text-sm font-semibold text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer"
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer"
                 title="Log out of session"
               >
-                <LogOut className="w-4 h-4" aria-hidden="true" />
+                <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Logout</span>
               </button>
             </>
@@ -91,16 +91,16 @@ export const PublicHeader: React.FC = () => {
             <>
               <Link
                 to="/login"
-                className="flex items-center space-x-1.5 px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-teal-300 transition-colors cursor-pointer"
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-teal-300 transition-colors cursor-pointer"
               >
-                <LogIn className="w-4 h-4" aria-hidden="true" />
+                <LogIn className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Log In</span>
               </Link>
               <Link
                 to="/signup"
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-xl hover:bg-teal-700 transition-colors shadow-sm cursor-pointer"
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-xs cursor-pointer"
               >
-                <UserPlus className="w-4 h-4" aria-hidden="true" />
+                <UserPlus className="w-3.5 h-3.5" aria-hidden="true" />
                 <span className="hidden sm:inline">Create Staff Account</span>
                 <span className="sm:hidden">Register</span>
               </Link>
@@ -110,7 +110,7 @@ export const PublicHeader: React.FC = () => {
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer ml-1"
+            className="md:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer ml-1"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileMenuOpen}
           >
