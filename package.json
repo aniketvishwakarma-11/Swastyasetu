@@ -16,10 +16,14 @@
     "build:web": "npm run build:shared && npm run build --workspace=apps/web",
     "start": "npm run start --workspace=apps/api",
     "start:api": "npm run start --workspace=apps/api",
-    "prisma:generate": "npm run prisma:generate --workspace=apps/api",
-    "prisma:migrate": "npm run prisma:migrate --workspace=apps/api",
+    "prisma:generate": "npx prisma generate --schema=apps/api/prisma/schema.prisma",
+    "prisma:migrate": "npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma",
     "db:seed": "npm run db:seed --workspace=apps/api",
     "lint": "npm run lint --workspaces --if-present"
+  },
+  "dependencies": {
+    "prisma": "^5.14.0",
+    "typescript": "^5.4.5"
   },
   "keywords": [
     "healthcare",
