@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build:web": "tsc && vite build",
+    "build": "tsc && vite build && node -e \"const fs=require('fs'); try{fs.cpSync('dist','../../dist',{recursive:true});}catch(e){} try{fs.mkdirSync('apps/web',{recursive:true});fs.cpSync('dist','apps/web/dist',{recursive:true});}catch(e){}\"",
+    "build:web": "tsc && vite build && node -e \"const fs=require('fs'); try{fs.cpSync('dist','../../dist',{recursive:true});}catch(e){} try{fs.mkdirSync('apps/web',{recursive:true});fs.cpSync('dist','apps/web/dist',{recursive:true});}catch(e){}\"",
     "preview": "vite preview"
   },
   "dependencies": {

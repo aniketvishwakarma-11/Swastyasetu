@@ -13,7 +13,7 @@
     "build": "npm run build --workspaces --if-present",
     "build:shared": "npm run build --workspace=packages/shared",
     "build:api": "npm run build:shared && npm run build --workspace=apps/api",
-    "build:web": "npm run build:shared && npm run build --workspace=apps/web",
+    "build:web": "npm run build:shared && npm run build --workspace=apps/web && node -e \"const fs=require('fs'); try{fs.cpSync('apps/web/dist','dist',{recursive:true});}catch(e){}\"",
     "start": "npm run start --workspace=apps/api",
     "start:api": "npm run start --workspace=apps/api",
     "prisma:generate": "npm run prisma:generate --workspace=apps/api",
