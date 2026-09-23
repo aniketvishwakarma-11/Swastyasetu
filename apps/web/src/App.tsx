@@ -13,19 +13,20 @@ import { AdminDashboard } from './features/admin/AdminDashboard';
 function AppLayout() {
   const { user } = useAuth();
   const location = useLocation();
+  const isHomePage = location.pathname === '/';
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
-  // Unauthenticated / Auth Pages View
-  if (!user || isAuthPage) {
+  // Public Home Page OR Unauthenticated / Auth Pages View
+  if (isHomePage || !user || isAuthPage) {
     return (
       <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white">
-        <Navbar />
+        {isAuthPage && <Navbar />}
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/login" element={<LoginView />} />
             <Route path="/signup" element={<SignupView />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </div>

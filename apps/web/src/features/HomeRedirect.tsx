@@ -1,10 +1,10 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth, getDefaultDashboard } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { LandingPage } from './home/LandingPage';
 import { Activity } from 'lucide-react';
 
 export const HomeRedirect: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const { isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -19,9 +19,5 @@ export const HomeRedirect: React.FC = () => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <Navigate to={getDefaultDashboard(user.role)} replace />;
+  return <LandingPage />;
 };
