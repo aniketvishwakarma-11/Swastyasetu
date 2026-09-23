@@ -251,7 +251,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
             <button
               type="button"
               onClick={handleLoadDemo}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-lg text-xs font-semibold transition-colors"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-xs font-semibold transition-colors"
               title="Autofill emergency case for Ramesh Yadav"
             >
               <Sparkles className="w-3.5 h-3.5" />

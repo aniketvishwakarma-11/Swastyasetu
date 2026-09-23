@@ -3,10 +3,82 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+    --canvas: #f4f8f8;
+    --ink: #102a2b;
+    --muted: #607375;
+    --teal: #0d9488;
+    --teal-deep: #115e59;
+    --line: #d9e5e4;
+  }
+
   html {
     scroll-behavior: smooth;
   }
+
   body {
-    @apply min-h-screen bg-slate-50 text-slate-900 font-sans;
+    @apply min-h-screen text-slate-900 font-sans antialiased;
+    background-color: var(--canvas);
+    background-image: linear-gradient(rgba(13, 148, 136, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13, 148, 136, 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 3px solid rgba(13, 148, 136, 0.35);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: #99f6e4;
+    color: #134e4a;
+  }
+}
+
+@layer components {
+  .clinical-enter {
+    animation: clinical-enter 500ms ease-out both;
+  }
+
+  .clinical-enter-delay {
+    animation: clinical-enter 500ms 100ms ease-out both;
+  }
+
+  .clinical-surface {
+    @apply bg-white border border-slate-200 shadow-sm;
+    box-shadow: 0 18px 45px rgba(15, 78, 74, 0.06);
+  }
+}
+
+@keyframes clinical-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

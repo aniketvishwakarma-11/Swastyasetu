@@ -14,9 +14,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center animate-pulse">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm animate-pulse">
             <Activity className="w-6 h-6 animate-spin" />
           </div>
           <p className="text-sm font-medium text-slate-600">Verifying healthcare session...</p>
@@ -31,8 +31,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center p-6 bg-slate-50">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-rose-200 shadow-sm p-8 text-center">
+      <div className="flex min-h-[80vh] items-center justify-center bg-slate-50 p-6">
+        <div className="clinical-surface w-full max-w-md rounded-[24px] border-rose-200 p-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-rose-50 text-rose-600 mb-4 border border-rose-100">
             <ShieldAlert className="w-8 h-8" />
           </div>

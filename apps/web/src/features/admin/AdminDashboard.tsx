@@ -51,9 +51,9 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Header & Feature Actions */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="clinical-surface flex flex-col justify-between gap-5 rounded-[24px] border-teal-100 p-5 sm:p-6 md:flex-row md:items-center">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
             <ShieldCheck className="w-6 h-6" />
@@ -100,7 +100,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* RBAC Security Audit Results */}
       {testLog.length > 0 && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="clinical-surface rounded-2xl p-6">
           <h2 className="text-sm font-bold text-slate-900 mb-4">RBAC Endpoint Security Audit Log</h2>
           <div className="space-y-2">
             {testLog.map((log, idx) => (
@@ -129,8 +129,8 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Operational Modules Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 flex items-center justify-center font-bold mb-4">
+        <div className="clinical-surface rounded-2xl p-6">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold mb-4">
             <Database className="w-5 h-5" />
           </div>
           <h2 className="text-sm font-bold text-slate-900 mb-1">PostgreSQL Master Schema</h2>
@@ -142,7 +142,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="clinical-surface rounded-2xl p-6">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold mb-4">
             <Building className="w-5 h-5" />
           </div>
@@ -155,8 +155,8 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold mb-4">
+        <div className="clinical-surface rounded-2xl p-6">
+          <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center font-bold mb-4">
             <Users className="w-5 h-5" />
           </div>
           <h2 className="text-sm font-bold text-slate-900 mb-1">Practitioner Access Control</h2>

@@ -70,10 +70,10 @@ export const FeatureBlueprintModal: React.FC<FeatureBlueprintModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl my-8 overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/55 p-4 backdrop-blur-sm">
+      <div className="clinical-surface my-8 flex w-full max-w-2xl flex-col overflow-hidden rounded-[24px]">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/90 px-6 py-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold">
               <Layers className="w-5 h-5" />
@@ -161,7 +161,7 @@ export const FeatureBlueprintModal: React.FC<FeatureBlueprintModalProps> = ({
                 {blueprint.technicalSpecs.aiServices?.map((ai, i) => (
                   <span
                     key={i}
-                    className="font-mono text-[11px] px-2 py-0.5 bg-purple-50 text-purple-800 rounded border border-purple-200 font-semibold"
+                    className="rounded border border-sky-200 bg-sky-50 px-2 py-0.5 font-mono text-[11px] font-semibold text-sky-800"
                   >
                     {ai}
                   </span>
@@ -187,7 +187,7 @@ export const FeatureBlueprintModal: React.FC<FeatureBlueprintModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/90 px-6 py-4">
           <div className="text-xs text-slate-500">
             Status: <span className="font-semibold text-slate-700">{blueprint.badgeLabel}</span>
           </div>

@@ -168,10 +168,10 @@ const DashboardIllustration: React.FC = () => (
       <div className="bg-white rounded-xl border border-slate-200 p-2.5 shadow-2xs">
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center space-x-1">
-            <FileText className="w-3 h-3 text-purple-600" />
+            <FileText className="w-3 h-3 text-amber-600" />
             <span className="text-[11px] font-bold text-slate-800">Active Test Case</span>
           </div>
-          <span className="text-[9px] font-bold text-purple-700 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.2 uppercase">
+          <span className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.2 uppercase">
             Demo
           </span>
         </div>
@@ -185,7 +185,7 @@ const DashboardIllustration: React.FC = () => (
             <span className="font-bold text-rose-700 truncate block">EMERGENCY (STEMI)</span>
           </div>
         </div>
-        <div className="w-full bg-purple-50 border border-purple-200 rounded-md py-1 text-center text-[10px] font-bold text-purple-700">
+        <div className="w-full bg-amber-50 border border-amber-200 rounded-md py-1 text-center text-[10px] font-bold text-amber-800">
           Load Sample Case
         </div>
       </div>
@@ -218,8 +218,12 @@ export const LandingPage: React.FC = () => (
     <PublicHeader />
 
     {/* ── 1. HERO ─────────────────────────────────────────────────────────── */}
-    <section className="bg-white pt-8 sm:pt-12 pb-14 sm:pb-16 border-b border-slate-100">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="border-b border-slate-100 bg-white pb-14 pt-6 sm:pb-16 sm:pt-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500 sm:flex-row sm:items-center sm:px-5">
+          <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]" /> District continuity network <span className="text-slate-300">/</span> Demo environment</div>
+          <div className="flex items-center gap-4 text-slate-400"><span>Sample data only</span><span className="text-emerald-700">System ready</span></div>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
 
           {/* Left: copy */}
@@ -229,7 +233,7 @@ export const LandingPage: React.FC = () => (
               <span>Offline-first healthcare continuity</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-900 leading-[1.18] tracking-tight mb-4">
+            <h1 className="text-3xl font-extrabold leading-[1.12] tracking-tight text-slate-900 sm:text-4xl lg:text-[44px]">
               Healthcare continuity<br />
               <span className="text-teal-600">that survives weak</span><br />
               connectivity.
@@ -258,15 +262,22 @@ export const LandingPage: React.FC = () => (
               </Link>
             </div>
 
-            <p className="text-xs text-slate-400 mt-3">
+            <p className="mt-3 text-xs text-slate-400">
               One-click demo logins available at the sign-in screen. No credentials required.
             </p>
+
+            <div className="mt-8 grid max-w-md grid-cols-3 divide-x divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50/70 py-3">
+              <div className="px-3"><p className="text-lg font-bold text-slate-900">4</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Care roles</p></div>
+              <div className="px-3"><p className="text-lg font-bold text-slate-900">24/7</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Queue ready</p></div>
+              <div className="px-3"><p className="text-lg font-bold text-slate-900">100%</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Auditable</p></div>
+            </div>
           </div>
 
           {/* Right: static illustration */}
           <div className="lg:col-span-6 xl:col-span-6">
             <DashboardIllustration />
-            <p className="text-center text-[11px] text-slate-400 mt-2 font-medium">
+            <div className="mt-3 flex items-center justify-between px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400"><span>Live workspace preview</span><span className="flex items-center gap-1.5 text-emerald-700"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Ready for handoff</span></div>
+            <p className="mt-2 text-center text-[11px] font-medium text-slate-400">
               PHC Referral &amp; Continuity Dashboard — actual application UI
             </p>
           </div>
@@ -446,7 +457,7 @@ export const LandingPage: React.FC = () => (
             badge: 'live' as StatusBadge,
           },
           {
-            icon: <MessageSquare className="w-4 h-4 text-purple-600" />,
+            icon: <MessageSquare className="w-4 h-4 text-amber-600" />,
             title: 'SMS Fallback',
             body: 'A compact ≤160-character referral payload for SMS delivery when internet is completely unavailable. Gateway adapter planned.',
             badge: 'dev' as StatusBadge,
@@ -517,11 +528,11 @@ export const LandingPage: React.FC = () => (
               'Creates digital referrals, monitors the local sync queue, and continues working during connectivity loss.',
           },
           {
-            icon: <Building className="w-5 h-5 text-purple-700" />,
+            icon: <Building className="w-5 h-5 text-sky-700" />,
             role: 'CLINICIAN',
             title: 'District Hospital Clinician',
-            color: 'border-purple-200 bg-purple-50',
-            iconBg: 'bg-purple-100',
+            color: 'border-sky-200 bg-sky-50',
+            iconBg: 'bg-sky-100',
             description:
               'Receives incoming referrals, confirms patient identity reconciliation, and reviews AI TrOCR discharge summaries.',
           },
@@ -687,7 +698,7 @@ export const LandingPage: React.FC = () => (
         {/* Bottom bar */}
         <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
           <span>© 2026 SwasthyaSetu Rural Healthcare Continuity Project</span>
-          <span>Demo build with simulated offline queue and test fixtures. Not for clinical use.</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Demo environment · synthetic data only</span>
         </div>
       </div>
     </footer>

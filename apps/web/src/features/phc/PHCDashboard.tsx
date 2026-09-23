@@ -108,9 +108,9 @@ export const PHCDashboard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Welcome & Status Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="clinical-surface flex flex-col justify-between gap-5 rounded-[24px] border-teal-100 p-5 sm:p-6 md:flex-row md:items-center">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold">
             <Stethoscope className="w-6 h-6" />
@@ -211,9 +211,9 @@ export const PHCDashboard: React.FC = () => {
       )}
 
       {/* Operational Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {/* Quick Referral Creator Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+        <div className="clinical-surface rounded-2xl p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
@@ -238,7 +238,7 @@ export const PHCDashboard: React.FC = () => {
         </div>
 
         {/* Offline Queue Box */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+        <div className="clinical-surface rounded-2xl p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
@@ -271,14 +271,14 @@ export const PHCDashboard: React.FC = () => {
         </div>
 
         {/* Demo Scenario Box */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+        <div className="clinical-surface rounded-2xl p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-                <FileText className="w-4 h-4 text-purple-600" />
+                <FileText className="w-4 h-4 text-amber-600" />
                 <span>Demo Scenario</span>
               </h2>
-              <span className="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+              <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                 Ramesh Yadav
               </span>
             </div>
@@ -291,7 +291,7 @@ export const PHCDashboard: React.FC = () => {
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
           >
             <span>Open & Load Demo Patient</span>
           </button>
@@ -299,7 +299,7 @@ export const PHCDashboard: React.FC = () => {
       </div>
 
       {/* Referrals Activity Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="clinical-surface rounded-2xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-slate-900">Recent Dispatched Referrals</h2>

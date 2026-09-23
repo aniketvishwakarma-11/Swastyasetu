@@ -27,15 +27,15 @@ export const PublicHeader: React.FC = () => {
   const dashboardRoute = user ? getDefaultDashboard(user.role) : '/phc';
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <Link to="/" className="flex items-center space-x-2.5 group cursor-pointer">
-          <div className="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center shadow-xs group-hover:bg-teal-700 transition-colors">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm transition-colors group-hover:bg-teal-700">
             <Activity className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-sm font-bold text-slate-900 tracking-tight">SwasthyaSetu</span>
+            <span className="text-sm font-bold tracking-tight text-slate-900">SwasthyaSetu</span>
             <span className="hidden sm:inline ml-2 text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.5">
               Continuity Layer
             </span>
@@ -91,14 +91,14 @@ export const PublicHeader: React.FC = () => {
             <>
               <Link
                 to="/login"
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-teal-300 transition-colors cursor-pointer"
+                className="flex items-center space-x-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-teal-300 hover:bg-slate-50 cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Log In</span>
               </Link>
               <Link
                 to="/signup"
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-xs cursor-pointer"
+                className="flex items-center space-x-1.5 rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-teal-700 cursor-pointer"
               >
                 <UserPlus className="w-3.5 h-3.5" aria-hidden="true" />
                 <span className="hidden sm:inline">Create Staff Account</span>

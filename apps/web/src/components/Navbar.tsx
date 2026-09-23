@@ -39,9 +39,9 @@ export const Navbar: React.FC = () => {
   // Render unauthenticated topbar for /login and /signup
   if (!user) {
     return (
-      <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between sticky top-0 z-50">
+      <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3.5 backdrop-blur sm:px-6">
         <Link to="/" className="flex items-center space-x-3 group">
-          <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold shadow-sm shadow-teal-600/20 group-hover:bg-teal-700 transition-colors">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 font-bold text-white shadow-sm shadow-teal-600/20 transition-colors group-hover:bg-teal-700">
             <Activity className="w-5 h-5" />
           </div>
           <div>
@@ -75,11 +75,11 @@ export const Navbar: React.FC = () => {
 
   // Render authenticated topbar with navigation & action controls
   return (
-    <header className="bg-white border-b border-slate-200/80 px-6 py-2.5 flex items-center justify-between z-30 shrink-0 gap-4 flex-wrap">
+    <header className="sticky top-0 z-30 flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 bg-white/95 px-4 py-2.5 backdrop-blur sm:px-6">
       {/* Left: Branding & Portal Tabs */}
       <div className="flex items-center space-x-6">
         <Link to="/" className="flex items-center space-x-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold shadow-sm shadow-teal-600/20 group-hover:bg-teal-700 transition-colors">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 font-bold text-white shadow-sm shadow-teal-600/20 transition-colors group-hover:bg-teal-700">
             <Activity className="w-4 h-4" />
           </div>
           <div>
@@ -191,9 +191,9 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Right Controls: Connectivity, Facility Context, User & Sign Out */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2.5">
         {/* Offline Simulation Switcher */}
-        <div className="flex items-center space-x-1 bg-slate-100 rounded-lg p-0.5 border border-slate-200 text-[10px] font-bold">
+        <div className="hidden items-center space-x-1 rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-[10px] font-bold sm:flex">
           <button
             onClick={() => setSimulatedOffline(false)}
             className={`flex items-center space-x-1 px-2 py-1 rounded-md transition-colors cursor-pointer ${
@@ -217,7 +217,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Connectivity Status Pill */}
-        <div className="hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2 py-1 rounded-md border border-slate-200 bg-white">
+        <div className="hidden items-center space-x-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold sm:flex">
           <div className={`w-2 h-2 rounded-full ${activeOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
           <span className={activeOnline ? 'text-emerald-700 text-[10px]' : 'text-amber-800 text-[10px]'}>
             {activeOnline ? 'SYNC READY' : 'OFFLINE MODE'}
@@ -243,7 +243,7 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600 text-xs font-bold text-white shadow-sm">
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
 

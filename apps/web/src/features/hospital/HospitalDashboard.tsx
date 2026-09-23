@@ -215,9 +215,9 @@ export const HospitalDashboard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="clinical-surface flex flex-col justify-between gap-5 rounded-[24px] border-teal-100 p-5 sm:p-6 sm:flex-row sm:items-center">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold">
             <Building className="w-6 h-6" />
@@ -321,7 +321,7 @@ export const HospitalDashboard: React.FC = () => {
       )}
 
       {/* Identity Reconciliation Queue Box */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+      <div className="clinical-surface rounded-2xl p-6">
         <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-teal-600" />
@@ -403,7 +403,7 @@ export const HospitalDashboard: React.FC = () => {
       </div>
 
       {/* Hospital Triage Overview Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="clinical-surface rounded-2xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-slate-900">Hospital Triage & Incoming Referrals</h2>

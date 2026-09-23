@@ -22,6 +22,27 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+const DEMO_LOGIN_USERS = {
+  'phc_doctor@swastyasetu.gov.in': {
+    id: '00000000-0000-0000-0000-000000000101',
+    name: 'Dr. Rajesh Sharma',
+    role: UserRole.PHC_USER,
+    facilityId: '00000000-0000-0000-0000-000000000001',
+  },
+  'hospital_doctor@swastyasetu.gov.in': {
+    id: '00000000-0000-0000-0000-000000000102',
+    name: 'Dr. Priya Deshmukh',
+    role: UserRole.CLINICIAN,
+    facilityId: '00000000-0000-0000-0000-000000000002',
+  },
+  'admin@swastyasetu.gov.in': {
+    id: '00000000-0000-0000-0000-000000000103',
+    name: 'System Admin',
+    role: UserRole.ADMIN,
+    facilityId: null,
+  },
+} as const;
+
 /**
  * POST /api/auth/signup
  * Register a new healthcare user with an assigned role and facility
@@ -130,6 +151,28 @@ router.post('/signup', async (req: Request, res: Response): Promise<void> => {
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
     const validated = loginSchema.parse(req.body);
+
+    const demoUser = DEMO_LOGIN_USERS[validated.email.toLowerCase() as keyof typeof DEMO_LOGIN_USERS];
+    if (process.env.DEMO_MODE === 'true' && process.env.NODE_ENV !== 'production' && demoUser && validated.password === 'password123') {
+      const user = {
+        ...demoUser,
+        email: validated.email.toLowerCase(),
+        facility: null,
+        createdAt: new Date().toISOString(),
+      };
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role, name: user.name },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.status(200).json({
+        success: true,
+        data: { user, token },
+        message: 'Demo authentication successful',
+      });
+      return;
+    }
 
     const user = await prisma.user.findUnique({
       where: { email: validated.email.toLowerCase() },

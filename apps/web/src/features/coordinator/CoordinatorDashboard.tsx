@@ -34,17 +34,17 @@ export const CoordinatorDashboard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Banner & Feature Action Buttons */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="clinical-surface flex flex-col justify-between gap-5 rounded-[24px] border-teal-100 p-5 sm:p-6 md:flex-row md:items-center">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold">
+          <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold">
             <Network className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-xl font-bold text-slate-900">Inter-Facility Referral Board</h1>
-              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 uppercase">
+              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200 uppercase">
                 {user?.role}
               </span>
             </div>
@@ -57,7 +57,7 @@ export const CoordinatorDashboard: React.FC = () => {
         <div className="flex items-center space-x-2 flex-wrap gap-2">
           <button
             onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.kanban)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
           >
             <Layers className="w-3.5 h-3.5" />
             <span>Transfer Kanban</span>
@@ -89,7 +89,7 @@ export const CoordinatorDashboard: React.FC = () => {
 
           <button
             onClick={testCoordinatorRbac}
-            className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors border border-blue-200"
+            className="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg text-xs font-medium transition-colors border border-teal-200"
           >
             Verify RBAC
           </button>
@@ -118,7 +118,7 @@ export const CoordinatorDashboard: React.FC = () => {
 
       {/* Transfer Pipeline */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="clinical-surface rounded-2xl p-6">
           <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2 mb-3">
             <Clock className="w-4 h-4 text-amber-600" />
             <span>Awaiting Ambulance</span>
@@ -131,7 +131,7 @@ export const CoordinatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="clinical-surface rounded-2xl p-6">
           <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2 mb-3">
             <ArrowRightLeft className="w-4 h-4 text-blue-600" />
             <span>In-Transit Active Transfers</span>
@@ -144,7 +144,7 @@ export const CoordinatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="clinical-surface rounded-2xl p-6">
           <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2 mb-3">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>Completed Handoffs</span>

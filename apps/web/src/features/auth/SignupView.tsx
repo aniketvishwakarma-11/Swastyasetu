@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth, getDefaultDashboard } from '../../context/AuthContext';
 import { UserRole, Facility, SEED_FACILITIES } from '@swastyasetu/shared';
 import { apiRequest } from '../../lib/api';
-import { Activity, Lock, Mail, User, Building2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Activity, Lock, Mail, User, Building2, AlertCircle, ArrowRight, ShieldCheck, Wifi } from 'lucide-react';
 
 export const SignupView: React.FC = () => {
   const { signup } = useAuth();
@@ -61,21 +61,38 @@ export const SignupView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-6 bg-slate-50">
-      <div className="max-w-lg w-full">
+    <div className="min-h-[calc(100vh-68px)] px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,78,74,0.10)] lg:grid-cols-[0.78fr_1.22fr]">
+        <aside className="relative hidden overflow-hidden bg-teal-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
+          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full border border-teal-800/70" />
+          <div className="relative">
+            <div className="mb-12 flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-400 text-teal-950"><Activity className="h-6 w-6" /></div><div><p className="text-lg font-bold">SwasthyaSetu</p><p className="text-[11px] uppercase tracking-[0.18em] text-teal-200">Clinical continuity</p></div></div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">Staff onboarding</p>
+            <h1 className="max-w-sm text-4xl font-semibold leading-[1.08] tracking-tight">Join the district care network.</h1>
+            <p className="mt-5 max-w-sm text-sm leading-6 text-teal-100/75">Create a role-aware workspace for safer referrals, clear handoffs, and dependable continuity.</p>
+          </div>
+          <div className="relative space-y-3">
+            <div className="flex items-center gap-3 rounded-2xl border border-teal-800/80 bg-teal-900/60 p-4"><ShieldCheck className="h-5 w-5 text-emerald-300" /><div><p className="text-sm font-semibold">Role-based by design</p><p className="mt-0.5 text-xs text-teal-200/65">Your workspace follows your clinical responsibility.</p></div></div>
+            <div className="flex items-center gap-3 rounded-2xl border border-teal-800/80 bg-teal-900/60 p-4"><Wifi className="h-5 w-5 text-teal-300" /><div><p className="text-sm font-semibold">Ready for the field</p><p className="mt-0.5 text-xs text-teal-200/65">Continue safely through weak connectivity.</p></div></div>
+          </div>
+        </aside>
+
+        <div className="p-6 sm:p-10 lg:p-12">
+        <div className="mx-auto max-w-lg">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-600 text-white mb-3 shadow-md shadow-teal-600/20">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-600 text-white mb-3 shadow-md shadow-teal-600/20 lg:hidden">
             <Activity className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Create Healthcare Staff Account</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">Secure staff onboarding</p>
+          <h1 className="mt-2 text-3xl font-semibold text-slate-950 tracking-tight">Create your workspace.</h1>
           <p className="text-xs text-slate-500 mt-1">
             Register your role in the SwasthyaSetu continuity network
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+        <div className="clinical-surface rounded-2xl p-6 sm:p-8">
           {errorMessage && (
             <div className="mb-6 p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start space-x-2.5 text-xs text-rose-700">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
@@ -163,7 +180,7 @@ export const SignupView: React.FC = () => {
                   onClick={() => setRole('CLINICIAN')}
                   className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
                     role === 'CLINICIAN'
-                      ? 'border-purple-600 bg-purple-50/70 text-purple-900 font-bold shadow-xs'
+                      ? 'border-sky-600 bg-sky-50/70 text-sky-900 font-bold shadow-xs'
                       : 'border-slate-200 hover:border-slate-300 text-slate-700'
                   }`}
                 >
@@ -176,7 +193,7 @@ export const SignupView: React.FC = () => {
                   onClick={() => setRole('REFERRAL_COORDINATOR')}
                   className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
                     role === 'REFERRAL_COORDINATOR'
-                      ? 'border-blue-600 bg-blue-50/70 text-blue-900 font-bold shadow-xs'
+                      ? 'border-teal-600 bg-teal-50/70 text-teal-900 font-bold shadow-xs'
                       : 'border-slate-200 hover:border-slate-300 text-slate-700'
                   }`}
                 >
@@ -238,6 +255,8 @@ export const SignupView: React.FC = () => {
             </Link>
           </div>
         </div>
+        </div>
+      </div>
       </div>
     </div>
   );
