@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Building2,
   CheckCircle2,
+  GitFork,
   Globe2,
   Lock,
   Mail,
@@ -18,6 +19,7 @@ import {
 const demoRoles = [
   { email: 'phc_doctor@swastyasetu.gov.in', role: 'PHC_USER', name: 'Dr. Rajesh Sharma', facility: 'PHC Khed', icon: Stethoscope, tone: 'teal' },
   { email: 'hospital_doctor@swastyasetu.gov.in', role: 'CLINICIAN', name: 'Dr. Priya Deshmukh', facility: 'Aundh District Hospital', icon: Building2, tone: 'sky' },
+  { email: 'coordinator@swastyasetu.gov.in', role: 'REFERRAL_COORDINATOR', name: 'Vikram Solanki', facility: 'Aundh District Hospital', icon: GitFork, tone: 'amber' },
   { email: 'admin@swastyasetu.gov.in', role: 'ADMIN', name: 'System Admin', facility: 'District Network', icon: ShieldCheck, tone: 'slate' },
 ] as const;
 
@@ -99,7 +101,14 @@ export const LoginView: React.FC = () => {
             <div className="my-7 flex items-center gap-3"><div className="h-px flex-1 bg-slate-200" /><span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">or use a demo role</span><div className="h-px flex-1 bg-slate-200" /></div>
             <div className="space-y-2">
               {demoRoles.map(({ email: demoEmail, role, name, facility, icon: Icon, tone }) => {
-                const toneClass = tone === 'teal' ? 'border-teal-200 bg-teal-50/50 text-teal-700 hover:border-teal-300 hover:bg-teal-50' : tone === 'sky' ? 'border-sky-200 bg-sky-50/50 text-sky-700 hover:border-sky-300 hover:bg-sky-50' : 'border-slate-200 bg-slate-50/60 text-slate-700 hover:border-slate-300 hover:bg-slate-100';
+                const toneClass =
+                  tone === 'teal'
+                    ? 'border-teal-200 bg-teal-50/50 text-teal-700 hover:border-teal-300 hover:bg-teal-50'
+                    : tone === 'sky'
+                    ? 'border-sky-200 bg-sky-50/50 text-sky-700 hover:border-sky-300 hover:bg-sky-50'
+                    : tone === 'amber'
+                    ? 'border-amber-200 bg-amber-50/50 text-amber-800 hover:border-amber-300 hover:bg-amber-50'
+                    : 'border-slate-200 bg-slate-50/60 text-slate-700 hover:border-slate-300 hover:bg-slate-100';
                 return <button key={role} type="button" onClick={() => authenticate(demoEmail, 'password123', role)} disabled={isSubmitting} className={`group flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all disabled:opacity-60 ${toneClass}`}><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-black/5"><Icon className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold text-slate-800">{name}</span><span className="mt-0.5 block truncate text-[11px] text-slate-500">{facility} · {role}</span></span><ArrowRight className="h-4 w-4 opacity-40 transition-transform group-hover:translate-x-0.5 group-hover:opacity-100" /></button>;
               })}
             </div>

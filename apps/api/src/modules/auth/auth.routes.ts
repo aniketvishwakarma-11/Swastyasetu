@@ -35,6 +35,18 @@ const DEMO_LOGIN_USERS = {
     role: UserRole.CLINICIAN,
     facilityId: '00000000-0000-0000-0000-000000000002',
   },
+  'coordinator@swastyasetu.gov.in': {
+    id: '00000000-0000-0000-0000-000000000104',
+    name: 'Vikram Solanki',
+    role: UserRole.REFERRAL_COORDINATOR,
+    facilityId: '00000000-0000-0000-0000-000000000002',
+  },
+  'triage_coordinator@swastyasetu.gov.in': {
+    id: '00000000-0000-0000-0000-000000000104',
+    name: 'Vikram Solanki',
+    role: UserRole.REFERRAL_COORDINATOR,
+    facilityId: '00000000-0000-0000-0000-000000000002',
+  },
   'admin@swastyasetu.gov.in': {
     id: '00000000-0000-0000-0000-000000000103',
     name: 'System Admin',

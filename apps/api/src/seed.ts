@@ -86,7 +86,37 @@ export async function seed() {
     },
   });
 
-  console.log('[Seed] Users seeded:', phcUser.email, hospitalClinician.email, admin.email);
+  const coordinator = await prisma.user.upsert({
+    where: { email: 'coordinator@swastyasetu.gov.in' },
+    update: {
+      role: UserRole.REFERRAL_COORDINATOR,
+      facilityId: distHosp.id,
+    },
+    create: {
+      name: 'Vikram Solanki',
+      email: 'coordinator@swastyasetu.gov.in',
+      passwordHash,
+      role: UserRole.REFERRAL_COORDINATOR,
+      facilityId: distHosp.id,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'triage_coordinator@swastyasetu.gov.in' },
+    update: {
+      role: UserRole.REFERRAL_COORDINATOR,
+      facilityId: distHosp.id,
+    },
+    create: {
+      name: 'Vikram Solanki',
+      email: 'triage_coordinator@swastyasetu.gov.in',
+      passwordHash,
+      role: UserRole.REFERRAL_COORDINATOR,
+      facilityId: distHosp.id,
+    },
+  });
+
+  console.log('[Seed] Users seeded:', phcUser.email, hospitalClinician.email, coordinator.email, admin.email);
 
   // 3. Seed Candidate Patient at District Hospital (For Fuzzy Identity Demonstration)
   // When Ramesh Yadav (Age 47, Male, Village Khed) is referred, the system compares against Ramesh Kumar
