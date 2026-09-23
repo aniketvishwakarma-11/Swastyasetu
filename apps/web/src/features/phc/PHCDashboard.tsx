@@ -4,8 +4,8 @@ import { apiRequest } from '../../lib/api';
 import { localDb, LocalReferral } from '../../lib/db';
 import { useNetworkSync } from '../../lib/useNetworkSync';
 import { ReferralModal } from './ReferralModal';
-import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
-import { PHC_BLUEPRINTS } from '../../lib/featureBlueprints';
+import { RapidVitalsModal } from './RapidVitalsModal';
+import { FollowUpTrackerModal } from './FollowUpTrackerModal';
 import { formatFallbackSMS } from '@swastyasetu/shared';
 import {
   Stethoscope,
@@ -32,7 +32,9 @@ export const PHCDashboard: React.FC = () => {
   const { isOnline, isSyncing, pendingCount, syncNow, refreshPendingCount } = useNetworkSync();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
+  const [isVitalsOpen, setIsVitalsOpen] = useState(false);
+  const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
+  const [referralInitialData, setReferralInitialData] = useState<any | null>(null);
   const [referrals, setReferrals] = useState<any[]>([]);
   const [loadingReferrals, setLoadingReferrals] = useState(false);
   const [selectedSmsReferral, setSelectedSmsReferral] = useState<any | null>(null);
@@ -146,7 +148,7 @@ export const PHCDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveBlueprint(PHC_BLUEPRINTS.vitals)}
+            onClick={() => setIsVitalsOpen(true)}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
             <HeartPulse className="w-3.5 h-3.5 text-rose-500" />
@@ -154,7 +156,7 @@ export const PHCDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveBlueprint(PHC_BLUEPRINTS.followup)}
+            onClick={() => setIsFollowUpOpen(true)}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
             <CalendarCheck className="w-3.5 h-3.5 text-teal-600" />
@@ -416,10 +418,35 @@ export const PHCDashboard: React.FC = () => {
       {/* Referral Creation Modal */}
       <ReferralModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          loadReferrals();
+        onClose={() => {
+          setIsModalOpen(false);
+          setReferralInitialData(null);
         }}
+        onSuccess={() => {
+          setIsModalOpen(false);
+          setReferralInitialData(null);
+          loadReferrals();
+          refreshPendingCount();
+        }}
+        isOnline={isOnline}
+        initialData={referralInitialData}
+      />
+
+      {/* Frontline Rapid Vitals & EWS Screening Modal */}
+      <RapidVitalsModal
+        isOpen={isVitalsOpen}
+        onClose={() => setIsVitalsOpen(false)}
+        isOnline={isOnline}
+        onEscalateToReferral={(data) => {
+          setReferralInitialData(data);
+          setIsModalOpen(true);
+        }}
+      />
+
+      {/* Post-Discharge Return & Follow-Up Tracker Modal */}
+      <FollowUpTrackerModal
+        isOpen={isFollowUpOpen}
+        onClose={() => setIsFollowUpOpen(false)}
         isOnline={isOnline}
       />
 
@@ -498,11 +525,6 @@ export const PHCDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Feature Blueprint Modal */}
-      <FeatureBlueprintModal
-        blueprint={activeBlueprint}
-        onClose={() => setActiveBlueprint(null)}
-      />
     </div>
   );
 };

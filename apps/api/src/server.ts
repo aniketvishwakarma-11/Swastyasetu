@@ -14,6 +14,8 @@ import referralsRoutes from './modules/referrals/referrals.routes';
 import syncRoutes from './modules/sync/sync.routes';
 import identityRoutes from './modules/identity/identity.routes';
 import documentsRoutes from './modules/documents/documents.routes';
+import vitalsRoutes from './modules/vitals/vitals.routes';
+import followupsRoutes from './modules/followups/followups.routes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,6 +45,8 @@ app.use('/api/referrals', referralsRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/identity', identityRoutes);
 app.use('/api/documents', documentsRoutes);
+app.use('/api/vitals', vitalsRoutes);
+app.use('/api/follow-ups', followupsRoutes);
 app.use('/api/test', rbacTestRoutes);
 
 // Root information

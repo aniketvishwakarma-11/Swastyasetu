@@ -9,6 +9,16 @@ interface ReferralModalProps {
   onClose: () => void;
   onSuccess: () => void;
   isOnline: boolean;
+  initialData?: {
+    patientName?: string;
+    age?: string;
+    gender?: 'Male' | 'Female' | 'Other';
+    phone?: string;
+    village?: string;
+    urgency?: 'ROUTINE' | 'URGENT' | 'EMERGENCY';
+    reason?: string;
+    clinicalSummary?: string;
+  } | null;
 }
 
 interface FacilityOption {
@@ -23,6 +33,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
   onClose,
   onSuccess,
   isOnline,
+  initialData,
 }) => {
   const { user } = useAuth();
   const [facilities, setFacilities] = useState<FacilityOption[]>([]);
@@ -39,6 +50,20 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
   const [urgency, setUrgency] = useState<'ROUTINE' | 'URGENT' | 'EMERGENCY'>('ROUTINE');
   const [reason, setReason] = useState('');
   const [clinicalSummary, setClinicalSummary] = useState('');
+
+  // Sync initialData when provided (e.g. from Rapid Vitals escalation)
+  useEffect(() => {
+    if (initialData && isOpen) {
+      if (initialData.patientName) setName(initialData.patientName);
+      if (initialData.age) setAge(initialData.age);
+      if (initialData.gender) setGender(initialData.gender);
+      if (initialData.phone) setPhone(initialData.phone);
+      if (initialData.village) setVillage(initialData.village);
+      if (initialData.urgency) setUrgency(initialData.urgency);
+      if (initialData.reason) setReason(initialData.reason);
+      if (initialData.clinicalSummary) setClinicalSummary(initialData.clinicalSummary);
+    }
+  }, [initialData, isOpen]);
 
   // Fetch facilities for destination dropdown
   useEffect(() => {
