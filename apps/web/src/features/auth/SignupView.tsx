@@ -26,7 +26,7 @@ export const SignupView: React.FC = () => {
         setFacilityId(res.data[0].id);
       } else {
         // Fallback to seeded demo facilities if server is offline
-        const fallback = SEED_FACILITIES.map((f, i) => ({
+        const fallback = SEED_FACILITIES.map((f: any, i: number) => ({
           ...f,
           id: `00000000-0000-0000-0000-00000000000${i + 1}`,
         }));
