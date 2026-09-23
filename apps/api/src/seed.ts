@@ -1,3 +1,10 @@
+import path from 'path';
+import dotenv from 'dotenv';
+
+// Load .env before Prisma initializes
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
 import { PrismaClient, UserRole, FacilityType, ReferralUrgency, ReferralStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
