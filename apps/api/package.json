@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r dotenv/config src/server.ts dotenv_config_path=../../.env",
     "build": "prisma generate && tsc",
+    "build:web": "npm run build --workspace=apps/web && node -e \"const fs=require('fs'); fs.cpSync('../web/dist', './dist', {recursive:true});\"",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "npx prisma migrate dev --schema=prisma/schema.prisma",
