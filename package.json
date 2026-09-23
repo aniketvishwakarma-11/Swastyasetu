@@ -11,6 +11,14 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "dev:api": "npm run dev --workspace=apps/api",
     "build": "npm run build --workspaces --if-present",
+    "build:shared": "npm run build --workspace=packages/shared",
+    "build:api": "npm run build:shared && npm run build --workspace=apps/api",
+    "build:web": "npm run build:shared && npm run build --workspace=apps/web",
+    "start": "npm run start --workspace=apps/api",
+    "start:api": "npm run start --workspace=apps/api",
+    "prisma:generate": "npm run prisma:generate --workspace=apps/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace=apps/api",
+    "db:seed": "npm run db:seed --workspace=apps/api",
     "lint": "npm run lint --workspaces --if-present"
   },
   "keywords": [

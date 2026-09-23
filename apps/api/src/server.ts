@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 
 // Load .env from monorepo root FIRST — before Prisma client is initialized
@@ -49,20 +50,39 @@ app.use('/api/vitals', vitalsRoutes);
 app.use('/api/follow-ups', followupsRoutes);
 app.use('/api/test', rbacTestRoutes);
 
-// Root information
-app.get('/', (_req: Request, res: Response) => {
-  res.json({
-    name: 'SwasthyaSetu API',
-    version: '1.0.0',
-    description: 'Offline-first healthcare continuity layer API with Supabase PostgreSQL and RBAC',
-    endpoints: {
-      health: '/api/health',
-      auth: '/api/auth',
-      facilities: '/api/facilities',
-      rbacTests: '/api/test',
-    },
+// Check if frontend build exists to serve full-stack monolith
+const candidatePaths = [
+  path.resolve(__dirname, '../../web/dist'),
+  path.resolve(__dirname, '../../../apps/web/dist'),
+  path.resolve(process.cwd(), 'apps/web/dist'),
+];
+const webDistPath = candidatePaths.find((p) => fs.existsSync(path.join(p, 'index.html')));
+
+if (webDistPath && (process.env.SERVE_FRONTEND === 'true' || process.env.NODE_ENV === 'production')) {
+  console.log(`[SwasthyaSetu API] Serving frontend bundle from ${webDistPath}`);
+  app.use(express.static(webDistPath));
+  app.get('*', (req: Request, res: Response, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(webDistPath, 'index.html'));
   });
-});
+} else {
+  // Root information when frontend is hosted separately
+  app.get('/', (_req: Request, res: Response) => {
+    res.json({
+      name: 'SwasthyaSetu API',
+      version: '1.0.0',
+      description: 'Offline-first healthcare continuity layer API with Supabase PostgreSQL and RBAC',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        facilities: '/api/facilities',
+        rbacTests: '/api/test',
+      },
+    });
+  });
+}
 
 // Start server
 if (process.env.NODE_ENV !== 'test') {

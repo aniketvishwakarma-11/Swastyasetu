@@ -397,7 +397,11 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
                   }}
                 >
                   <img
-                    src={`http://localhost:5000${documentFileUrl}`}
+                    src={
+                      documentFileUrl.startsWith('http')
+                        ? documentFileUrl
+                        : `${(import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '').replace(/\/$/, '')}${documentFileUrl}`
+                    }
                     alt="Clinical Document"
                     className="max-h-[500px] w-auto rounded shadow-lg object-contain bg-white"
                   />

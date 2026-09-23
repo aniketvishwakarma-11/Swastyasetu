@@ -1,6 +1,7 @@
 import { ApiResponse } from '@swastyasetu/shared';
 
-const API_BASE = '/api';
+const envApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const API_BASE = envApiUrl ? (envApiUrl.endsWith('/api') ? envApiUrl : `${envApiUrl}/api`) : '/api';
 
 export async function apiRequest<T = any>(
   endpoint: string,

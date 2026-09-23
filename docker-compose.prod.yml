@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swastyasetu_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DEMO_MODE: "true"
+      SERVE_FRONTEND: "true"
+      DATABASE_URL: "postgresql://postgres:postgrespassword@postgres:5432/swastyasetu?schema=public"
+      JWT_SECRET: "swastyasetu-super-secure-production-jwt-key-min-32-chars"
+      JWT_EXPIRES_IN: "7d"
+      OCR_PROVIDER: "mock"
+      SMS_PROVIDER: "demo"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - swastyasetu_net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: swastyasetu_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: swastyasetu
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - swastyasetu_net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  swastyasetu_net:
+    driver: bridge
