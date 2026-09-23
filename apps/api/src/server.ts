@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../../../../.env') }); // fallback
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import authRoutes from './modules/auth/auth.routes';
 import facilitiesRoutes from './modules/facilities/facilities.routes';
@@ -61,7 +61,7 @@ const webDistPath = candidatePaths.find((p) => fs.existsSync(path.join(p, 'index
 if (webDistPath && (process.env.SERVE_FRONTEND === 'true' || process.env.NODE_ENV === 'production')) {
   console.log(`[SwasthyaSetu API] Serving frontend bundle from ${webDistPath}`);
   app.use(express.static(webDistPath));
-  app.get('*', (req: Request, res: Response, next) => {
+  app.get('*', (req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
       return next();
     }
