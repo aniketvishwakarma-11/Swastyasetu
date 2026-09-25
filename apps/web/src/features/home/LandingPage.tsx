@@ -214,7 +214,7 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 // ─── Landing page ─────────────────────────────────────────────────────────────
 export const LandingPage: React.FC = () => (
-  <div className="bg-white text-slate-900">
+  <div className="bg-white text-slate-900 pt-16">
     <PublicHeader />
 
     {/* ── 1. HERO ─────────────────────────────────────────────────────────── */}
