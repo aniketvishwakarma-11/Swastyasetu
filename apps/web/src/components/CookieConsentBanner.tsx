@@ -27,7 +27,7 @@ export const CookieConsentBanner: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md z-50 animate-in slide-in-from-bottom-5 duration-300">
+    <div className="fixed bottom-16 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md z-50 animate-in slide-in-from-bottom-5 duration-300">
       <div className="clinical-surface rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-teal-200/80 bg-white/95 backdrop-blur-md space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center space-x-2.5">
