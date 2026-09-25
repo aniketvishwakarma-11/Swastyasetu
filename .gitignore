@@ -80,3 +80,17 @@ uploads/
 !apps/api/uploads/samples/
 temp/
 tmp/
+
+# Local AI Agent Workspace & Internal Context Docs (Kept local, ignored from Git)
+.agents/
+AGENTS.md
+AI_AGENT_CONTEXT.md
+FEATURES.md
+SwasthyaSetu_MediVault_AI_Agent_Project_Spec.md
+TECH_STACK_AND_ARCHITECTURE.md
+UI_UX_DESIGN_SYSTEM.md
+docs/
+docker-compose.yml
+apps/api/test-auth-rbac.ts
+apps/api/vercel.json
+services/ai/main.py
