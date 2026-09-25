@@ -23,7 +23,7 @@
 
 ## 📖 Executive Summary & Mission
 
-In tiered public healthcare networks (Sub-Centres $\to$ Primary Health Centres [PHCs] $\to$ Community Health Centres [CHCs] $\to$ Sub-District Hospitals $\to$ District Hospitals / Tertiary Medical Colleges), **the critical failure mode is not a lack of doctors or diagnostic equipment—it is the catastrophic loss of clinical continuity between care tiers.**
+In tiered public healthcare networks (Sub-Centres → Primary Health Centres [PHCs] → Community Health Centres [CHCs] → Sub-District Hospitals → District Hospitals / Tertiary Medical Colleges), **the critical failure mode is not a lack of doctors or diagnostic equipment—it is the catastrophic loss of clinical continuity between care tiers.**
 
 **SwasthyaSetu** (स्वास्थ्यसेतु - *Bridge of Health*) is an **offline-first, closed-loop healthcare referral, document intelligence, and post-discharge continuity platform**. It eliminates the transit blind spot between rural frontline clinics and district hospitals, ensures zero patient records are lost in transit, and guarantees that discharge plans translate into real-world recovery in rural villages.
 
@@ -70,13 +70,19 @@ SwasthyaSetu provides a unified clinical continuity platform built upon six foun
 * **Standardized Clinical Referral**: Replaces paper slips with structured digital referrals specifying urgency (`ROUTINE`, `URGENT`, `EMERGENCY`), primary clinical indication, provisional diagnosis, and immediate stabilized interventions.
 * **Live District Bed Visibility**: Query real-time bed capacity (General, Oxygen, ICU, Ventilator) at receiving District Hospitals before dispatch.
 * **Bidirectional Lifecycle**: Track every patient from referral to completed community follow-up:
-  $$\text{DRAFT} \longrightarrow \text{QUEUED} \longrightarrow \text{SYNCED} \longrightarrow \text{SENT} \longrightarrow \text{RECEIVED} \longrightarrow \text{IDENTITY\_CONFIRMED} \longrightarrow \text{CONSULTED} \longrightarrow \text{FOLLOW\_UP\_DUE} \longrightarrow \text{FOLLOW\_UP\_COMPLETED}$$
+
+```
+[ DRAFT ] ➔ [ QUEUED ] ➔ [ SYNCED ] ➔ [ SENT ] ➔ [ RECEIVED ]
+                                                    │
+                                                    ▼
+[ FOLLOW_UP_COMPLETED ] 🠔 [ FOLLOW_UP_DUE ] 🠔 [ CONSULTED ] 🠔 [ IDENTITY_CONFIRMED ]
+```
 
 ### 3. 📄 AI Document Intelligence & Human-in-the-Loop OCR
 * **Frontline Document Capture**: Clinicians capture photos of handwritten discharge summaries, paper prescriptions, and lab sheets directly via mobile camera or desktop upload.
 * **Dual OCR Engine**: Microservices powered by Google Gemini 1.5 Flash and Hugging Face TrOCR extract handwritten clinical text.
 * **Clinical Normalization**: Parses unstructured cursive into structured fields: Diagnosis, Medications, Dosages, Regimen Frequencies, Precautions, and Follow-Up Dates.
-* **Human-in-the-Loop Verification**: Extractions below $90\%$ confidence are flagged with `NEEDS_REVIEW` badges and open an interactive side-by-side image comparison drawer. *No AI guess is ever saved as fact without explicit clinician confirmation.*
+* **Human-in-the-Loop Verification**: Extractions below 90% confidence are flagged with `NEEDS_REVIEW` badges and open an interactive side-by-side image comparison drawer. *No AI guess is ever saved as fact without explicit clinician confirmation.*
 
 ### 4. 🔍 Fuzzy & Deterministic Identity Reconciliation
 * **Multi-Vector Matching Algorithm**: Evaluates incoming patient records against hospital registries using weighted scoring vectors:
@@ -90,9 +96,9 @@ SwasthyaSetu provides a unified clinical continuity platform built upon six foun
 * **High-Speed Intake**: Records Systolic/Diastolic BP, Heart Rate, Respiratory Rate, SpO2, and Blood Glucose in seconds.
 * **Dynamic EWS Scoring**: Calculates real-time 0–4 acuity scores with instant visual alerts.
 * **Clinical Safety Safeguards**:
-  * Systolic BP $\ge 160$ mmHg $\to$ Hypertensive Urgency / Crisis alert.
-  * $\text{SpO}_2 < 92\%$ $\to$ Hypoxemic Distress alert.
-  * Blood Glucose $< 60$ or $> 250$ mg/dL $\to$ Glycemic emergency alert.
+  * **Systolic BP ≥ 160 mmHg** → Hypertensive Urgency / Crisis alert.
+  * **SpO₂ < 92%** → Hypoxemic Distress alert.
+  * **Blood Glucose < 60 or > 250 mg/dL** → Glycemic emergency alert.
 * **1-Click Emergency Escalation**: Automatically generates a pre-populated emergency referral slip.
 
 ### 6. 🤝 Post-Discharge Return & Community Follow-Up Tracker
