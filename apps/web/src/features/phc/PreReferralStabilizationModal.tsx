@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 import {
   X,
   Pill,
@@ -75,16 +76,23 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
   referral,
   onStabilizationSaved,
 }) => {
+  const { user } = useAuth();
   const [protocolType, setProtocolType] = useState<string>('STEMI');
   const [items, setItems] = useState<StabilizationItemInput[]>([]);
-  const [bloodPressure, setBloodPressure] = useState('140/90');
-  const [pulseRate, setPulseRate] = useState('98');
-  const [spo2, setSpo2] = useState('94');
-  const [bloodSugar, setBloodSugar] = useState('142');
-  const [doctorName, setDoctorName] = useState('Dr. Rajesh Sharma');
+  const [bloodPressure, setBloodPressure] = useState('120/80');
+  const [pulseRate, setPulseRate] = useState('76');
+  const [spo2, setSpo2] = useState('98');
+  const [bloodSugar, setBloodSugar] = useState('110');
+  const [doctorName, setDoctorName] = useState(user?.name || 'Attending PHC Medical Officer');
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.name) {
+      setDoctorName(user.name);
+    }
+  }, [user?.name]);
 
   // Load protocol template
   useEffect(() => {
@@ -110,7 +118,12 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
     setSuccessMsg(null);
     setErrorMsg(null);
 
-    const targetId = referral?.id || referral?.referralNumber || 'ref-stemi-01';
+    const targetId = referral?.id || referral?.referralNumber;
+    if (!targetId) {
+      setErrorMsg('No referral selected for stabilization checklist.');
+      setSaving(false);
+      return;
+    }
     const template = PROTOCOL_TEMPLATES[protocolType] || PROTOCOL_TEMPLATES.STEMI;
 
     try {
@@ -169,7 +182,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                Frontline loading protocol checklist for patient: <strong className="text-white">{referral?.patient?.name || 'Ramesh Yadav'}</strong> ({referral?.referralNumber || 'RF-1024'})
+                Frontline loading protocol checklist for patient: <strong className="text-white">{referral?.patient?.name || 'Patient'}</strong> ({referral?.referralNumber || 'Referral'})
               </p>
             </div>
           </div>

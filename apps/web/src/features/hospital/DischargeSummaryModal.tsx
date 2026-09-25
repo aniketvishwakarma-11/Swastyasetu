@@ -46,12 +46,12 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Form State
-  const [patientName, setPatientName] = useState('');
-  const [age, setAge] = useState<number | string>(45);
-  const [gender, setGender] = useState('Male');
-  const [village, setVillage] = useState('Khed Rural');
-  const [phone, setPhone] = useState('9876543210');
-  const [referralNumber, setReferralNumber] = useState('RF-1024');
+  const [patientName, setPatientName] = useState(referral?.patient?.name || '');
+  const [age, setAge] = useState<number | string>(referral?.patient?.age ?? '');
+  const [gender, setGender] = useState(referral?.patient?.gender || 'Male');
+  const [village, setVillage] = useState(referral?.patient?.village || '');
+  const [phone, setPhone] = useState(referral?.patient?.phone || '');
+  const [referralNumber, setReferralNumber] = useState(referral?.referralNumber || '');
 
   // Clinical Summary Fields
   const [admissionDate, setAdmissionDate] = useState(
@@ -62,85 +62,43 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
   );
   const [lengthOfStay, setLengthOfStay] = useState(4);
 
-  const [primaryDiagnosis, setPrimaryDiagnosis] = useState(
-    'Acute Anterior Wall ST-Elevation Myocardial Infarction (STEMI)'
-  );
-  const [icd10Code, setIcd10Code] = useState('I21.0');
-  const [secondaryDiagnoses, setSecondaryDiagnoses] = useState(
-    'Essential Hypertension (I10), Dyslipidemia (E78.5)'
-  );
+  const [primaryDiagnosis, setPrimaryDiagnosis] = useState(referral?.reason || '');
+  const [icd10Code, setIcd10Code] = useState('');
+  const [secondaryDiagnoses, setSecondaryDiagnoses] = useState('');
   const [clinicalCourse, setClinicalCourse] = useState(
-    'Patient admitted in cardiogenic shock via 108 ambulance from PHC Khed. Emergency coronary angiography revealed 99% proximal LAD occlusion. Successful primary PCI with drug-eluting stent achieved TIMI 3 flow. Uncomplicated CCU recovery. Patient is pain-free, hemodynamically stable, and ambulating independently.'
+    referral?.clinicalSummary ||
+      (referral?.reason
+        ? `Patient admitted for ${referral.reason}. Completed inpatient treatment and monitoring. Hemodynamically stable at discharge.`
+        : '')
   );
-  const [proceduresPerformed, setProceduresPerformed] = useState(
-    'Primary Percutaneous Coronary Intervention (PCI), Coronary Angiography, 2D Echocardiography (LVEF: 48%)'
-  );
+  const [proceduresPerformed, setProceduresPerformed] = useState('');
 
   // Discharge Vitals
-  const [bp, setBp] = useState('118/76 mmHg');
-  const [pulse, setPulse] = useState(68);
-  const [spo2, setSpo2] = useState(99);
-  const [temp, setTemp] = useState(98.4);
-  const [rr, setRr] = useState(14);
+  const [bp, setBp] = useState('120/80 mmHg');
+  const [pulse, setPulse] = useState(72);
+  const [spo2, setSpo2] = useState(98);
+  const [temp, setTemp] = useState(98.6);
+  const [rr, setRr] = useState(16);
   const [condition, setCondition] = useState<'STABLE' | 'IMPROVED' | 'GUARDED'>('STABLE');
 
   // Take-Home Medications
-  const [medications, setMedications] = useState<DischargeMedicationItem[]>([
-    {
-      name: 'Tab. Aspirin',
-      dosage: '75 mg',
-      frequency: 'OD (Once Daily)',
-      timing: 'After breakfast',
-      duration: 'Life-long',
-      instructions: 'Antiplatelet - Take strictly after meals',
-    },
-    {
-      name: 'Tab. Clopidogrel',
-      dosage: '75 mg',
-      frequency: 'OD (Once Daily)',
-      timing: 'After breakfast',
-      duration: '12 Months',
-      instructions: 'Antiplatelet - Dual protection for drug-eluting stent',
-    },
-    {
-      name: 'Tab. Atorvastatin',
-      dosage: '80 mg',
-      frequency: 'OD (Once Daily)',
-      timing: 'At bedtime',
-      duration: 'Life-long',
-      instructions: 'High-intensity statin for plaque stabilization',
-    },
-    {
-      name: 'Tab. Metoprolol Succinate',
-      dosage: '25 mg',
-      frequency: 'OD (Once Daily)',
-      timing: 'Morning',
-      duration: 'Ongoing',
-      instructions: 'Beta-blocker - Monitor pulse',
-    },
-    {
-      name: 'Tab. Ramipril',
-      dosage: '2.5 mg',
-      frequency: 'OD (Once Daily)',
-      timing: 'Morning',
-      duration: 'Ongoing',
-      instructions: 'Cardioprotective ACE inhibitor',
-    },
-  ]);
+  const [medications, setMedications] = useState<DischargeMedicationItem[]>([]);
 
   // Advice & Red Flags
   const [dietAdvice, setDietAdvice] = useState(
-    'Strict low-salt cardiac diet (<2g sodium/day). Avoid deep-fried, oily, and processed foods. 20-min daily gentle walking. Avoid heavy physical lifting >5kg for 3 weeks. Complete tobacco/smoking cessation.'
+    'Nutritious balanced diet. Adequate rest and hydration. Complete prescribed medication course.'
   );
   const [redFlags, setRedFlags] = useState(
-    'Return immediately to nearest emergency room if experiencing: 1) Recurrent chest tightness or burning lasting >5 mins, 2) Sudden breathlessness at rest, 3) Dizziness or fainting spells, 4) Unexplained bleeding or black stools.'
+    'Return immediately to nearest emergency room if experiencing:\n1) Severe recurrent symptoms\n2) Sudden breathlessness or chest pain\n3) High persistent fever or altered sensorium'
   );
 
   // Closed-Loop PHC Follow-Up
   const [followUpDays, setFollowUpDays] = useState(7);
-  const [followUpFacility, setFollowUpFacility] = useState('Primary Health Centre Khed');
+  const [followUpFacility, setFollowUpFacility] = useState(referral?.sourceFacility?.name || 'Primary Health Centre');
   const [followUpPurpose, setFollowUpPurpose] = useState(
-    'Day-7 Post-PCI Review: Repeat 12-lead ECG, assess vitals & radial access site, verify DAPT medication adherence.'
+    referral?.reason
+      ? `Day-7 Post-Discharge review for ${referral.reason}. Assess recovery vitals and compliance.`
+      : 'Day-7 Post-Discharge review.'
   );
 
   // Clinician Sign-Off (Hard Rule 3)
@@ -154,14 +112,59 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
       setSuccessMsg(null);
 
       if (referral) {
-        setPatientName(referral.patient?.name || 'Ramesh Yadav');
-        setAge(referral.patient?.age || 52);
+        setPatientName(referral.patient?.name || 'Patient');
+        setAge(referral.patient?.age ?? '');
         setGender(referral.patient?.gender || 'Male');
-        setVillage(referral.patient?.village || 'Khed Shivapur');
-        setPhone(referral.patient?.phone || '9876543210');
-        setReferralNumber(referral.referralNumber || 'RF-1024');
+        setVillage(referral.patient?.village || '');
+        setPhone(referral.patient?.phone || '');
+        setReferralNumber(referral.referralNumber || '');
         if (referral.sourceFacility?.name) {
           setFollowUpFacility(referral.sourceFacility.name);
+        }
+        if (referral.reason) {
+          setPrimaryDiagnosis(referral.reason);
+          setClinicalCourse(
+            referral.clinicalSummary ||
+              `Patient admitted for ${referral.reason}. Completed inpatient treatment and monitoring. Hemodynamically stable at discharge.`
+          );
+          setFollowUpPurpose(
+            `Day-7 Post-Discharge review for ${referral.reason}. Assess recovery vitals and compliance.`
+          );
+        }
+
+        // Fetch template from API if referral ID exists
+        if (referral.id) {
+          apiRequest(`/discharge-summaries/template/${referral.id}`)
+            .then((res) => {
+              if (res.success && res.data) {
+                const t = res.data;
+                if (t.patientName) setPatientName(t.patientName);
+                if (t.age !== undefined) setAge(t.age);
+                if (t.gender) setGender(t.gender);
+                if (t.village) setVillage(t.village);
+                if (t.phone) setPhone(t.phone);
+                if (t.referralNumber) setReferralNumber(t.referralNumber);
+                if (t.primaryDiagnosis) setPrimaryDiagnosis(t.primaryDiagnosis);
+                if (t.icd10Code) setIcd10Code(t.icd10Code);
+                if (t.clinicalCourse) setClinicalCourse(t.clinicalCourse);
+                if (t.dietAndActivityAdvice) setDietAdvice(t.dietAndActivityAdvice);
+                if (t.redFlagSymptoms && Array.isArray(t.redFlagSymptoms)) {
+                  setRedFlags(t.redFlagSymptoms.join('\n'));
+                }
+                if (t.medications && t.medications.length > 0) {
+                  setMedications(t.medications);
+                }
+                if (t.followUpSchedule?.assignedFacility) {
+                  setFollowUpFacility(t.followUpSchedule.assignedFacility);
+                }
+                if (t.followUpSchedule?.purpose) {
+                  setFollowUpPurpose(t.followUpSchedule.purpose);
+                }
+              }
+            })
+            .catch((err) => {
+              console.warn('Could not fetch discharge template:', err);
+            });
         }
       }
     }
@@ -196,19 +199,15 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
     setMedications(updated);
   };
 
-  // Preset Loader: Instant high-fidelity demo
+  // Preset Loader: Instant STEMI clinical template
   const loadStemiPreset = () => {
-    setPatientName('Ramesh Yadav');
-    setAge(52);
-    setGender('Male');
-    setVillage('Khed Shivapur');
-    setPhone('9876543210');
-    setReferralNumber(referral?.referralNumber || 'RF-1024');
+    if (!patientName) setPatientName(referral?.patient?.name || 'Patient');
+    if (!referralNumber) setReferralNumber(referral?.referralNumber || 'RF-STEMI');
     setPrimaryDiagnosis('Acute Anterior Wall ST-Elevation Myocardial Infarction (STEMI)');
     setIcd10Code('I21.0');
     setSecondaryDiagnoses('Essential Hypertension (I10), Dyslipidemia (E78.5)');
     setClinicalCourse(
-      'Patient arrived via 108 ambulance from PHC Khed with acute anterior STEMI. Emergent coronary angiography revealed 99% thrombotic stenosis of proximal LAD. Successfully deployed 3.0 x 28 mm drug-eluting stent (DES) with TIMI 3 distal flow. Peak serum Troponin I: 44.8 ng/mL. Uncomplicated CCU recovery. Stable and pain-free at discharge.'
+      'Patient arrived via 108 ambulance with acute anterior STEMI. Emergent coronary angiography revealed 99% thrombotic stenosis of proximal LAD. Successfully deployed 3.0 x 28 mm drug-eluting stent (DES) with TIMI 3 distal flow. Peak serum Troponin I: 44.8 ng/mL. Uncomplicated CCU recovery. Stable and pain-free at discharge.'
     );
     setProceduresPerformed(
       'Emergency Coronary Angiography, Primary PCI to LAD with DES, 2D Echocardiogram (LVEF: 48%)'
@@ -219,8 +218,58 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
     setTemp(98.4);
     setRr(14);
     setCondition('STABLE');
+    setMedications([
+      {
+        name: 'Tab. Aspirin',
+        dosage: '75 mg',
+        frequency: 'OD (Once Daily)',
+        timing: 'After breakfast',
+        duration: 'Life-long',
+        instructions: 'Antiplatelet - Take strictly after meals',
+      },
+      {
+        name: 'Tab. Clopidogrel',
+        dosage: '75 mg',
+        frequency: 'OD (Once Daily)',
+        timing: 'After breakfast',
+        duration: '12 Months',
+        instructions: 'Antiplatelet - Dual protection for drug-eluting stent',
+      },
+      {
+        name: 'Tab. Atorvastatin',
+        dosage: '80 mg',
+        frequency: 'OD (Once Daily)',
+        timing: 'At bedtime',
+        duration: 'Life-long',
+        instructions: 'High-intensity statin for plaque stabilization',
+      },
+      {
+        name: 'Tab. Metoprolol Succinate',
+        dosage: '25 mg',
+        frequency: 'OD (Once Daily)',
+        timing: 'Morning',
+        duration: 'Ongoing',
+        instructions: 'Beta-blocker - Monitor pulse',
+      },
+      {
+        name: 'Tab. Ramipril',
+        dosage: '2.5 mg',
+        frequency: 'OD (Once Daily)',
+        timing: 'Morning',
+        duration: 'Ongoing',
+        instructions: 'Cardioprotective ACE inhibitor',
+      },
+    ]);
+    setDietAdvice(
+      'Strict low-salt cardiac diet (<2g sodium/day). Avoid deep-fried, oily, and processed foods. 20-min daily gentle walking. Avoid heavy physical lifting >5kg for 3 weeks. Complete tobacco/smoking cessation.'
+    );
+    setRedFlags(
+      'Return immediately to nearest emergency room if experiencing: 1) Recurrent chest tightness or burning lasting >5 mins, 2) Sudden breathlessness at rest, 3) Dizziness or fainting spells, 4) Unexplained bleeding or black stools.'
+    );
     setFollowUpDays(7);
-    setFollowUpFacility('Primary Health Centre Khed');
+    if (referral?.sourceFacility?.name) {
+      setFollowUpFacility(referral.sourceFacility.name);
+    }
     setFollowUpPurpose(
       'Day-7 Post-PCI Review: Repeat 12-lead ECG, assess vitals & radial access site, verify DAPT medication adherence.'
     );
@@ -245,7 +294,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
     const dueAtDate = new Date(Date.now() + followUpDays * 86400000).toISOString();
 
     const payload = {
-      patientId: referral?.patientId || referral?.patient?.id || 'pat-ramesh-demo',
+      patientId: referral?.patientId || referral?.patient?.id || 'pat-inpatient',
       patientName,
       age: Number(age),
       gender,
@@ -254,8 +303,8 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
       referralId: referral?.id,
       referralNumber,
       dischargingFacilityId: user?.facilityId || 'fac-dist-01',
-      dischargingFacilityName: user?.facility?.name || 'Aundh District Hospital, Pune',
-      consultantName: user?.name || 'Dr. Vikram Deshmukh',
+      dischargingFacilityName: user?.facility?.name || 'District Hospital',
+      consultantName: user?.name || 'Attending Specialist',
       admissionDate,
       dischargeDate,
       lengthOfStayDays: Number(lengthOfStay),
@@ -336,7 +385,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
             <button
               onClick={loadStemiPreset}
               className="px-2.5 py-1 bg-teal-600/40 hover:bg-teal-600/60 border border-teal-400/40 rounded-lg text-xs font-semibold text-teal-100 flex items-center space-x-1.5 transition-colors cursor-pointer"
-              title="Auto-fill with Ramesh Yadav STEMI clinical trial data"
+              title="Auto-fill with STEMI clinical pathway template"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               <span>Load STEMI Preset</span>

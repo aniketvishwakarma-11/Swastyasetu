@@ -44,7 +44,7 @@ const fallbackAuditLog: Array<Omit<EnrichedAuditEvent, 'hash' | 'prevHash'>> = [
     entityType: 'REFERRAL',
     entityId: 'RF-1024',
     metadata: {
-      patientName: 'Ramesh Yadav',
+      patientName: 'Anand Kumar',
       urgency: 'EMERGENCY',
       reason: 'Acute Anterior Wall STEMI',
       destination: 'Aundh District Hospital, Pune',
@@ -101,7 +101,7 @@ const fallbackAuditLog: Array<Omit<EnrichedAuditEvent, 'hash' | 'prevHash'>> = [
     facilityName: 'Aundh District Hospital, Pune',
     eventType: 'IDENTITY_CONFIRMED',
     entityType: 'PATIENT',
-    entityId: 'pat-ramesh-01',
+    entityId: 'pat-anand-01',
     metadata: {
       referralId: 'ref-stemi-01',
       candidateScore: 0.94,
@@ -142,7 +142,7 @@ const fallbackAuditLog: Array<Omit<EnrichedAuditEvent, 'hash' | 'prevHash'>> = [
     entityType: 'DISCHARGE_SUMMARY',
     entityId: 'DS-2026-1024',
     metadata: {
-      patientName: 'Ramesh Yadav',
+      patientName: 'Anand Kumar',
       primaryDiagnosis: 'Acute Anterior Wall STEMI - Post Primary PCI with DES',
       icd10Code: 'I21.0',
       medicationsCount: 6,
@@ -211,32 +211,51 @@ router.get('/events', requireAuth, async (req: Request, res: Response): Promise<
       console.warn('[Audit DB fetch warning]', dbErr);
     }
 
-    // Merge DB events with mock fallback to ensure comprehensive test data
-    let combinedEvents: Array<Omit<EnrichedAuditEvent, 'hash' | 'prevHash'>> = [...fallbackAuditLog];
+    // Use authentic database events as the primary cryptographic ledger
+    let combinedEvents: Array<Omit<EnrichedAuditEvent, 'hash' | 'prevHash'>> = [];
 
     if (dbEvents.length > 0) {
-      const mappedDbEvents: Array<Omit<EnrichedAuditEvent, 'hash' | 'prevHash'>> = dbEvents.map((e) => ({
+      // Resolve real names for actors and facilities
+      const actorIds = [...new Set(dbEvents.map((e) => e.actorId))];
+      const facilityIds = [...new Set(dbEvents.map((e) => e.facilityId).filter(Boolean))] as string[];
+
+      let userMap = new Map<string, string>();
+      let facilityMap = new Map<string, string>();
+
+      try {
+        const [users, facilities] = await Promise.all([
+          prisma.user.findMany({
+            where: { id: { in: actorIds } },
+            select: { id: true, name: true },
+          }),
+          prisma.facility.findMany({
+            where: { id: { in: facilityIds } },
+            select: { id: true, name: true },
+          }),
+        ]);
+        userMap = new Map(users.map((u) => [u.id, u.name]));
+        facilityMap = new Map(facilities.map((f) => [f.id, f.name]));
+      } catch (lookupErr) {
+        console.warn('[Audit actor/facility lookup warning]', lookupErr);
+      }
+
+      combinedEvents = dbEvents.map((e) => ({
         id: e.id,
         eventId: e.eventId,
         actorId: e.actorId,
-        actorName: e.actorId === req.user?.id ? (req.user?.name || 'Logged In User') : `Staff (${e.actorRole})`,
+        actorName: userMap.get(e.actorId) || (e.actorId === req.user?.id ? (req.user?.name || 'Logged In User') : `Clinician (${e.actorRole})`),
         actorRole: e.actorRole,
         facilityId: e.facilityId || 'N/A',
-        facilityName: e.facilityId || 'District Health Network',
+        facilityName: (e.facilityId && facilityMap.get(e.facilityId)) || 'District Health Network',
         eventType: e.eventType,
         entityType: e.entityType,
         entityId: e.entityId,
         metadata: (e.metadata as Record<string, any>) || {},
         timestamp: e.timestamp.toISOString(),
       }));
-
-      // Deduplicate by eventId
-      const existingIds = new Set(fallbackAuditLog.map((f) => f.eventId));
-      for (const dbe of mappedDbEvents) {
-        if (!existingIds.has(dbe.eventId)) {
-          combinedEvents.push(dbe);
-        }
-      }
+    } else {
+      // Empty or offline database fallback
+      combinedEvents = [...fallbackAuditLog];
     }
 
     // Sort chronologically ascending to compute correct hash chain
@@ -305,7 +324,31 @@ router.get('/events', requireAuth, async (req: Request, res: Response): Promise<
  */
 router.get('/verify', requireAuth, async (_req: Request, res: Response): Promise<void> => {
   try {
-    const fullChain = buildHashChain(fallbackAuditLog);
+    let eventsToVerify: any[] = [];
+    const dbEvents = await prisma.auditEvent.findMany({
+      orderBy: { timestamp: 'asc' },
+    });
+
+    if (dbEvents.length > 0) {
+      eventsToVerify = dbEvents.map((e) => ({
+        id: e.id,
+        eventId: e.eventId,
+        actorId: e.actorId,
+        actorName: `Staff (${e.actorRole})`,
+        actorRole: e.actorRole,
+        facilityId: e.facilityId || 'N/A',
+        facilityName: e.facilityId || 'District Health Network',
+        eventType: e.eventType,
+        entityType: e.entityType,
+        entityId: e.entityId,
+        metadata: (e.metadata as Record<string, any>) || {},
+        timestamp: e.timestamp.toISOString(),
+      }));
+    } else {
+      eventsToVerify = fallbackAuditLog;
+    }
+
+    const fullChain = buildHashChain(eventsToVerify);
     let isChainValid = true;
     let breakPoint: number | null = null;
 
@@ -349,12 +392,21 @@ router.get('/verify', requireAuth, async (_req: Request, res: Response): Promise
  */
 router.get('/stats', requireAuth, async (_req: Request, res: Response): Promise<void> => {
   try {
-    const fullChain = buildHashChain(fallbackAuditLog);
+    const dbEvents = await prisma.auditEvent.findMany({
+      orderBy: { timestamp: 'asc' },
+    });
+
+    const events = dbEvents.length > 0
+      ? dbEvents.map((e) => ({
+          eventType: e.eventType,
+          actorRole: e.actorRole,
+        }))
+      : fallbackAuditLog;
 
     const typeBreakdown: Record<string, number> = {};
     const roleBreakdown: Record<string, number> = {};
 
-    for (const ev of fullChain) {
+    for (const ev of events) {
       typeBreakdown[ev.eventType] = (typeBreakdown[ev.eventType] || 0) + 1;
       roleBreakdown[ev.actorRole] = (roleBreakdown[ev.actorRole] || 0) + 1;
     }
@@ -362,11 +414,11 @@ router.get('/stats', requireAuth, async (_req: Request, res: Response): Promise<
     res.status(200).json({
       success: true,
       data: {
-        totalAuditEvents: fullChain.length,
+        totalAuditEvents: events.length,
         verifiedLedger: true,
         typeBreakdown,
         roleBreakdown,
-        lastEventTimestamp: fullChain[fullChain.length - 1]?.timestamp,
+        lastEventTimestamp: dbEvents[dbEvents.length - 1]?.timestamp || (events[events.length - 1] as any)?.timestamp,
       },
     });
   } catch (error: any) {

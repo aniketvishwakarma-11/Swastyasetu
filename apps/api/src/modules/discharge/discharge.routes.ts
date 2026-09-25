@@ -63,114 +63,8 @@ export interface DischargeSummary {
   createdAt: string;
 }
 
-// In-memory store for instant zero-latency retrieval and offline resilience
-const dischargeSummariesStore: DischargeSummary[] = [
-  {
-    id: 'DS-2026-1024',
-    patientId: 'pat-kailash-01',
-    patientName: 'Kailash Jadhav',
-    age: 47,
-    gender: 'Male',
-    village: 'Khed Shivapur',
-    phone: '9876543210',
-    referralId: 'ref-stemi-01',
-    referralNumber: 'RF-1024',
-    dischargingFacilityId: 'fac-dist-01',
-    dischargingFacilityName: 'Aundh District Hospital, Pune',
-    consultantName: 'Dr. Vikram Deshmukh (Chief Cardiologist)',
-    admissionDate: new Date(Date.now() - 6 * 86400000).toISOString(),
-    dischargeDate: new Date().toISOString(),
-    lengthOfStayDays: 6,
-    primaryDiagnosis: 'Acute Anterior Wall ST-Elevation Myocardial Infarction (STEMI)',
-    icd10Code: 'I21.0',
-    secondaryDiagnoses: ['Hypertension Essential (I10)', 'Dyslipidemia (E78.5)'],
-    clinicalCourse:
-      'Patient arrived via 108 ambulance from PHC Khed in cardiogenic shock. Emergent coronary angiography revealed 99% thrombotic stenosis of the proximal LAD. Successfully deployed 3.0 x 28 mm drug-eluting stent (DES) with TIMI 3 distal flow. Peak serum Troponin I: 44.8 ng/mL. CCU stay was uneventful without malignant arrhythmias. Stable and pain-free at discharge.',
-    proceduresPerformed: [
-      'Emergency Coronary Angiography',
-      'Primary Percutaneous Coronary Intervention (PCI) to LAD with DES',
-      '2D Transthoracic Echocardiogram (LVEF: 48%, anterior hypokinesia)',
-    ],
-    dischargeVitals: {
-      bloodPressure: '122/78 mmHg',
-      pulseRate: 70,
-      spo2: 98,
-      temperature: 98.4,
-      respiratoryRate: 14,
-    },
-    conditionAtDischarge: 'STABLE',
-    medications: [
-      {
-        name: 'Tab. Aspirin',
-        dosage: '75 mg',
-        frequency: 'OD (Once Daily)',
-        timing: 'After breakfast',
-        duration: 'Life-long',
-        instructions: 'Antiplatelet - Take strictly after food with a full glass of water',
-      },
-      {
-        name: 'Tab. Clopidogrel',
-        dosage: '75 mg',
-        frequency: 'OD (Once Daily)',
-        timing: 'After breakfast',
-        duration: '12 Months (Minimum)',
-        instructions: 'Antiplatelet - Dual Antiplatelet Therapy (DAPT) protection against stent thrombosis',
-      },
-      {
-        name: 'Tab. Atorvastatin',
-        dosage: '80 mg',
-        frequency: 'OD (Once Daily)',
-        timing: 'At bedtime',
-        duration: 'Life-long',
-        instructions: 'High-intensity statin for plaque stabilization and LDL reduction',
-      },
-      {
-        name: 'Tab. Metoprolol Succinate PR',
-        dosage: '25 mg',
-        frequency: 'OD (Once Daily)',
-        timing: 'Morning after food',
-        duration: 'Ongoing',
-        instructions: 'Cardioprotective beta-blocker. Monitor pulse rate.',
-      },
-      {
-        name: 'Tab. Ramipril',
-        dosage: '2.5 mg',
-        frequency: 'OD (Once Daily)',
-        timing: 'Morning',
-        duration: 'Ongoing',
-        instructions: 'ACE inhibitor to prevent adverse ventricular remodeling',
-      },
-      {
-        name: 'Tab. Pantoprazole',
-        dosage: '40 mg',
-        frequency: 'OD (Once Daily)',
-        timing: '30 mins before breakfast',
-        duration: '14 Days',
-        instructions: 'Gastric protection with DAPT',
-      },
-    ],
-    dietAndActivityAdvice:
-      'Strict low-salt cardiac diet (<2g sodium/day). Avoid deep-fried, oily, and high-cholesterol foods. Light walking 20 minutes daily on level ground. Avoid strenuous heavy lifting (>5 kg) for 3 weeks. Strict cessation of tobacco/bidi.',
-    redFlagSymptoms: [
-      'Recurrent central crushing chest pain or left arm heaviness lasting >5 minutes',
-      'Sudden breathlessness or inability to lie flat (orthopnea)',
-      'Dizziness, lightheadedness, or sudden loss of consciousness',
-      'Unprovoked nosebleeds, bleeding gums, or dark/black stools (melena)',
-    ],
-    followUpSchedule: {
-      dueDays: 7,
-      dueAt: new Date(Date.now() + 7 * 86400000).toISOString(),
-      assignedFacility: 'Primary Health Centre Khed',
-      purpose: 'Day-7 Post-PCI Review: Repeat 12-lead ECG, monitor resting BP/HR, assess DAPT compliance, inspect femoral/radial access site.',
-    },
-    doctorSignOff: {
-      verifiedBy: 'Dr. Vikram Deshmukh (M.D., D.M. Cardiology)',
-      verifiedAt: new Date().toISOString(),
-      notes: 'Discharged in stable clinical state. Frontline CHO at PHC Khed notified for post-discharge adherence visit.',
-    },
-    createdAt: new Date().toISOString(),
-  },
-];
+// In-memory cache backed by Postgres AuditEvent persistence
+const dischargeSummariesStore: DischargeSummary[] = [];
 
 /**
  * GET /api/discharge-summaries
@@ -182,12 +76,30 @@ router.get('/', requireAuth, async (req: Request, res: Response): Promise<void> 
 
     let results = [...dischargeSummariesStore];
 
+    // Load persistent summaries from DB AuditEvents
+    try {
+      const dbAudits = await prisma.auditEvent.findMany({
+        where: { eventType: 'DISCHARGE_SUMMARY_CREATED' },
+        orderBy: { timestamp: 'desc' },
+        take: 50,
+      });
+
+      for (const a of dbAudits) {
+        const full = (a.metadata as any)?.fullSummary;
+        if (full && !results.some((s) => s.id === full.id)) {
+          results.push(full);
+        }
+      }
+    } catch (dbErr) {
+      console.warn('[Discharge DB retrieval warning]', dbErr);
+    }
+
     if (patientId && typeof patientId === 'string') {
       results = results.filter((s) => s.patientId === patientId);
     }
 
     if (referralId && typeof referralId === 'string') {
-      results = results.filter((s) => s.referralId === referralId);
+      results = results.filter((s) => s.referralId === referralId || s.referralNumber === referralId);
     }
 
     res.status(200).json({
@@ -210,7 +122,19 @@ router.get('/', requireAuth, async (req: Request, res: Response): Promise<void> 
 router.get('/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const summary = dischargeSummariesStore.find((s) => s.id === id);
+    let summary = dischargeSummariesStore.find((s) => s.id === id);
+
+    if (!summary) {
+      const audit = await prisma.auditEvent.findFirst({
+        where: {
+          entityId: id,
+          eventType: 'DISCHARGE_SUMMARY_CREATED',
+        },
+      });
+      if (audit && (audit.metadata as any)?.fullSummary) {
+        summary = (audit.metadata as any).fullSummary;
+      }
+    }
 
     if (!summary) {
       res.status(404).json({
@@ -268,13 +192,20 @@ router.get('/template/:referralId', requireAuth, async (req: Request, res: Respo
       console.warn('[Discharge Template DB Fetch fallback]', dbErr);
     }
 
-    // Fallback patient data if not found in DB
-    const patientName = patient?.name || 'Ramesh Yadav';
-    const patientAge = patient?.age || 52;
-    const patientGender = patient?.gender || 'Male';
-    const patientVillage = patient?.village || 'Khed Rural';
-    const patientPhone = patient?.phone || '9876543210';
-    const referralNumber = referral?.referralNumber || 'RF-STEMI-901';
+    if (!referral) {
+      res.status(404).json({
+        success: false,
+        error: `Referral ${referralId} not found. Cannot generate discharge template.`,
+      });
+      return;
+    }
+
+    const patientName = patient?.name || 'Patient';
+    const patientAge = patient?.age || 0;
+    const patientGender = patient?.gender || 'Other';
+    const patientVillage = patient?.village || 'Catchment Area';
+    const patientPhone = patient?.phone || '';
+    const referralNumber = referral.referralNumber;
 
     // Extract any verified medications from OCR
     const prefillMeds: DischargeMedication[] = [];
@@ -287,91 +218,52 @@ router.get('/template/:referralId', requireAuth, async (req: Request, res: Respo
           dosage: 'Standard',
           frequency: 'OD',
           timing: 'After food',
-          duration: '30 days',
+          duration: '14 days',
           instructions: 'Verified via AI Clinical OCR Scanner',
         });
       });
-    } else {
-      // Default standard cardiac post-PCI regimen
-      prefillMeds.push(
-        {
-          name: 'Tab. Aspirin',
-          dosage: '75 mg',
-          frequency: 'OD',
-          timing: 'After breakfast',
-          duration: 'Life-long',
-          instructions: 'Antiplatelet',
-        },
-        {
-          name: 'Tab. Clopidogrel',
-          dosage: '75 mg',
-          frequency: 'OD',
-          timing: 'After breakfast',
-          duration: '12 Months',
-          instructions: 'DAPT Stent Protection',
-        },
-        {
-          name: 'Tab. Atorvastatin',
-          dosage: '80 mg',
-          frequency: 'OD',
-          timing: 'At bedtime',
-          duration: 'Ongoing',
-          instructions: 'Plaque stabilization',
-        },
-        {
-          name: 'Tab. Metoprolol Succinate PR',
-          dosage: '25 mg',
-          frequency: 'OD',
-          timing: 'Morning',
-          duration: 'Ongoing',
-          instructions: 'Beta-blocker',
-        }
-      );
     }
 
     const template: Partial<DischargeSummary> = {
-      patientId: patient?.id || 'pat-ramesh-demo',
+      patientId: patient?.id || referral.patientId,
       patientName,
       age: patientAge,
       gender: patientGender,
       village: patientVillage,
       phone: patientPhone,
-      referralId,
+      referralId: referral.id,
       referralNumber,
-      dischargingFacilityId: req.user?.facilityId || 'fac-dist-01',
-      dischargingFacilityName: (req.user as any)?.facility?.name || 'Aundh District Hospital, Pune',
-      consultantName: req.user?.name || 'Dr. Vikram Deshmukh (Attending Specialist)',
-      admissionDate: referral?.createdAt ? new Date(referral.createdAt).toISOString() : new Date(Date.now() - 4 * 86400000).toISOString(),
+      dischargingFacilityId: req.user?.facilityId || referral.destinationFacilityId,
+      dischargingFacilityName: referral.destinationFacility?.name || 'District Hospital',
+      consultantName: req.user?.name || 'Attending Specialist',
+      admissionDate: referral.createdAt ? new Date(referral.createdAt).toISOString() : new Date(Date.now() - 3 * 86400000).toISOString(),
       dischargeDate: new Date().toISOString(),
-      lengthOfStayDays: 4,
-      primaryDiagnosis: referral?.reason || 'Acute Anterior Wall STEMI - Post Primary PCI',
-      icd10Code: 'I21.0',
-      secondaryDiagnoses: ['Essential Hypertension (I10)'],
-      clinicalCourse: referral?.clinicalSummary || 'Patient transferred from PHC with acute chest pain. Emergency primary angioplasty performed. Stent deployed. Hemodynamically stable at discharge.',
-      proceduresPerformed: [
-        'Coronary Angiography',
-        'Primary PCI to LAD with Drug-Eluting Stent',
-      ],
+      lengthOfStayDays: Math.max(1, Math.round((Date.now() - new Date(referral.createdAt).getTime()) / 86400000)),
+      primaryDiagnosis: referral.reason || 'Hospital Admission',
+      icd10Code: 'Z00.0',
+      secondaryDiagnoses: [],
+      clinicalCourse: referral.clinicalSummary || `Patient admitted from ${referral.sourceFacility?.name || 'PHC'} for ${referral.reason}. Successfully stabilized and monitored. Hemodynamically stable at discharge.`,
+      proceduresPerformed: [],
       dischargeVitals: {
-        bloodPressure: '120/78 mmHg',
+        bloodPressure: '120/80 mmHg',
         pulseRate: 72,
-        spo2: 99,
+        spo2: 98,
         temperature: 98.4,
         respiratoryRate: 16,
       },
       conditionAtDischarge: 'STABLE',
       medications: prefillMeds,
-      dietAndActivityAdvice: 'Low salt, low fat diet. Avoid strenuous activity for 2 weeks. Walk 15-20 mins daily.',
+      dietAndActivityAdvice: 'Nutritious balanced diet. Adequate rest and hydration. Gradual return to normal daily routine.',
       redFlagSymptoms: [
-        'Recurrent chest discomfort or pressure',
-        'Shortness of breath on mild exertion or rest',
-        'Cold sweats or dizziness',
+        'Sudden worsening of presenting symptoms',
+        'High fever or chills',
+        'Persistent severe pain or dizziness',
       ],
       followUpSchedule: {
         dueDays: 7,
         dueAt: new Date(Date.now() + 7 * 86400000).toISOString(),
-        assignedFacility: referral?.sourceFacility?.name || 'Primary Health Centre Khed',
-        purpose: 'Day-7 Post-Discharge Clinical Review: Repeat ECG, check vitals, and review take-home medication adherence.',
+        assignedFacility: referral.sourceFacility?.name || 'Local Primary Health Centre',
+        purpose: `Day-7 Post-Discharge clinical review for ${referral.reason}. Check vitals and treatment response.`,
       },
     };
 
@@ -544,6 +436,7 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
             assignedPHC: newSummary.followUpSchedule.assignedFacility,
             followUpDueAt: newSummary.followUpSchedule.dueAt,
             conditionAtDischarge: newSummary.conditionAtDischarge,
+            fullSummary: newSummary as any,
           },
         },
       }).catch((e) => console.warn('[Prisma AuditEvent create warn]', e.message));
