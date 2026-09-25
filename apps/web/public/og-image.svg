@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#042f2e" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14b8a6" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="30" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+
+  <!-- Subtle Decorative Grid Lines -->
+  <g stroke="#1e293b" stroke-width="1" opacity="0.6">
+    <line x1="0" y1="100" x2="1200" y2="100" />
+    <line x1="0" y1="200" x2="1200" y2="200" />
+    <line x1="0" y1="300" x2="1200" y2="300" />
+    <line x1="0" y1="400" x2="1200" y2="400" />
+    <line x1="0" y1="500" x2="1200" y2="500" />
+    <line x1="200" y1="0" x2="200" y2="630" />
+    <line x1="400" y1="0" x2="400" y2="630" />
+    <line x1="600" y1="0" x2="600" y2="630" />
+    <line x1="800" y1="0" x2="800" y2="630" />
+    <line x1="1000" y1="0" x2="1000" y2="630" />
+  </g>
+
+  <!-- Glow orb behind badge -->
+  <circle cx="210" cy="180" r="120" fill="#0d9488" opacity="0.25" filter="url(#glow)" />
+
+  <!-- Medical Cross / Bridge Icon Badge -->
+  <rect x="140" y="110" width="140" height="140" rx="36" fill="url(#tealGrad)" />
+  <path d="M 160 215 C 185 195, 235 195, 260 215" stroke="#ffffff" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.5" />
+  <rect x="198" y="142" width="24" height="60" rx="10" fill="#ffffff" />
+  <rect x="180" y="160" width="60" height="24" rx="10" fill="#ffffff" />
+  <path d="M 185 172 L 196 172 L 202 162 L 210 182 L 217 166 L 222 172 L 235 172" stroke="#0d9488" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+  <!-- Main Title -->
+  <text x="320" y="170" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="900" fill="#ffffff" letter-spacing="-1">
+    SwasthyaSetu
+  </text>
+  <text x="735" y="140" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" fill="#2dd4bf" letter-spacing="1">
+    AI CONTINUITY LAYER
+  </text>
+  <text x="320" y="225" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="600" fill="#94a3b8">
+    Healthcare continuity that survives weak connectivity
+  </text>
+
+  <!-- Core Equation Bar -->
+  <rect x="140" y="300" width="920" height="85" rx="20" fill="#0f172a" stroke="#334155" stroke-width="2" />
+  <text x="175" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#38bdf8">
+    REFERRAL
+  </text>
+  <text x="320" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#64748b">+</text>
+  <text x="360" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#a855f7">
+    IDENTITY
+  </text>
+  <text x="500" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#64748b">+</text>
+  <text x="540" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#f59e0b">
+    DOCUMENT
+  </text>
+  <text x="705" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#64748b">+</text>
+  <text x="745" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#10b981">
+    FOLLOW-UP
+  </text>
+  <text x="910" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#64748b">=</text>
+  <text x="945" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="800" fill="#2dd4bf">
+    CLOSED LOOP
+  </text>
+
+  <!-- Pillar Badges -->
+  <g transform="translate(140, 430)">
+    <rect width="210" height="70" rx="14" fill="#134e4a" stroke="#2dd4bf" stroke-width="1.5" />
+    <text x="25" y="42" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#ccfbf1">⚡ Zero-Data Offline Sync</text>
+  </g>
+
+  <g transform="translate(375, 430)">
+    <rect width="210" height="70" rx="14" fill="#3b0764" stroke="#c084fc" stroke-width="1.5" />
+    <text x="22" y="42" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#f3e8ff">🔍 Fuzzy Biometric Match</text>
+  </g>
+
+  <g transform="translate(610, 430)">
+    <rect width="210" height="70" rx="14" fill="#451a03" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="25" y="42" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#fef3c7">📄 AI Clinical OCR Review</text>
+  </g>
+
+  <g transform="translate(845, 430)">
+    <rect width="215" height="70" rx="14" fill="#064e3b" stroke="#34d399" stroke-width="1.5" />
+    <text x="24" y="42" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#d1fae5">🔒 SHA-256 Audit Trail</text>
+  </g>
+
+  <!-- Footer Tagline -->
+  <text x="145" y="565" font-family="system-ui, sans-serif" font-size="15" font-weight="500" fill="#64748b">
+    MUSA CodeX • CX0302 • Rural Healthcare &amp; Digital Health Continuity Layer
+  </text>
+  <text x="1055" y="565" text-anchor="end" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#94a3b8">
+    District Health Network • Pune
+  </text>
+</svg>

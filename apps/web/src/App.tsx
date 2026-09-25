@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -9,80 +9,100 @@ import { PHCDashboard } from './features/phc/PHCDashboard';
 import { HospitalDashboard } from './features/hospital/HospitalDashboard';
 import { CoordinatorDashboard } from './features/coordinator/CoordinatorDashboard';
 import { AdminDashboard } from './features/admin/AdminDashboard';
+import { NotFoundPage } from './features/error/NotFoundPage';
+import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
+import { TermsPage } from './features/legal/TermsPage';
+import { CookieConsentBanner } from './components/CookieConsentBanner';
+import { MobileQuickBar } from './components/MobileQuickBar';
+import { usePageMeta } from './hooks/usePageMeta';
 
 function AppLayout() {
   const { user } = useAuth();
   const location = useLocation();
+
+  // Apply dynamic SEO title and meta descriptions on route change
+  usePageMeta();
+
   const isHomePage = location.pathname === '/';
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms';
 
   // Public Home Page OR Unauthenticated / Auth Pages View
-  if (isHomePage || !user || isAuthPage) {
+  if (isHomePage || !user || isAuthPage || isLegalPage) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white">
-        {isAuthPage && <Navbar />}
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white pb-14 md:pb-0">
+        {(isAuthPage || isLegalPage) && <Navbar />}
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/login" element={<LoginView />} />
             <Route path="/signup" element={<SignupView />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
+        <CookieConsentBanner />
+        <MobileQuickBar />
       </div>
     );
   }
 
   // Authenticated Portal View (Full-Width Workspace - Sidebar Removed)
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white pb-14 md:pb-0">
       {/* Top Header with Global Search, Navigation & User Controls */}
       <Navbar />
 
       {/* Main Content Viewport */}
       <main className="flex-1 overflow-y-auto">
-          <Routes>
-            <Route path="/" element={<HomeRedirect />} />
+        <Routes>
+          <Route path="/" element={<HomeRedirect />} />
 
-            <Route
-              path="/phc"
-              element={
-                <ProtectedRoute allowedRoles={['PHC_USER', 'ADMIN']}>
-                  <PHCDashboard />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/phc"
+            element={
+              <ProtectedRoute allowedRoles={['PHC_USER', 'ADMIN']}>
+                <PHCDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/hospital"
-              element={
-                <ProtectedRoute allowedRoles={['CLINICIAN', 'ADMIN']}>
-                  <HospitalDashboard />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/hospital"
+            element={
+              <ProtectedRoute allowedRoles={['CLINICIAN', 'ADMIN']}>
+                <HospitalDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/triage"
-              element={
-                <ProtectedRoute allowedRoles={['REFERRAL_COORDINATOR', 'ADMIN']}>
-                  <CoordinatorDashboard />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/triage"
+            element={
+              <ProtectedRoute allowedRoles={['REFERRAL_COORDINATOR', 'ADMIN']}>
+                <CoordinatorDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
+
+      <CookieConsentBanner />
+      <MobileQuickBar />
     </div>
   );
 }

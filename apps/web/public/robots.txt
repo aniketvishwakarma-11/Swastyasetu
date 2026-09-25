@@ -1,0 +1,18 @@
+# SwasthyaSetu - Rural Healthcare Continuity Robots Policy
+# Compliant with DPDP 2023 & Clinical Data Privacy Directives
+
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /signup
+Allow: /privacy
+Allow: /terms
+
+# Strictly Disallow Crawling on Clinical Triage & Patient Health Records
+Disallow: /phc
+Disallow: /hospital
+Disallow: /triage
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://swasthyasetu.gov.in/sitemap.xml

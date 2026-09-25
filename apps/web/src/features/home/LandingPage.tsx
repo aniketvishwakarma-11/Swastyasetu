@@ -623,7 +623,7 @@ export const LandingPage: React.FC = () => (
     {/* ── 7. FOOTER ────────────────────────────────────────────────────── */}
     <footer className="bg-slate-900 text-slate-300">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
 
           {/* Column 1 — Brand */}
           <div>
@@ -637,19 +637,19 @@ export const LandingPage: React.FC = () => (
               Healthcare continuity that survives weak connectivity.
             </p>
             <p className="text-xs text-slate-500 leading-relaxed mt-2">
-              An offline-first continuity layer connecting PHCs and district hospitals across rural health networks.
+              An offline-first continuity layer connecting rural PHCs and district hospitals across rural health networks.
             </p>
           </div>
 
           {/* Column 2 — Explore */}
           <div>
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">Explore</h3>
+            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">Continuity Architecture</h3>
             <ul className="space-y-2 text-xs">
               {[
                 { label: 'How it works', href: '#how-it-works' },
-                { label: 'Offline-first', href: '#offline-first' },
-                { label: 'Capabilities', href: '#capabilities' },
-                { label: 'Roles', href: '#roles' },
+                { label: 'Dexie.js Offline Sync', href: '#offline-first' },
+                { label: 'AI Document OCR', href: '#capabilities' },
+                { label: 'Role-Based Portals', href: '#roles' },
               ].map(({ label, href }) => (
                 <li key={label}>
                   <a
@@ -663,24 +663,16 @@ export const LandingPage: React.FC = () => (
             </ul>
           </div>
 
-          {/* Column 3 — Access */}
+          {/* Column 3 — Access & Legal */}
           <div>
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">Access</h3>
+            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">Access &amp; Compliance</h3>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link
                   to="/login"
                   className="text-slate-400 hover:text-white focus:outline-none focus:underline hover:underline transition-colors"
                 >
-                  Open demo
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/login"
-                  className="text-slate-400 hover:text-white focus:outline-none focus:underline hover:underline transition-colors"
-                >
-                  Log in
+                  Clinical Staff Log in
                 </Link>
               </li>
               <li>
@@ -688,17 +680,54 @@ export const LandingPage: React.FC = () => (
                   to="/signup"
                   className="text-slate-400 hover:text-white focus:outline-none focus:underline hover:underline transition-colors"
                 >
-                  Create staff account
+                  Create Staff Account
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/privacy"
+                  className="text-teal-400 hover:text-teal-300 focus:outline-none focus:underline hover:underline transition-colors"
+                >
+                  Privacy Policy (DPDP 2023)
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/terms"
+                  className="text-teal-400 hover:text-teal-300 focus:outline-none focus:underline hover:underline transition-colors"
+                >
+                  Terms &amp; Protocols (Rule 3)
                 </Link>
               </li>
             </ul>
+          </div>
+
+          {/* Column 4 — Official Facility & Emergency Contact */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">District Authority</h3>
+            <address className="not-italic text-xs text-slate-400 space-y-1.5 leading-relaxed">
+              <p className="font-semibold text-slate-300">District Health Office (DHO)</p>
+              <p>Public Health Department, Maharashtra</p>
+              <p>Aundh District Hospital Campus, Pune — 411027</p>
+              <p className="text-teal-400 pt-1 font-semibold">Emergency Dial: 108 (24/7)</p>
+              <p className="text-slate-400">Health Advice: Toll-Free 104</p>
+            </address>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <span>© 2026 SwasthyaSetu Rural Healthcare Continuity Project</span>
-          <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Demo environment · synthetic data only</span>
+          <span>© 2026 SwasthyaSetu Rural Healthcare Continuity Project • Government of Maharashtra</span>
+          <div className="flex items-center space-x-3">
+            <Link to="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
+            <span>•</span>
+            <Link to="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
+            <span>•</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Demo Environment
+            </span>
+          </div>
         </div>
       </div>
     </footer>
