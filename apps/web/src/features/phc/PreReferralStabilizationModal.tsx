@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Save,
   Check,
+  AlertCircle,
 } from 'lucide-react';
 
 interface StabilizationItemInput {
@@ -83,6 +84,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
   const [doctorName, setDoctorName] = useState('Dr. Rajesh Sharma');
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Load protocol template
   useEffect(() => {
@@ -106,6 +108,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
     e.preventDefault();
     setSaving(true);
     setSuccessMsg(null);
+    setErrorMsg(null);
 
     const targetId = referral?.id || referral?.referralNumber || 'ref-stemi-01';
     const template = PROTOCOL_TEMPLATES[protocolType] || PROTOCOL_TEMPLATES.STEMI;
@@ -135,9 +138,12 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
         setTimeout(() => {
           onClose();
         }, 1500);
+      } else {
+        setErrorMsg(res.error?.message || 'Failed to record pre-referral stabilization checklist.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[Stabilization submit error]', err);
+      setErrorMsg(err.message || 'Network error saving stabilization checklist.');
     } finally {
       setSaving(false);
     }
@@ -183,6 +189,13 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
             <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-900 flex items-center space-x-2 font-semibold">
               <Check className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{successMsg}</span>
+            </div>
+          )}
+
+          {errorMsg && (
+            <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-900 flex items-center space-x-2 font-semibold">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{errorMsg}</span>
             </div>
           )}
 
@@ -291,7 +304,10 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
                   <input
                     type="checkbox"
                     checked={item.administered}
-                    onChange={() => {}}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleItem(item.id);
+                    }}
                     className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                   />
                   <div className="flex-1 text-xs">

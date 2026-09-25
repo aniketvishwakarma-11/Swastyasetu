@@ -511,10 +511,19 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
     // Update referral status to FOLLOW_UP_DUE and create AuditEvent
     try {
       if (referralId) {
-        await prisma.referral.update({
-          where: { id: referralId },
-          data: { status: 'FOLLOW_UP_DUE' as any },
-        }).catch((e) => console.warn('[Prisma referral status update warn]', e.message));
+        const existingRef = await prisma.referral.findFirst({
+          where: {
+            OR: [{ id: referralId }, { referralNumber: referralId }],
+          },
+          select: { id: true },
+        });
+
+        if (existingRef) {
+          await prisma.referral.update({
+            where: { id: existingRef.id },
+            data: { status: 'FOLLOW_UP_DUE' as any },
+          }).catch((e) => console.warn('[Prisma referral status update warn]', e.message));
+        }
       }
 
       await prisma.auditEvent.create({

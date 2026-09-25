@@ -474,15 +474,22 @@ router.post('/:id/stabilization', requireAuth, async (req: Request, res: Respons
       notes,
     } = req.body;
 
-    const referral = await prisma.referral.findUnique({
+    let referral = await prisma.referral.findUnique({
       where: { id },
       include: { patient: true, sourceFacility: true, destinationFacility: true },
     });
 
+    if (!referral) {
+      referral = await prisma.referral.findFirst({
+        where: { referralNumber: id },
+        include: { patient: true, sourceFacility: true, destinationFacility: true },
+      });
+    }
+
     const token = `SIG-${protocolType}-${Math.floor(10000 + Math.random() * 90000)}`;
 
     const record: StabilizationRecord = {
-      referralId: id,
+      referralId: referral?.id || id,
       protocolType: protocolType as any,
       protocolName,
       administeredBy: administeredBy || req.user?.name || 'Attending PHC Medical Officer',
@@ -498,6 +505,9 @@ router.post('/:id/stabilization', requireAuth, async (req: Request, res: Respons
     };
 
     stabilizationStore[id] = record;
+    if (referral?.id) {
+      stabilizationStore[referral.id] = record;
+    }
     if (referral?.referralNumber) {
       stabilizationStore[referral.referralNumber] = record;
     }
@@ -556,7 +566,23 @@ router.post('/:id/stabilization', requireAuth, async (req: Request, res: Respons
 router.get('/:id/stabilization', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const record = stabilizationStore[id] || stabilizationStore['ref-stemi-01'];
+    let record = stabilizationStore[id];
+
+    if (!record) {
+      const referral = await prisma.referral.findFirst({
+        where: {
+          OR: [{ id }, { referralNumber: id }],
+        },
+        select: { id: true, referralNumber: true },
+      });
+      if (referral) {
+        record = stabilizationStore[referral.id] || stabilizationStore[referral.referralNumber];
+      }
+    }
+
+    if (!record) {
+      record = stabilizationStore['ref-stemi-01'];
+    }
 
     res.status(200).json({
       success: true,
@@ -636,13 +662,13 @@ router.get('/:id/transport-slip', requireAuth, async (req: Request, res: Respons
       .toUpperCase();
 
     // 5. Construct 2G-compliant Compact GSM Fallback String (<160 chars)
-    const primaryDrugSummary = stabRecord.items
+    const primaryDrugSummary = (stabRecord?.items || [])
       .filter((i) => i.administered)
       .slice(0, 3)
-      .map((i) => i.name.split(' ')[0].toUpperCase())
+      .map((i) => (i.name || '').split(' ')[0].toUpperCase())
       .join('+');
 
-    const offlineSmsPayload = `SETU*108*${transportSlipCode}*${referralNumber}*${patientName.split(' ')[0].toUpperCase()}*${patientAge}${patientGender[0]}*BP${stabRecord.vitals.bloodPressure || '140/90'}*SPO2-${stabRecord.vitals.spo2 || 94}*${primaryDrugSummary || 'STABILIZED'}*ETA42M*VER-${securityVerificationHash.slice(0, 4)}`;
+    const offlineSmsPayload = `SETU*108*${transportSlipCode}*${referralNumber}*${patientName.split(' ')[0].toUpperCase()}*${patientAge}${patientGender[0]}*BP${stabRecord?.vitals?.bloodPressure || '140/90'}*SPO2-${stabRecord?.vitals?.spo2 || 94}*${primaryDrugSummary || 'STABILIZED'}*ETA42M*VER-${securityVerificationHash.slice(0, 4)}`;
 
     const transportSlip = {
       transportSlipCode,
@@ -688,16 +714,20 @@ router.get('/:id/transport-slip', requireAuth, async (req: Request, res: Respons
       clinicalSummary,
       provisionalDiagnosis: 'Acute ST-Elevation Myocardial Infarction (STEMI)',
       initialVitals: {
-        bloodPressure: stabRecord.vitals.bloodPressure || '140/90',
-        pulseRate: stabRecord.vitals.pulseRate || 98,
-        spo2: stabRecord.vitals.spo2 || 94,
+        bloodPressure: stabRecord?.vitals?.bloodPressure || '140/90',
+        pulseRate: stabRecord?.vitals?.pulseRate || 98,
+        spo2: stabRecord?.vitals?.spo2 || 94,
         temperature: 98.4,
-        respiratoryRate: stabRecord.vitals.respiratoryRate || 22,
-        bloodSugar: stabRecord.vitals.bloodSugar || 142,
-        recordedAt: stabRecord.administeredAt,
+        respiratoryRate: stabRecord?.vitals?.respiratoryRate || 22,
+        bloodSugar: stabRecord?.vitals?.bloodSugar || 142,
+        recordedAt: stabRecord?.administeredAt || new Date().toISOString(),
       },
-      stabilizationProtocol: stabRecord,
-      enRouteInstructions: stabRecord.paramedicInstructions,
+      stabilizationProtocol: stabRecord || null,
+      enRouteInstructions: stabRecord?.paramedicInstructions || [
+        'Maintain continuous vitals monitoring every 15 minutes during transit.',
+        'Keep patient immobilized and oxygenated as clinically indicated.',
+        'Notify receiving casualty desk prior to arrival.',
+      ],
       offlineSmsPayload,
       securityVerificationHash,
       governmentAuthority: 'Government of Maharashtra • Public Health Department • 108 EMRI Service',

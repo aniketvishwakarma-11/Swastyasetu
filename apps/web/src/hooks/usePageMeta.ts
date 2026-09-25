@@ -53,10 +53,7 @@ export function usePageMeta() {
   const location = useLocation();
 
   useEffect(() => {
-    const meta = ROUTE_META[location.pathname] || {
-      title: 'SwasthyaSetu | Healthcare Continuity Layer',
-      description: 'Healthcare continuity that survives weak connectivity.',
-    };
+    const meta = ROUTE_META[location.pathname] || ROUTE_META['/404'];
 
     document.title = meta.title;
 

@@ -372,6 +372,7 @@ async function buildTimelineResponse(patient: any, res: Response) {
   // Fetch low-level audit events if any
   try {
     const validReferralIds = validReferrals.map((r: any) => r.id);
+    const validReferralNumbers = validReferrals.map((r: any) => r.referralNumber).filter(Boolean);
     const validDocumentIds = validDocuments.map((d: any) => d.id);
     
     const auditEvents = await prisma.auditEvent.findMany({
@@ -379,6 +380,7 @@ async function buildTimelineResponse(patient: any, res: Response) {
         OR: [
           { entityId: patient.id },
           ...validReferralIds.map((id: string) => ({ entityId: id })),
+          ...validReferralNumbers.map((num: string) => ({ entityId: num })),
           ...validDocumentIds.map((id: string) => ({ entityId: id })),
         ],
       },
