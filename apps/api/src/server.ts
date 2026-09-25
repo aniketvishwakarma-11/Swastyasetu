@@ -17,6 +17,7 @@ import identityRoutes from './modules/identity/identity.routes';
 import documentsRoutes from './modules/documents/documents.routes';
 import vitalsRoutes from './modules/vitals/vitals.routes';
 import followupsRoutes from './modules/followups/followups.routes';
+import patientsRoutes from './modules/patients/patients.routes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -48,6 +49,7 @@ app.use('/api/identity', identityRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/vitals', vitalsRoutes);
 app.use('/api/follow-ups', followupsRoutes);
+app.use('/api/patients', patientsRoutes);
 app.use('/api/test', rbacTestRoutes);
 
 // Check if frontend build exists to serve full-stack monolith

@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { IdentityReconciliationModal } from './IdentityReconciliationModal';
 import { DocumentOcrModal } from './DocumentOcrModal';
+import { CareContinuityTimelineModal } from './CareContinuityTimelineModal';
 import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
 import { HOSPITAL_BLUEPRINTS } from '../../lib/featureBlueprints';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
@@ -50,6 +51,10 @@ export const HospitalDashboard: React.FC = () => {
 
   // Feature blueprint modal state
   const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
+
+  // Care Continuity Timeline state
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  const [timelineTarget, setTimelineTarget] = useState<{ id: string; name: string } | null>(null);
 
   // Fetch referrals for this hospital and run identity candidate evaluation
   const loadHospitalData = useCallback(async () => {
@@ -230,7 +235,21 @@ export const HospitalDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveBlueprint(HOSPITAL_BLUEPRINTS.timeline)}
+            onClick={() => {
+              if (referrals.length > 0) {
+                const ref = referrals[0];
+                setTimelineTarget({
+                  id: ref.patientId || ref.patient?.id || 'target-patient',
+                  name: ref.patient?.name || 'Patient Record',
+                });
+              } else {
+                setTimelineTarget({
+                  id: '00000000-0000-0000-0000-000000000001',
+                  name: 'Ramesh Yadav',
+                });
+              }
+              setIsTimelineOpen(true);
+            }}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
             <Clock className="w-3.5 h-3.5 text-teal-600" />
@@ -455,6 +474,20 @@ export const HospitalDashboard: React.FC = () => {
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => {
+                              setTimelineTarget({
+                                id: ref.patientId || ref.patient?.id || 'target-patient',
+                                name: ref.patient?.name || 'Patient Record',
+                              });
+                              setIsTimelineOpen(true);
+                            }}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-slate-50 text-teal-700 border border-teal-200 rounded-md text-[11px] font-semibold transition-colors cursor-pointer"
+                            title="View Longitudinal care continuity timeline"
+                          >
+                            <Clock className="w-3.5 h-3.5 text-teal-600" />
+                            <span>Timeline</span>
+                          </button>
+                          <button
+                            onClick={() => {
                               setSelectedDetailReferral(ref);
                               setIsDetailModalOpen(true);
                             }}
@@ -536,6 +569,26 @@ export const HospitalDashboard: React.FC = () => {
           onSuccess={() => {
             setActionSuccessMsg('Clinical document OCR verified and committed to patient care record!');
             loadHospitalData();
+          }}
+        />
+      )}
+
+      {/* Care Continuity Timeline Modal */}
+      {timelineTarget && (
+        <CareContinuityTimelineModal
+          isOpen={isTimelineOpen}
+          onClose={() => {
+            setIsTimelineOpen(false);
+            setTimelineTarget(null);
+          }}
+          patientId={timelineTarget.id}
+          patientName={timelineTarget.name}
+          availablePatients={referrals.map((ref) => ({
+            id: ref.patientId || ref.patient?.id,
+            name: ref.patient?.name || 'Unknown Patient',
+          })).filter((p, i, arr) => p.id && arr.findIndex(x => x.id === p.id) === i)}
+          onSwitchPatient={(patient) => {
+            setTimelineTarget(patient);
           }}
         />
       )}

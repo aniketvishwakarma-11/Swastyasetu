@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../../db';
+import capacityRoutes from './capacity.routes';
 
 const router = Router();
+
+router.use('/', capacityRoutes);
 
 /**
  * GET /api/facilities

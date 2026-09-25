@@ -110,6 +110,8 @@ model Facility {
   users                User[]
   outgoingReferrals    Referral[] @relation("SourceFacility")
   incomingReferrals    Referral[] @relation("DestinationFacility")
+  capacity             FacilityCapacity?
+  specialists          SpecialistRoster[]
 }
 
 // ----------------------------------------------------
@@ -257,6 +259,43 @@ model FollowUp {
   @@index([patientId])
   @@index([dueAt])
   @@index([status])
+}
+
+model FacilityCapacity {
+  id                String   @id @default(uuid())
+  facilityId        String   @unique
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  icuTotal          Int      @default(0)
+  icuAvailable      Int      @default(0)
+  oxygenTotal       Int      @default(0)
+  oxygenAvailable   Int      @default(0)
+  generalTotal      Int      @default(0)
+  generalAvailable  Int      @default(0)
+  ventilatorTotal   Int      @default(0)
+  ventilatorAvailable Int    @default(0)
+  lastUpdatedBy     String?
+  lastUpdatedAt     DateTime @updatedAt
+  createdAt         DateTime @default(now())
+
+  @@index([facilityId])
+}
+
+model SpecialistRoster {
+  id              String   @id @default(uuid())
+  facilityId      String
+  facility        Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  specialty       String   // e.g., "Interventional Cardiology", "Neurosurgery", "Obstetrics"
+  specialistName  String
+  isOnDuty        Boolean  @default(false)
+  contactPhone    String?
+  shiftStart      String?  // e.g., "08:00"
+  shiftEnd        String?  // e.g., "20:00"
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([facilityId])
+  @@index([specialty])
 }
 
 model AuditEvent {
