@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
 import { HospitalReadinessRadarModal } from './HospitalReadinessRadarModal';
+import { AmbulanceTransportSlipModal } from './AmbulanceTransportSlipModal';
 import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
 import { COORDINATOR_BLUEPRINTS } from '../../lib/featureBlueprints';
 import {
@@ -36,6 +37,10 @@ export const CoordinatorDashboard: React.FC = () => {
 
   // Bed & ICU Readiness Radar Modal state
   const [isRadarOpen, setIsRadarOpen] = useState(false);
+
+  // 108 Transport Slip Modal state
+  const [isTransportSlipOpen, setIsTransportSlipOpen] = useState(false);
+  const [transportSlipReferral, setTransportSlipReferral] = useState<any | null>(null);
 
   const loadReferrals = useCallback(async () => {
     setLoading(true);
@@ -147,7 +152,10 @@ export const CoordinatorDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.ambulanceSlip)}
+            onClick={() => {
+              setTransportSlipReferral(referrals[0] || null);
+              setIsTransportSlipOpen(true);
+            }}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-teal-600" />
@@ -235,16 +243,30 @@ export const CoordinatorDashboard: React.FC = () => {
                     </div>
 
                     <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedReferral(ref);
-                          setIsDetailModalOpen(true);
-                        }}
-                        className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-1"
-                      >
-                        <FileText className="w-3 h-3 text-slate-400" />
-                        <span>Details</span>
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => {
+                            setSelectedReferral(ref);
+                            setIsDetailModalOpen(true);
+                          }}
+                          className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-1 cursor-pointer"
+                        >
+                          <FileText className="w-3 h-3 text-slate-400" />
+                          <span>Details</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setTransportSlipReferral(ref);
+                            setIsTransportSlipOpen(true);
+                          }}
+                          className="text-[11px] font-semibold text-teal-700 hover:text-teal-900 flex items-center space-x-1 cursor-pointer"
+                          title="Generate 108 Ambulance Transport Slip"
+                        >
+                          <FileSpreadsheet className="w-3 h-3 text-teal-600" />
+                          <span>108 Slip</span>
+                        </button>
+                      </div>
 
                       <button
                         onClick={() => handleTransitStatus(ref.id, 'SYNCING', '108 Ambulance Unit Assigned')}
@@ -303,16 +325,30 @@ export const CoordinatorDashboard: React.FC = () => {
                     </div>
 
                     <div className="pt-2 border-t border-blue-100 flex items-center justify-between gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedReferral(ref);
-                          setIsDetailModalOpen(true);
-                        }}
-                        className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-1"
-                      >
-                        <FileText className="w-3 h-3 text-slate-400" />
-                        <span>Details</span>
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => {
+                            setSelectedReferral(ref);
+                            setIsDetailModalOpen(true);
+                          }}
+                          className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-1 cursor-pointer"
+                        >
+                          <FileText className="w-3 h-3 text-slate-400" />
+                          <span>Details</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setTransportSlipReferral(ref);
+                            setIsTransportSlipOpen(true);
+                          }}
+                          className="text-[11px] font-semibold text-blue-700 hover:text-blue-900 flex items-center space-x-1 cursor-pointer"
+                          title="View 108 Ambulance Transport Slip"
+                        >
+                          <FileSpreadsheet className="w-3 h-3 text-blue-600" />
+                          <span>108 Slip</span>
+                        </button>
+                      </div>
 
                       <button
                         onClick={() => handleTransitStatus(ref.id, 'RECEIVED', 'Arrived at Destination ER')}
@@ -416,6 +452,21 @@ export const CoordinatorDashboard: React.FC = () => {
       <FeatureBlueprintModal
         blueprint={activeBlueprint}
         onClose={() => setActiveBlueprint(null)}
+      />
+
+      {/* 108 Ambulance Digital Transport Slip Modal */}
+      <AmbulanceTransportSlipModal
+        isOpen={isTransportSlipOpen}
+        onClose={() => {
+          setIsTransportSlipOpen(false);
+          setTransportSlipReferral(null);
+        }}
+        referralId={transportSlipReferral?.id}
+        referralNumber={transportSlipReferral?.referralNumber}
+        onStatusUpdated={(updated) => {
+          setActionSuccessMsg(`Referral ${updated.referralNumber} status updated to ${updated.status}.`);
+          loadReferrals();
+        }}
       />
     </div>
   );

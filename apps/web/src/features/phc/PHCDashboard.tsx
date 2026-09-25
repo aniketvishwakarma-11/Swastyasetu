@@ -6,6 +6,8 @@ import { useNetworkSync } from '../../lib/useNetworkSync';
 import { ReferralModal } from './ReferralModal';
 import { RapidVitalsModal } from './RapidVitalsModal';
 import { FollowUpTrackerModal } from './FollowUpTrackerModal';
+import { PreReferralStabilizationModal } from './PreReferralStabilizationModal';
+import { AmbulanceTransportSlipModal } from '../coordinator/AmbulanceTransportSlipModal';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
 import { CareContinuityTimelineModal } from '../hospital/CareContinuityTimelineModal';
 import { formatFallbackSMS } from '@swastyasetu/shared';
@@ -25,6 +27,8 @@ import {
   CalendarCheck,
   FileText,
   Activity,
+  Pill,
+  Ambulance,
 } from 'lucide-react';
 
 export const PHCDashboard: React.FC = () => {
@@ -34,6 +38,10 @@ export const PHCDashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVitalsOpen, setIsVitalsOpen] = useState(false);
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
+  const [isStabilizationOpen, setIsStabilizationOpen] = useState(false);
+  const [stabilizationReferral, setStabilizationReferral] = useState<any | null>(null);
+  const [isTransportSlipOpen, setIsTransportSlipOpen] = useState(false);
+  const [transportSlipReferral, setTransportSlipReferral] = useState<any | null>(null);
   const [referralInitialData, setReferralInitialData] = useState<any | null>(null);
   const [referrals, setReferrals] = useState<any[]>([]);
   const [loadingReferrals, setLoadingReferrals] = useState(false);
@@ -147,6 +155,17 @@ export const PHCDashboard: React.FC = () => {
           >
             <CalendarCheck className="w-4 h-4 text-teal-600" />
             <span>Follow-Up Tracker</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setStabilizationReferral(referrals[0] || null);
+              setIsStabilizationOpen(true);
+            }}
+            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <Pill className="w-4 h-4 text-emerald-600" />
+            <span>Pre-Referral Stabilization</span>
           </button>
 
           {pendingCount > 0 && (
@@ -320,18 +339,43 @@ export const PHCDashboard: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end space-x-2">
+                        <div className="flex items-center justify-end space-x-1.5 flex-wrap gap-1">
                           <button
                             onClick={() => {
                               setSelectedDetailReferral(ref);
                               setIsDetailModalOpen(true);
                             }}
-                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                            className="inline-flex items-center space-x-1 px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
                             title="View Clinical Summary & Patient Details"
                           >
                             <FileText className="w-3 h-3 text-slate-500" />
                             <span>Details</span>
                           </button>
+
+                          <button
+                            onClick={() => {
+                              setStabilizationReferral(ref);
+                              setIsStabilizationOpen(true);
+                            }}
+                            className="inline-flex items-center space-x-1 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                            title="Record Emergency Stabilization Loading Protocol"
+                          >
+                            <Pill className="w-3 h-3 text-emerald-600" />
+                            <span>Stabilize</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setTransportSlipReferral(ref);
+                              setIsTransportSlipOpen(true);
+                            }}
+                            className="inline-flex items-center space-x-1 px-2 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                            title="Generate 108 Ambulance Digital Transport Slip"
+                          >
+                            <Ambulance className="w-3 h-3 text-teal-600" />
+                            <span>108 Slip</span>
+                          </button>
+
                           <button
                             onClick={() => {
                               const pid = ref.patientId || ref.patient?.id || ref.id;
@@ -347,11 +391,11 @@ export const PHCDashboard: React.FC = () => {
                           </button>
                           <button
                             onClick={() => setSelectedSmsReferral(ref)}
-                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-300 text-slate-700 border border-slate-200 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                            className="inline-flex items-center space-x-1 px-2 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-300 text-slate-700 border border-slate-200 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
                             title="View 2G Cellular SMS Fallback Payload"
                           >
                             <MessageSquare className="w-3 h-3 text-teal-600" />
-                            <span>SMS Payload</span>
+                            <span>SMS</span>
                           </button>
                         </div>
                       </td>
@@ -508,6 +552,33 @@ export const PHCDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Pre-Referral Emergency Stabilization Modal */}
+      <PreReferralStabilizationModal
+        isOpen={isStabilizationOpen}
+        onClose={() => {
+          setIsStabilizationOpen(false);
+          setStabilizationReferral(null);
+        }}
+        referral={stabilizationReferral}
+        onStabilizationSaved={() => {
+          loadReferrals();
+        }}
+      />
+
+      {/* 108 Ambulance Digital Transport Slip Modal */}
+      <AmbulanceTransportSlipModal
+        isOpen={isTransportSlipOpen}
+        onClose={() => {
+          setIsTransportSlipOpen(false);
+          setTransportSlipReferral(null);
+        }}
+        referralId={transportSlipReferral?.id}
+        referralNumber={transportSlipReferral?.referralNumber}
+        onStatusUpdated={() => {
+          loadReferrals();
+        }}
+      />
 
     </div>
   );

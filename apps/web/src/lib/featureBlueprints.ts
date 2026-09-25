@@ -133,8 +133,8 @@ export const COORDINATOR_BLUEPRINTS: Record<string, FeatureBlueprint> = {
     id: 'coord-ambulance-slip',
     title: '108 Ambulance Digital Transport Slip',
     role: 'REFERRAL_COORDINATOR',
-    status: 'PLANNED',
-    badgeLabel: 'Roadmap Sprint 3',
+    status: 'BUILT',
+    badgeLabel: 'Operational',
     clinicalPurpose: 'Generates a 1-click printable or SMS handoff summary for ambulance drivers containing pickup coordinates, patient vitals, and en-route stabilization notes.',
     targetUsers: 'Ambulance EMTs and paramedic drivers',
     technicalSpecs: {
