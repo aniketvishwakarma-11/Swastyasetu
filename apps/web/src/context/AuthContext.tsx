@@ -218,6 +218,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     import('../lib/supabaseClient').then(({ supabase }) => {
       supabase.auth.signOut().catch(() => {});
     });
+    // Immediately redirect to home page to prevent 404 on protected dashboard routes
+    window.location.href = '/';
   };
 
   return (

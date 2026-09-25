@@ -195,6 +195,34 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     const demoUser = DEMO_LOGIN_USERS[validated.email.toLowerCase() as keyof typeof DEMO_LOGIN_USERS];
     if (demoUser && validated.password === 'password123') {
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: validated.email.toLowerCase() },
+          include: {
+            facility: {
+              select: { id: true, code: true, name: true, type: true, district: true },
+            },
+          },
+        });
+
+        if (dbUser) {
+          const token = jwt.sign(
+            { id: dbUser.id, email: dbUser.email, role: dbUser.role, name: dbUser.name },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+          );
+          const { passwordHash: _, ...safeUser } = dbUser;
+          res.status(200).json({
+            success: true,
+            data: { user: safeUser, token },
+            message: 'Demo authentication successful',
+          });
+          return;
+        }
+      } catch (dbErr) {
+        console.warn('[Demo login DB lookup fallback]', dbErr);
+      }
+
       const user = {
         id: demoUser.id,
         name: demoUser.name,
@@ -295,20 +323,64 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
  */
 router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user!.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        facilityId: true,
-        facility: {
-          select: { id: true, code: true, name: true, type: true, district: true },
-        },
-        createdAt: true,
-      },
-    });
+    let user = null;
+
+    if (req.user?.id) {
+      try {
+        user = await prisma.user.findUnique({
+          where: { id: req.user.id },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            facilityId: true,
+            facility: {
+              select: { id: true, code: true, name: true, type: true, district: true },
+            },
+            createdAt: true,
+          },
+        });
+      } catch (err) {
+        console.warn('[GET /me id lookup warn]', err);
+      }
+    }
+
+    if (!user && req.user?.email) {
+      try {
+        user = await prisma.user.findUnique({
+          where: { email: req.user.email.toLowerCase() },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            facilityId: true,
+            facility: {
+              select: { id: true, code: true, name: true, type: true, district: true },
+            },
+            createdAt: true,
+          },
+        });
+      } catch (err) {
+        console.warn('[GET /me email lookup warn]', err);
+      }
+    }
+
+    if (!user && req.user?.email) {
+      const demo = DEMO_LOGIN_USERS[req.user.email.toLowerCase() as keyof typeof DEMO_LOGIN_USERS];
+      if (demo) {
+        user = {
+          id: demo.id,
+          name: demo.name,
+          email: req.user.email.toLowerCase(),
+          role: demo.role,
+          facilityId: demo.facilityId,
+          facility: demo.facility,
+          createdAt: new Date().toISOString(),
+        } as any;
+      }
+    }
 
     if (!user) {
       res.status(404).json({
