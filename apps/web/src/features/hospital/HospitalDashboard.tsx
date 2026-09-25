@@ -7,6 +7,7 @@ import { CareContinuityTimelineModal } from './CareContinuityTimelineModal';
 import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
 import { HOSPITAL_BLUEPRINTS } from '../../lib/featureBlueprints';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
+import { DischargeSummaryModal } from './DischargeSummaryModal';
 import {
   Building,
   ShieldCheck,
@@ -55,6 +56,10 @@ export const HospitalDashboard: React.FC = () => {
   // Care Continuity Timeline state
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [timelineTarget, setTimelineTarget] = useState<{ id: string; name: string } | null>(null);
+
+  // Structured Discharge Summary state
+  const [isDischargeModalOpen, setIsDischargeModalOpen] = useState(false);
+  const [dischargeReferralTarget, setDischargeReferralTarget] = useState<any | null>(null);
 
   // Fetch referrals for this hospital and run identity candidate evaluation
   const loadHospitalData = useCallback(async () => {
@@ -265,10 +270,17 @@ export const HospitalDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveBlueprint(HOSPITAL_BLUEPRINTS.discharge)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            onClick={() => {
+              const target =
+                referrals.find((r) => r.status === 'IDENTITY_CONFIRMED' || r.status === 'CONSULTED') ||
+                referrals[0] ||
+                null;
+              setDischargeReferralTarget(target);
+              setIsDischargeModalOpen(true);
+            }}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
-            <FileText className="w-3.5 h-3.5 text-emerald-600" />
+            <FileText className="w-3.5 h-3.5" />
             <span>Discharge Summary</span>
           </button>
         </div>
@@ -513,10 +525,23 @@ export const HospitalDashboard: React.FC = () => {
                               <span>Verify Identity</span>
                             </button>
                           ) : (
-                            <span className="inline-flex items-center space-x-1 text-emerald-700 font-semibold text-[11px]">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>Linked</span>
-                            </span>
+                            <div className="flex items-center space-x-1.5">
+                              <span className="inline-flex items-center space-x-1 text-emerald-700 font-semibold text-[11px]">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Linked</span>
+                              </span>
+                              <button
+                                onClick={() => {
+                                  setDischargeReferralTarget(ref);
+                                  setIsDischargeModalOpen(true);
+                                }}
+                                className="inline-flex items-center space-x-1 px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold transition-colors border border-emerald-300 cursor-pointer"
+                                title="Issue structured discharge summary & take-home prescriptions"
+                              >
+                                <FileText className="w-3 h-3 text-emerald-600" />
+                                <span>Discharge</span>
+                              </button>
+                            </div>
                           )}
                         </div>
                       </td>
@@ -592,6 +617,22 @@ export const HospitalDashboard: React.FC = () => {
           }}
         />
       )}
+
+      {/* Structured Clinical Discharge Summary Modal */}
+      <DischargeSummaryModal
+        isOpen={isDischargeModalOpen}
+        onClose={() => {
+          setIsDischargeModalOpen(false);
+          setDischargeReferralTarget(null);
+        }}
+        referral={dischargeReferralTarget}
+        onDischargeComplete={(summary) => {
+          setActionSuccessMsg(
+            `Discharge Summary ${summary.id} issued successfully! Closed-loop follow-up dispatched to village PHC.`
+          );
+          loadHospitalData();
+        }}
+      />
 
       {/* Feature Blueprint Modal */}
       <FeatureBlueprintModal

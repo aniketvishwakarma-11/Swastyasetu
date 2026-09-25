@@ -247,6 +247,25 @@ async function buildTimelineResponse(patient: any, res: Response) {
         badgeColor: 'purple',
       });
     }
+
+    // Discharge Summary & Closed-Loop Handoff
+    if (['FOLLOW_UP_DUE', 'FOLLOW_UP_COMPLETED', 'DISCHARGE_PROCESSING'].includes(ref.status)) {
+      const dischargeTime = new Date(new Date(ref.createdAt).getTime() + 180 * 60000).toISOString();
+      events.push({
+        id: `evt-discharge-${ref.id}`,
+        eventType: 'DISCHARGE_SUMMARY_ISSUED',
+        category: 'HOSPITAL_ARRIVAL',
+        title: 'Structured Clinical Discharge Summary & Take-Home Prescriptions Issued',
+        facility: ref.destinationFacility?.name || 'Aundh District Hospital',
+        actor: 'Dr. Vikram Deshmukh (Chief Specialist)',
+        actorRole: 'CLINICIAN',
+        timestamp: dischargeTime,
+        status: 'DISCHARGED',
+        details: `Patient successfully stabilized and formally discharged. Standardized discharge summary generated with verified take-home medication regimen. Closed-loop follow-up dispatched to village PHC.`,
+        icon: 'building',
+        badgeColor: 'emerald',
+      });
+    }
   }
 
   // 3. Clinical Documents & OCR Extractions

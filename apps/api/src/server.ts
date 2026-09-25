@@ -18,6 +18,8 @@ import documentsRoutes from './modules/documents/documents.routes';
 import vitalsRoutes from './modules/vitals/vitals.routes';
 import followupsRoutes from './modules/followups/followups.routes';
 import patientsRoutes from './modules/patients/patients.routes';
+import dischargeRoutes from './modules/discharge/discharge.routes';
+import auditRoutes from './modules/audit/audit.routes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,6 +52,8 @@ app.use('/api/documents', documentsRoutes);
 app.use('/api/vitals', vitalsRoutes);
 app.use('/api/follow-ups', followupsRoutes);
 app.use('/api/patients', patientsRoutes);
+app.use('/api/discharge-summaries', dischargeRoutes);
+app.use('/api/audit', auditRoutes);
 app.use('/api/test', rbacTestRoutes);
 
 // Check if frontend build exists to serve full-stack monolith

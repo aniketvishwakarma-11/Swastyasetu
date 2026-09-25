@@ -30,7 +30,7 @@ export interface FollowUpItem {
 }
 
 // In-memory store initialized with clinical continuity fixtures
-const followUpsStore: FollowUpItem[] = [
+export const followUpsStore: FollowUpItem[] = [
   {
     id: 'fup-101',
     patientId: 'pat-kailash-01',
@@ -199,5 +199,9 @@ router.post('/:id/flag-asha', requireAuth, async (req: Request, res: Response): 
     });
   }
 });
+ 
+export function addFollowUpItem(item: FollowUpItem) {
+  followUpsStore.unshift(item);
+}
 
 export default router;

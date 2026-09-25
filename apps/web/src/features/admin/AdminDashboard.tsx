@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
 import { ADMIN_BLUEPRINTS } from '../../lib/featureBlueprints';
+import { AuditTrailModal } from './AuditTrailModal';
 import {
   ShieldCheck,
   Database,
@@ -19,6 +20,7 @@ export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
   const [testLog, setTestLog] = useState<Array<{ endpoint: string; status: 'ok' | 'fail'; message: string }>>([]);
   const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
 
   const runFullRbacAudit = async () => {
     const endpoints = [
@@ -81,10 +83,10 @@ export const AdminDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveBlueprint(ADMIN_BLUEPRINTS.auditTrail)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            onClick={() => setIsAuditModalOpen(true)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
-            <FileText className="w-3.5 h-3.5 text-teal-600" />
+            <FileText className="w-3.5 h-3.5" />
             <span>Audit Trail Explorer</span>
           </button>
 
@@ -168,6 +170,12 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Immutable Clinical Audit Trail Modal */}
+      <AuditTrailModal
+        isOpen={isAuditModalOpen}
+        onClose={() => setIsAuditModalOpen(false)}
+      />
 
       {/* Feature Blueprint Modal */}
       <FeatureBlueprintModal
