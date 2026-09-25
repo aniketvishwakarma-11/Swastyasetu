@@ -34,7 +34,14 @@ router.post('/events', requireAuth, async (req: Request, res: Response): Promise
       return;
     }
 
-    const results: Array<{ eventId: string; status: SyncStatus; duplicate: boolean; error?: string; entityId?: string }> = [];
+    const results: Array<{
+      eventId: string;
+      status: SyncStatus;
+      duplicate: boolean;
+      error?: string;
+      entityId?: string;
+      referralNumber?: string;
+    }> = [];
 
     for (const evt of rawEvents) {
       if (!evt.eventId) {
@@ -53,11 +60,21 @@ router.post('/events', requireAuth, async (req: Request, res: Response): Promise
       });
 
       if (existingEvent && existingEvent.status === SyncStatus.SYNCED) {
+        let existingRefNumber: string | undefined = undefined;
+        if (existingEvent.entityId && evt.entityType === 'REFERRAL') {
+          const ref = await prisma.referral.findUnique({
+            where: { id: existingEvent.entityId },
+            select: { referralNumber: true },
+          });
+          if (ref) existingRefNumber = ref.referralNumber;
+        }
+
         results.push({
           eventId: evt.eventId,
           status: SyncStatus.SYNCED,
           duplicate: true,
           entityId: existingEvent.entityId,
+          referralNumber: existingRefNumber,
         });
         continue;
       }
@@ -66,27 +83,54 @@ router.post('/events', requireAuth, async (req: Request, res: Response): Promise
         await prisma.$transaction(
           async (tx) => {
             let targetEntityId = evt.entityId;
+            let finalReferralNumber: string | undefined = undefined;
 
             if (evt.entityType === 'REFERRAL' && evt.operation === 'CREATE') {
-              const { patient, destinationFacilityId: rawDestinationFacilityId, urgency, reason, clinicalSummary, sourceFacilityId: providedSourceFacilityId } = evt.payload;
+              const {
+                patient,
+                destinationFacilityId: rawDestinationFacilityId,
+                urgency,
+                reason,
+                clinicalSummary,
+                sourceFacilityId: providedSourceFacilityId,
+                referralNumber: clientReferralNumber,
+              } = evt.payload;
               const sourceFacilityId = await resolveFacilityId(providedSourceFacilityId || req.user?.facilityId, FacilityType.PHC);
               const destinationFacilityId = await resolveFacilityId(rawDestinationFacilityId, FacilityType.DISTRICT_HOSPITAL);
 
-              // 1. Resolve or Create Patient
-              let patientRecord = await tx.patient.create({
-                data: {
-                  localId: patient.localId || `LOC-${randomUUID().slice(0, 8)}`,
-                  name: patient.name?.trim() || 'Unknown',
-                  age: Number(patient.age) || 0,
-                  gender: patient.gender || 'Other',
-                  phone: patient.phone?.trim() || null,
-                  village: patient.village?.trim() || 'Unknown',
-                  address: patient.address?.trim() || null,
-                },
-              });
+              // 1. Resolve or Create Patient (Deduplication check)
+              let patientRecord = null;
+              if (patient?.id) {
+                patientRecord = await tx.patient.findUnique({ where: { id: patient.id } });
+              }
+              if (!patientRecord && patient?.localId) {
+                patientRecord = await tx.patient.findFirst({ where: { localId: patient.localId } });
+              }
+              if (!patientRecord) {
+                patientRecord = await tx.patient.create({
+                  data: {
+                    localId: patient?.localId || `LOC-${randomUUID().slice(0, 8)}`,
+                    name: patient?.name?.trim() || 'Unknown',
+                    age: Number(patient?.age) || 0,
+                    gender: patient?.gender || 'Other',
+                    phone: patient?.phone?.trim() || null,
+                    village: patient?.village?.trim() || 'Unknown',
+                    address: patient?.address?.trim() || null,
+                  },
+                });
+              }
 
-              // 2. Generate referral number
-              const referralNumber = `RF-${Math.floor(100000 + Math.random() * 900000)}`;
+              // 2. Generate or preserve referral number
+              let referralNumber = clientReferralNumber;
+              if (referralNumber) {
+                const existingRef = await tx.referral.findUnique({ where: { referralNumber } });
+                if (existingRef) {
+                  referralNumber = `RF-${Math.floor(100000 + Math.random() * 900000)}`;
+                }
+              } else {
+                referralNumber = `RF-${Math.floor(100000 + Math.random() * 900000)}`;
+              }
+              finalReferralNumber = referralNumber;
 
               // 3. Create Referral
               const newReferral = await tx.referral.create({
@@ -148,6 +192,7 @@ router.post('/events', requireAuth, async (req: Request, res: Response): Promise
               status: SyncStatus.SYNCED,
               duplicate: false,
               entityId: targetEntityId,
+              referralNumber: finalReferralNumber,
             });
           },
           {

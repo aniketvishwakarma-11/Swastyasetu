@@ -200,21 +200,27 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
       FacilityType.DISTRICT_HOSPITAL
     );
 
-    // Generate unique referral number
-    let referralNumber = generateReferralNumber();
-    // Verify uniqueness
-    const existing = await prisma.referral.findUnique({ where: { referralNumber } });
-    if (existing) {
-      referralNumber = `RF-${Date.now().toString().slice(-5)}`;
+    // Generate or preserve unique referral number
+    let referralNumber = req.body.referralNumber;
+    if (referralNumber) {
+      const existing = await prisma.referral.findUnique({ where: { referralNumber } });
+      if (existing) {
+        referralNumber = generateReferralNumber();
+      }
+    } else {
+      referralNumber = generateReferralNumber();
     }
 
     // Prisma Transaction to ensure atomic patient + referral + audit event creation
     const result = await prisma.$transaction(
       async (tx) => {
         // 1. Create or Find Patient
-        let patientRecord;
+        let patientRecord = null;
         if (patient.id) {
           patientRecord = await tx.patient.findUnique({ where: { id: patient.id } });
+        }
+        if (!patientRecord && patient.localId) {
+          patientRecord = await tx.patient.findFirst({ where: { localId: patient.localId } });
         }
 
         if (!patientRecord) {
@@ -291,6 +297,94 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to create referral.',
+        details: error.message,
+      },
+    });
+  }
+});
+
+/**
+ * PATCH /api/referrals/:id/status
+ * Update referral operational status (RECEIVED, CONSULTED, etc.)
+ * Strictly generates an AuditEvent (Hard Clinical Safety Rule 4: Auditability)
+ */
+router.patch('/:id/status', requireAuth, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { status, notes, ambulanceId } = req.body;
+
+    if (!status || !Object.values(ReferralStatus).includes(status as ReferralStatus)) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_STATUS',
+          message: `Invalid status. Must be one of: ${Object.values(ReferralStatus).join(', ')}`,
+        },
+      });
+      return;
+    }
+
+    const referral = await prisma.referral.findUnique({
+      where: { id },
+      include: { patient: true },
+    });
+
+    if (!referral) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Referral not found.' },
+      });
+      return;
+    }
+
+    const updatedReferral = await prisma.$transaction(async (tx) => {
+      const updated = await tx.referral.update({
+        where: { id },
+        data: { status: status as ReferralStatus },
+        include: {
+          patient: true,
+          sourceFacility: true,
+          destinationFacility: true,
+          createdBy: {
+            select: { id: true, name: true, role: true },
+          },
+        },
+      });
+
+      await tx.auditEvent.create({
+        data: {
+          eventId: `AUD-STATUS-${randomUUID()}`,
+          actorId: req.user!.id,
+          actorRole: req.user!.role,
+          facilityId: req.user?.facilityId || referral.destinationFacilityId,
+          eventType: 'REFERRAL_STATUS_UPDATED',
+          entityType: 'REFERRAL',
+          entityId: referral.id,
+          metadata: {
+            referralNumber: referral.referralNumber,
+            previousStatus: referral.status,
+            newStatus: status,
+            notes: notes || null,
+            ambulanceId: ambulanceId || null,
+          },
+        },
+      });
+
+      return updated;
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Referral status updated to ${status}.`,
+      data: updatedReferral,
+    });
+  } catch (error: any) {
+    console.error('[Referrals PATCH Status Error]', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to update referral status.',
         details: error.message,
       },
     });

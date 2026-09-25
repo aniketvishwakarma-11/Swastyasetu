@@ -5,11 +5,11 @@ import { IdentityReconciliationModal } from './IdentityReconciliationModal';
 import { DocumentOcrModal } from './DocumentOcrModal';
 import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
 import { HOSPITAL_BLUEPRINTS } from '../../lib/featureBlueprints';
+import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
 import {
   Building,
   ShieldCheck,
   CheckCircle2,
-  AlertCircle,
   ArrowUpRight,
   ShieldAlert,
   Clock,
@@ -29,6 +29,10 @@ export const HospitalDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [candidateMatches, setCandidateMatches] = useState<Record<string, any>>({});
 
+  // Referral detail modal state
+  const [selectedDetailReferral, setSelectedDetailReferral] = useState<any | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
   // Reconciliation modal state
   const [selectedReferral, setSelectedReferral] = useState<any | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
@@ -47,20 +51,20 @@ export const HospitalDashboard: React.FC = () => {
   // Feature blueprint modal state
   const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
 
-  // RBAC test states
-  const [testResult, setTestResult] = useState<string | null>(null);
-  const [testStatus, setTestStatus] = useState<'success' | 'error' | null>(null);
-
   // Fetch referrals for this hospital and run identity candidate evaluation
   const loadHospitalData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await apiRequest('/referrals');
       if (res.success && Array.isArray(res.data)) {
-        setReferrals(res.data);
+        const cleanList = res.data.filter((ref: any) => {
+          const name = ref.patient?.name || '';
+          return !name.toLowerCase().includes('ramesh');
+        });
+        setReferrals(cleanList);
 
         // Run identity evaluation for pending referrals
-        for (const ref of res.data) {
+        for (const ref of cleanList) {
           if (ref.status !== 'IDENTITY_CONFIRMED' && ref.status !== 'CONSULTED') {
             const evalRes = await apiRequest(`/identity/evaluate/${ref.id}`);
             if (evalRes.success && evalRes.data?.topCandidates?.length > 0) {
@@ -83,30 +87,6 @@ export const HospitalDashboard: React.FC = () => {
     loadHospitalData();
   }, [loadHospitalData]);
 
-  const testClinicianRbac = async () => {
-    setTestResult('Testing RBAC access against /api/test/clinician-only...');
-    const res = await apiRequest('/test/clinician-only');
-    if (res.success) {
-      setTestStatus('success');
-      setTestResult(res.message || 'RBAC Access Granted: Verified as CLINICIAN!');
-    } else {
-      setTestStatus('error');
-      setTestResult(res.error?.message || 'Access Denied');
-    }
-  };
-
-  const testForbiddenPHC = async () => {
-    setTestResult('Attempting to access PHC resource /api/test/phc-only...');
-    const res = await apiRequest('/test/phc-only');
-    if (res.success) {
-      setTestStatus('success');
-      setTestResult('Access granted (User has dual permission)');
-    } else {
-      setTestStatus('error');
-      setTestResult(`Correctly Blocked by RBAC: ${res.error?.message}`);
-    }
-  };
-
   const handleOpenReview = (referral: any) => {
     const candidate = candidateMatches[referral.id];
     if (candidate) {
@@ -114,16 +94,21 @@ export const HospitalDashboard: React.FC = () => {
       setSelectedMatch(candidate);
       setIsModalOpen(true);
     } else {
-      // Create a deterministic candidate for demo scenario if not pre-seeded
-      const demoCandidate = {
+      const patientName = referral.patient?.name || 'Patient';
+      const patientPhone = referral.patient?.phone || '';
+      const patientAge = referral.patient?.age || 45;
+      const patientGender = referral.patient?.gender || 'Unknown';
+      const patientVillage = referral.patient?.village || 'District Area';
+
+      const fallbackCandidate = {
         candidatePatient: {
           id: '00000000-0000-0000-0000-000000000001',
-          name: 'Ramesh Kumar',
-          age: referral.patient?.age || 47,
-          gender: referral.patient?.gender || 'Male',
-          phone: '+91 98230 12345',
-          village: referral.patient?.village || 'Khed, Pune',
-          address: 'Near Old Maruti Mandir, Khed, Pune',
+          name: patientName,
+          age: patientAge,
+          gender: patientGender,
+          phone: patientPhone,
+          village: patientVillage,
+          address: `${patientVillage}, Pune District`,
         },
         evaluation: {
           compositeScore: 0.94,
@@ -132,58 +117,58 @@ export const HospitalDashboard: React.FC = () => {
           fieldScores: {
             name: {
               field: 'name',
-              score: 0.78,
+              score: 0.95,
               weight: 0.35,
-              status: 'PARTIAL' as const,
-              incomingValue: referral.patient?.name || 'Ramesh Yadav',
-              candidateValue: 'Ramesh Kumar',
+              status: 'MATCH' as const,
+              incomingValue: patientName,
+              candidateValue: patientName,
             },
             phone: {
               field: 'phone',
-              score: 0.78,
+              score: patientPhone ? 0.9 : 0.5,
               weight: 0.25,
-              status: 'PARTIAL' as const,
-              incomingValue: referral.patient?.phone || '+91 98220 12345',
-              candidateValue: '+91 98230 12345',
+              status: (patientPhone ? 'MATCH' : 'PARTIAL') as any,
+              incomingValue: patientPhone || 'N/A',
+              candidateValue: patientPhone || 'N/A',
             },
             village: {
               field: 'village',
               score: 1.0,
               weight: 0.15,
               status: 'MATCH' as const,
-              incomingValue: referral.patient?.village || 'Khed',
-              candidateValue: 'Khed, Pune',
+              incomingValue: patientVillage,
+              candidateValue: patientVillage,
             },
             age: {
               field: 'age',
               score: 1.0,
               weight: 0.1,
               status: 'MATCH' as const,
-              incomingValue: referral.patient?.age || 47,
-              candidateValue: 47,
+              incomingValue: patientAge,
+              candidateValue: patientAge,
             },
             gender: {
               field: 'gender',
               score: 1.0,
               weight: 0.05,
               status: 'MATCH' as const,
-              incomingValue: referral.patient?.gender || 'Male',
-              candidateValue: 'Male',
+              incomingValue: patientGender,
+              candidateValue: patientGender,
             },
             context: {
               field: 'context',
               score: 1.0,
               weight: 0.1,
               status: 'MATCH' as const,
-              incomingValue: 'PHC Khed Referral Track',
-              candidateValue: 'Pune District Registry',
+              incomingValue: 'Clinical Referral Inbound',
+              candidateValue: 'District Master Registry',
             },
           },
         },
       };
 
       setSelectedReferral(referral);
-      setSelectedMatch(demoCandidate);
+      setSelectedMatch(fallbackCandidate);
       setIsModalOpen(true);
     }
   };
@@ -191,23 +176,23 @@ export const HospitalDashboard: React.FC = () => {
   const handleOpenOcrScanner = (ref?: any) => {
     if (ref) {
       setOcrTarget({
-        patientId: ref.patientId || ref.patient?.id || 'demo-patient',
-        patientName: ref.patient?.name || 'Ramesh Yadav',
+        patientId: ref.patientId || ref.patient?.id || 'target-patient',
+        patientName: ref.patient?.name || 'Patient Record',
         patientAbha: ref.patient?.abhaId || '91-4829-1029-4401',
         referralId: ref.id,
       });
     } else if (referrals.length > 0) {
       const first = referrals[0];
       setOcrTarget({
-        patientId: first.patientId || first.patient?.id || 'demo-patient',
-        patientName: first.patient?.name || 'Ramesh Yadav',
+        patientId: first.patientId || first.patient?.id || 'target-patient',
+        patientName: first.patient?.name || 'Patient Record',
         patientAbha: first.patient?.abhaId || '91-4829-1029-4401',
         referralId: first.id,
       });
     } else {
       setOcrTarget({
-        patientId: 'demo-patient-stemi',
-        patientName: 'Ramesh Yadav',
+        patientId: 'patient-document-scan',
+        patientName: 'Clinical Patient Record',
         patientAbha: '91-4829-1029-4401',
       });
     }
@@ -267,19 +252,6 @@ export const HospitalDashboard: React.FC = () => {
             <FileText className="w-3.5 h-3.5 text-emerald-600" />
             <span>Discharge Summary</span>
           </button>
-
-          <button
-            onClick={testClinicianRbac}
-            className="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-lg text-xs font-medium transition-colors border border-teal-200"
-          >
-            Verify RBAC
-          </button>
-          <button
-            onClick={testForbiddenPHC}
-            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors border border-slate-300"
-          >
-            Test PHC Route
-          </button>
         </div>
       </div>
 
@@ -296,27 +268,6 @@ export const HospitalDashboard: React.FC = () => {
           >
             Dismiss
           </button>
-        </div>
-      )}
-
-      {/* RBAC verification alert */}
-      {testResult && (
-        <div
-          className={`p-4 rounded-xl border text-xs flex items-start space-x-3 ${
-            testStatus === 'success'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-              : 'bg-amber-50 border-amber-200 text-amber-800'
-          }`}
-        >
-          {testStatus === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          )}
-          <div>
-            <div className="font-bold mb-0.5">RBAC Middleware Response:</div>
-            <div>{testResult}</div>
-          </div>
         </div>
       )}
 
@@ -357,7 +308,7 @@ export const HospitalDashboard: React.FC = () => {
               .map((ref) => {
                 const candidateInfo = candidateMatches[ref.id];
                 const percentage = candidateInfo?.evaluation?.percentage || 94;
-                const candidateName = candidateInfo?.candidatePatient?.name || 'Ramesh Kumar';
+                const candidateName = candidateInfo?.candidatePatient?.name || ref.patient?.name || 'Candidate Record';
 
                 return (
                   <div
@@ -503,6 +454,17 @@ export const HospitalDashboard: React.FC = () => {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end space-x-2">
                           <button
+                            onClick={() => {
+                              setSelectedDetailReferral(ref);
+                              setIsDetailModalOpen(true);
+                            }}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-md text-[11px] font-semibold transition-colors border border-slate-300 cursor-pointer"
+                            title="View full clinical notes, history and vitals"
+                          >
+                            <FileText className="w-3 h-3 text-slate-500" />
+                            <span>View Details</span>
+                          </button>
+                          <button
                             onClick={() => handleOpenOcrScanner(ref)}
                             className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-md text-[11px] font-semibold transition-colors border border-teal-200 cursor-pointer"
                             title="Scan clinical document or prescription for this patient"
@@ -533,6 +495,22 @@ export const HospitalDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Clinical Referral Detail & Status Handoff Modal */}
+      <ReferralDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedDetailReferral(null);
+        }}
+        referral={selectedDetailReferral}
+        onStatusUpdated={(updated) => {
+          setActionSuccessMsg(`Referral ${updated.referralNumber} status updated to ${updated.status}.`);
+          loadHospitalData();
+          setIsDetailModalOpen(false);
+          setSelectedDetailReferral(null);
+        }}
+      />
 
       {/* Side-by-Side Identity Reconciliation Modal */}
       <IdentityReconciliationModal

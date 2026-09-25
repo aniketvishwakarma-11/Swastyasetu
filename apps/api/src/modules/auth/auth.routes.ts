@@ -28,30 +28,59 @@ const DEMO_LOGIN_USERS = {
     name: 'Dr. Rajesh Sharma',
     role: UserRole.PHC_USER,
     facilityId: '00000000-0000-0000-0000-000000000001',
+    facility: {
+      id: '00000000-0000-0000-0000-000000000001',
+      code: 'PHC-KHED',
+      name: 'Primary Health Centre Khed',
+      type: 'PHC',
+      district: 'Pune',
+    },
   },
   'hospital_doctor@swastyasetu.gov.in': {
     id: '00000000-0000-0000-0000-000000000102',
     name: 'Dr. Priya Deshmukh',
     role: UserRole.CLINICIAN,
     facilityId: '00000000-0000-0000-0000-000000000002',
+    facility: {
+      id: '00000000-0000-0000-0000-000000000002',
+      code: 'DIST-HOSP',
+      name: 'Aundh District Hospital',
+      type: 'DISTRICT_HOSPITAL',
+      district: 'Pune',
+    },
   },
   'coordinator@swastyasetu.gov.in': {
     id: '00000000-0000-0000-0000-000000000104',
     name: 'Vikram Solanki',
     role: UserRole.REFERRAL_COORDINATOR,
     facilityId: '00000000-0000-0000-0000-000000000002',
+    facility: {
+      id: '00000000-0000-0000-0000-000000000002',
+      code: 'DIST-HOSP',
+      name: 'Aundh District Hospital',
+      type: 'DISTRICT_HOSPITAL',
+      district: 'Pune',
+    },
   },
   'triage_coordinator@swastyasetu.gov.in': {
     id: '00000000-0000-0000-0000-000000000104',
     name: 'Vikram Solanki',
     role: UserRole.REFERRAL_COORDINATOR,
     facilityId: '00000000-0000-0000-0000-000000000002',
+    facility: {
+      id: '00000000-0000-0000-0000-000000000002',
+      code: 'DIST-HOSP',
+      name: 'Aundh District Hospital',
+      type: 'DISTRICT_HOSPITAL',
+      district: 'Pune',
+    },
   },
   'admin@swastyasetu.gov.in': {
     id: '00000000-0000-0000-0000-000000000103',
     name: 'System Admin',
     role: UserRole.ADMIN,
     facilityId: null,
+    facility: null,
   },
 } as const;
 
@@ -166,28 +195,13 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     const demoUser = DEMO_LOGIN_USERS[validated.email.toLowerCase() as keyof typeof DEMO_LOGIN_USERS];
     if (demoUser && validated.password === 'password123') {
-      let facility = null;
-      if (demoUser.facilityId) {
-        try {
-          facility = await prisma.facility.findUnique({
-            where: { id: demoUser.facilityId },
-            select: { id: true, code: true, name: true, type: true, district: true },
-          });
-        } catch {
-          // fallback if database query fails
-        }
-      }
-
       const user = {
-        ...demoUser,
+        id: demoUser.id,
+        name: demoUser.name,
+        role: demoUser.role,
+        facilityId: demoUser.facilityId,
+        facility: demoUser.facility,
         email: validated.email.toLowerCase(),
-        facility: facility || (demoUser.facilityId ? {
-          id: demoUser.facilityId,
-          code: demoUser.role === UserRole.PHC_USER ? 'PHC-KHED' : 'DIST-HOSP',
-          name: demoUser.role === UserRole.PHC_USER ? 'Primary Health Centre Khed' : 'Aundh District Hospital',
-          type: demoUser.role === UserRole.PHC_USER ? 'PHC' : 'DISTRICT_HOSPITAL',
-          district: 'Pune',
-        } : null),
         createdAt: new Date().toISOString(),
       };
       const token = jwt.sign(

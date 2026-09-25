@@ -32,7 +32,7 @@ export interface VitalsRecord {
 const vitalsStore: VitalsRecord[] = [
   {
     id: 'vit-demo-01',
-    patientName: 'Ramesh Yadav',
+    patientName: 'Santosh Shinde',
     age: 47,
     gender: 'Male',
     phone: '9876543210',

@@ -49,8 +49,8 @@ interface FollowUpTrackerModalProps {
 const INITIAL_FOLLOWUPS: FollowUpItem[] = [
   {
     id: 'fup-101',
-    patientId: 'pat-ramesh-01',
-    patientName: 'Ramesh Yadav',
+    patientId: 'pat-kailash-01',
+    patientName: 'Kailash Jadhav',
     age: 47,
     gender: 'Male',
     phone: '9876543210',

@@ -43,11 +43,22 @@ export function useNetworkSync() {
             // Remove from queue
             await localDb.syncQueue.where('eventId').equals(evtResult.eventId).delete();
 
-            // Update local referral record status
+            // Update local referral record status and server id
+            const updates: any = {
+              syncStatus: 'SYNCED',
+              lastSyncedAt: new Date().toISOString(),
+            };
+            if (evtResult.entityId) {
+              updates.id = evtResult.entityId;
+            }
+            if (evtResult.referralNumber) {
+              updates.referralNumber = evtResult.referralNumber;
+            }
+
             await localDb.referrals
               .where('localId')
               .equals(evtResult.eventId)
-              .modify({ syncStatus: 'SYNCED', lastSyncedAt: new Date().toISOString() });
+              .modify(updates);
           }
         }
         setLastSyncTime(new Date());

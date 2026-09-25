@@ -9,7 +9,6 @@ import {
   Activity,
   History,
   User,
-  Zap,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
 
@@ -36,20 +35,20 @@ export const RapidVitalsModal: React.FC<RapidVitalsModalProps> = ({
   isOnline,
 }) => {
   // Patient details
-  const [patientName, setPatientName] = useState('Ramesh Yadav');
-  const [age, setAge] = useState('47');
+  const [patientName, setPatientName] = useState('');
+  const [age, setAge] = useState('');
   const [gender, setGender] = useState<'Male' | 'Female' | 'Other'>('Male');
-  const [phone, setPhone] = useState('9876543210');
-  const [village, setVillage] = useState('Khed Shivapur');
+  const [phone, setPhone] = useState('');
+  const [village, setVillage] = useState('');
 
   // Vitals measurements
-  const [systolicBp, setSystolicBp] = useState('175');
-  const [diastolicBp, setDiastolicBp] = useState('105');
-  const [spo2, setSpo2] = useState('89');
-  const [heartRate, setHeartRate] = useState('118');
-  const [bloodSugar, setBloodSugar] = useState('210');
-  const [respiratoryRate, setRespiratoryRate] = useState('26');
-  const [temperature, setTemperature] = useState('99.1');
+  const [systolicBp, setSystolicBp] = useState('');
+  const [diastolicBp, setDiastolicBp] = useState('');
+  const [spo2, setSpo2] = useState('');
+  const [heartRate, setHeartRate] = useState('');
+  const [bloodSugar, setBloodSugar] = useState('');
+  const [respiratoryRate, setRespiratoryRate] = useState('');
+  const [temperature, setTemperature] = useState('');
   const [gestationalWeeks, setGestationalWeeks] = useState('');
 
   // UI state
@@ -134,41 +133,6 @@ export const RapidVitalsModal: React.FC<RapidVitalsModalProps> = ({
   }, [systolicBp, diastolicBp, spo2, heartRate, respiratoryRate, bloodSugar, temperature, gestationalWeeks, gender]);
 
   if (!isOpen) return null;
-
-  // Preset loaders for fast testing
-  const loadCrisisPreset = () => {
-    setPatientName('Ramesh Yadav');
-    setAge('47');
-    setGender('Male');
-    setPhone('9876543210');
-    setVillage('Khed Shivapur');
-    setSystolicBp('175');
-    setDiastolicBp('105');
-    setSpo2('89');
-    setHeartRate('118');
-    setBloodSugar('210');
-    setRespiratoryRate('26');
-    setTemperature('99.2');
-    setGestationalWeeks('');
-    setFeedback(null);
-  };
-
-  const loadNormalPreset = () => {
-    setPatientName('Sunita Patil');
-    setAge('34');
-    setGender('Female');
-    setPhone('9822114477');
-    setVillage('Khed Rural');
-    setSystolicBp('118');
-    setDiastolicBp('76');
-    setSpo2('99');
-    setHeartRate('72');
-    setBloodSugar('104');
-    setRespiratoryRate('16');
-    setTemperature('98.4');
-    setGestationalWeeks('');
-    setFeedback(null);
-  };
 
   const handleSave = async () => {
     setIsSubmitting(true);
@@ -279,24 +243,9 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
           </button>
         </div>
 
-        {/* Quick Presets & Patient Header */}
-        <div className="px-6 py-3 bg-slate-100/70 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-700">
-            <Zap className="w-3.5 h-3.5 text-amber-500" />
-            <span>1-Click Test Scenarios:</span>
-            <button
-              onClick={loadCrisisPreset}
-              className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-md text-[11px] font-bold transition-colors cursor-pointer"
-            >
-              STEMI Crisis (Ramesh Yadav)
-            </button>
-            <button
-              onClick={loadNormalPreset}
-              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-md text-[11px] font-bold transition-colors cursor-pointer"
-            >
-              Normal Vitals (Sunita Patil)
-            </button>
-          </div>
+        {/* Ledger View Header */}
+        <div className="px-6 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <p className="text-xs text-slate-500">Record direct clinical observations and physiological measurements.</p>
           <button
             onClick={() => setShowHistory(!showHistory)}
             className="text-xs font-semibold text-teal-700 hover:text-teal-900 flex items-center space-x-1 cursor-pointer"
@@ -314,13 +263,14 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               <User className="w-3.5 h-3.5 text-teal-600" />
               <span>Patient Identification</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-6 gap-3">
               <div className="sm:col-span-2">
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">Full Name</label>
                 <input
                   type="text"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
+                  placeholder="e.g. Patient Full Name"
                   className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 outline-none"
                 />
               </div>
@@ -330,6 +280,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
                   type="number"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
+                  placeholder="e.g. 45"
                   className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 outline-none"
                 />
               </div>
@@ -346,11 +297,22 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
                 </select>
               </div>
               <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="98XXXXXXXX"
+                  className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 outline-none"
+                />
+              </div>
+              <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">Village</label>
                 <input
                   type="text"
                   value={village}
                   onChange={(e) => setVillage(e.target.value)}
+                  placeholder="e.g. Khed"
                   className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 outline-none"
                 />
               </div>
@@ -593,7 +555,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               <div className="divide-y divide-slate-100 text-xs">
                 <div className="p-3 flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-slate-800">Ramesh Yadav (47, M)</span>
+                    <span className="font-bold text-slate-800">Santosh Shinde (52, M)</span>
                     <span className="text-slate-400 ml-2">BP: 175/105 · SpO2: 89% · Pulse: 118</span>
                   </div>
                   <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold text-[10px]">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Send, ShieldAlert, HeartPulse, MapPin, UserCheck, AlertTriangle } from 'lucide-react';
+import { X, Send, ShieldAlert, HeartPulse, MapPin, UserCheck, AlertTriangle } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
 import { localDb } from '../../lib/db';
 import { useAuth } from '../../context/AuthContext';
@@ -68,19 +68,29 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
   // Fetch facilities for destination dropdown
   useEffect(() => {
     async function loadFacilities() {
-      const res = await apiRequest('/facilities');
-      if (res.success && res.data) {
-        setFacilities(res.data);
-        // Default to first district hospital if available
-        const dh = res.data.find((f: any) => f.type === 'DISTRICT_HOSPITAL');
-        if (dh) setDestinationFacilityId(dh.id);
-        else if (res.data.length > 0) setDestinationFacilityId(res.data[0].id);
-        // Fallback demo facilities if offline / API unreachable
-        setFacilities([
-          { id: '4bc1557c-065a-4d59-921d-34af559e2e54', name: 'Aundh District Hospital, Pune', type: 'DISTRICT_HOSPITAL', district: 'Pune' },
-          { id: '7bc00d00-e0f3-4f8d-b0f3-31f99d33f1aa', name: 'Sanjivani Community Clinic, Pune', type: 'PRIVATE_CLINIC', district: 'Pune' },
-        ]);
-        setDestinationFacilityId('4bc1557c-065a-4d59-921d-34af559e2e54');
+      try {
+        const res = await apiRequest('/facilities');
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setFacilities(res.data);
+          const dh = res.data.find((f: any) => f.type === 'DISTRICT_HOSPITAL');
+          if (dh) setDestinationFacilityId(dh.id);
+          else setDestinationFacilityId(res.data[0].id);
+        } else {
+          // Fallback standard facilities if offline / API unreachable
+          const fallbackFacilities = [
+            { id: '00000000-0000-0000-0000-000000000002', name: 'Aundh District Hospital, Pune', type: 'DISTRICT_HOSPITAL', district: 'Pune' },
+            { id: '00000000-0000-0000-0000-000000000003', name: 'Sanjivani Community Clinic, Pune', type: 'PRIVATE_CLINIC', district: 'Pune' },
+          ];
+          setFacilities(fallbackFacilities);
+          setDestinationFacilityId('00000000-0000-0000-0000-000000000002');
+        }
+      } catch {
+        const fallbackFacilities = [
+          { id: '00000000-0000-0000-0000-000000000002', name: 'Aundh District Hospital, Pune', type: 'DISTRICT_HOSPITAL', district: 'Pune' },
+          { id: '00000000-0000-0000-0000-000000000003', name: 'Sanjivani Community Clinic, Pune', type: 'PRIVATE_CLINIC', district: 'Pune' },
+        ];
+        setFacilities(fallbackFacilities);
+        setDestinationFacilityId('00000000-0000-0000-0000-000000000002');
       }
     }
 
@@ -90,25 +100,6 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  // 1-Click Load Demo Scenario: "Ramesh Yadav" Emergency Case
-  const handleLoadDemo = () => {
-    setName('Ramesh Yadav');
-    setAge('47');
-    setGender('Male');
-    setPhone('+91 98220 12345');
-    setVillage('Khed, Pune');
-    setUrgency('EMERGENCY');
-    setReason('Acute Coronary Syndrome (Suspected STEMI)');
-    setClinicalSummary(
-      '47M presented with severe retrosternal crushing chest pain radiating to left arm for 2 hours, sweating, dyspnea. BP 160/100 mmHg, HR 102 bpm, SpO2 93% on room air. ECG shows ST elevation in leads V1-V4. Administered Aspirin 300mg, Clopidogrel 300mg, Atorvastatin 80mg orally. Oxygen initiated at 4L/min. Urgent Cath Lab evaluation requested.'
-    );
-    // Find Aundh or Sassoon hospital
-    const targetFacility = facilities.find((f) => f.name.toLowerCase().includes('aundh') || f.type === 'DISTRICT_HOSPITAL');
-    if (targetFacility) {
-      setDestinationFacilityId(targetFacility.id);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,9 +114,10 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
 
     const clientLocalId = `LOC-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const clientEventId = `EVT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const referralNumber = `RF-${Math.floor(1000 + Math.random() * 9000)}`;
+    const referralNumber = `RF-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const referralPayload = {
+      referralNumber,
       patient: {
         localId: clientLocalId,
         name: name.trim(),
@@ -134,7 +126,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
         phone: phone.trim() || undefined,
         village: village.trim(),
       },
-      sourceFacilityId: user?.facilityId || '8ffa5608-7ed5-4853-9eb9-c06f995ce560',
+      sourceFacilityId: user?.facilityId || '00000000-0000-0000-0000-000000000001',
       destinationFacilityId,
       urgency,
       reason: reason.trim(),
@@ -193,7 +185,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
-        sourceFacilityId: user?.facilityId || 'PHC-KHED',
+        sourceFacilityId: user?.facilityId || '00000000-0000-0000-0000-000000000001',
         destinationFacilityId,
         urgency,
         reason: reason.trim(),
@@ -250,15 +242,6 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
           <div className="flex items-center space-x-2">
             <button
               type="button"
-              onClick={handleLoadDemo}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-xs font-semibold transition-colors"
-              title="Autofill emergency case for Ramesh Yadav"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Load Ramesh Yadav Demo</span>
-            </button>
-            <button
-              type="button"
               onClick={onClose}
               className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
             >
@@ -291,7 +274,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Ramesh Yadav"
+                  placeholder="e.g. Patient Full Name"
                   required
                   className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition-all"
                 />

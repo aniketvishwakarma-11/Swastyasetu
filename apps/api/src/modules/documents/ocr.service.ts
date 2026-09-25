@@ -128,7 +128,7 @@ export const CLINICAL_DEMO_PRESETS: Record<
 > = {
   STEMI_DISCHARGE: {
     rawText: `DISTRICT GENERAL HOSPITAL - CARDIOLOGY STEP-DOWN DISCHARGE
-Patient: Ramesh Yadav | Age: 52 / Male | ABHA: 91-4829-1029-4401
+Patient: Cardiology Inpatient | Age: 52 / Male | ABHA: 91-4829-1029-4401
 Dx: Acute Antero-Septal STEMI (Post Primary PCI to LAD - Stent 3.0x24mm)
 Rx:
 1. Tab Ecosprin 75mg - 1 tab OD (After breakfast) x 1 year

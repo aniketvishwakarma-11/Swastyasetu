@@ -107,7 +107,10 @@ router.get(
             phone: candidate.phone,
             village: candidate.village,
             address: candidate.address,
-          }
+          },
+          true,
+          `${referral.sourceFacility?.name || 'PHC'} Inbound Referral`,
+          `${referral.destinationFacility?.name || 'District Hospital'} Registry`
         );
 
         if (evalResult.compositeScore >= 0.5) {
@@ -163,6 +166,12 @@ router.post(
 
       const result = await prisma.$transaction(
         async (tx) => {
+          const currentReferral = await tx.referral.findUnique({
+            where: { id: referralId },
+            select: { patientId: true },
+          });
+          const incomingPatientId = currentReferral?.patientId;
+
           // 1. Update match record if matchId provided
           let matchRecord = null;
           if (matchId) {
@@ -189,7 +198,34 @@ router.post(
             },
           });
 
-          // 3. Log AuditEvent (Hard Clinical Safety Rule 4: Auditability)
+          // 3. Clean up transient incoming patient if distinct and unreferenced elsewhere
+          if (incomingPatientId && incomingPatientId !== canonicalPatientId) {
+            const otherReferrals = await tx.referral.count({
+              where: { patientId: incomingPatientId },
+            });
+            const otherDocs = await tx.clinicalDocument.count({
+              where: { patientId: incomingPatientId },
+            });
+            const otherFollowUps = await tx.followUp.count({
+              where: { patientId: incomingPatientId },
+            });
+
+            if (otherReferrals === 0 && otherDocs === 0 && otherFollowUps === 0) {
+              await tx.identityMatch.deleteMany({
+                where: {
+                  OR: [
+                    { incomingPatientId },
+                    { candidatePatientId: incomingPatientId },
+                  ],
+                },
+              });
+              await tx.patient.delete({
+                where: { id: incomingPatientId },
+              });
+            }
+          }
+
+          // 4. Log AuditEvent (Hard Clinical Safety Rule 4: Auditability)
           await tx.auditEvent.create({
             data: {
               eventId: `EVT-${randomUUID()}`,

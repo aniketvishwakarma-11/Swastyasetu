@@ -84,7 +84,7 @@ function tokenSortSimilarity(s1: string, s2: string): number {
   const dist = levenshtein(tokens1, tokens2);
   const sim = Math.max(0, (maxLen - dist) / maxLen);
 
-  // Also check if first tokens (e.g. given name "Ramesh") match exactly
+  // Also check if first tokens (e.g. given name) match exactly
   const t1First = tokens1.split(' ')[0];
   const t2First = tokens2.split(' ')[0];
   if (t1First === t2First && t1First.length >= 3) {
@@ -108,7 +108,9 @@ function normalizePhone(p?: string | null): string {
 export function evaluateIdentityMatch(
   incoming: PatientMatchInput,
   candidate: PatientMatchInput,
-  hasSharedContext: boolean = true
+  hasSharedContext: boolean = true,
+  incomingContext: string = 'PHC Referral Inbound',
+  candidateContext: string = 'District Master Registry'
 ): MatchEvaluationResult {
   const fieldScores: Record<string, FieldScore> = {};
 
@@ -185,8 +187,8 @@ export function evaluateIdentityMatch(
     score: contextSim,
     weight: 0.1,
     status: contextSim === 1.0 ? 'MATCH' : 'PARTIAL',
-    incomingValue: 'PHC Khed Referral Track',
-    candidateValue: 'Pune District Registry',
+    incomingValue: incomingContext,
+    candidateValue: candidateContext,
   };
 
   // Compute composite score

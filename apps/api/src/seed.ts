@@ -125,14 +125,13 @@ export async function seed() {
 
   console.log('[Seed] Users seeded:', phcUser.email, hospitalClinician.email, coordinator.email, admin.email);
 
-  // 3. Seed Candidate Patient at District Hospital (For Fuzzy Identity Demonstration)
-  // When Ramesh Yadav (Age 47, Male, Village Khed) is referred, the system compares against Ramesh Kumar
+  // 3. Seed Candidate Patient at District Hospital (For Multi-Field Identity Matching)
   const candidatePatient = await prisma.patient.upsert({
     where: { id: '00000000-0000-0000-0000-000000000001' },
     update: {},
     create: {
       id: '00000000-0000-0000-0000-000000000001',
-      name: 'Ramesh Kumar',
+      name: 'Anand Kumar',
       age: 47,
       gender: 'Male',
       phone: '+91 98230 12345',

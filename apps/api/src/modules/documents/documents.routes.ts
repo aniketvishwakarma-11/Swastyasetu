@@ -71,18 +71,15 @@ router.post(
       });
 
       if (!patient) {
-        patient =
-          (await prisma.patient.findFirst({
-            where: { name: { contains: 'Ramesh' } },
-          })) || (await prisma.patient.findFirst());
+        patient = await prisma.patient.findFirst();
 
         if (!patient) {
           patient = await prisma.patient.create({
             data: {
-              name: 'Ramesh Yadav',
-              age: 52,
+              name: 'Patient Record',
+              age: 48,
               gender: 'Male',
-              village: 'Khed',
+              village: 'District Center',
               localId: 'ABHA-91-4829-1029-4401',
             },
           });
@@ -101,8 +98,8 @@ router.post(
         fileBuffer = fs.readFileSync(req.file.path);
       } else if (presetKey && CLINICAL_DEMO_PRESETS[presetKey]) {
         // Use demo sample file
-        fileName = 'ramesh_stemi_discharge.svg';
-        originalFileUrl = '/uploads/samples/ramesh_stemi_discharge.svg';
+        fileName = 'cardiology_stemi_discharge.svg';
+        originalFileUrl = '/uploads/samples/cardiology_stemi_discharge.svg';
         mimeType = 'image/svg+xml';
         const samplePath = path.resolve(uploadsDir, 'samples', fileName);
         if (fs.existsSync(samplePath)) {

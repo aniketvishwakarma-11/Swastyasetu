@@ -78,12 +78,15 @@ export function formatFallbackSMS(params: {
   sourceFacilityCode: string;
   destinationFacilityCode: string;
   urgency: string;
+  reason?: string;
 }): string {
   const cleanName = params.patientName.toUpperCase().slice(0, 16);
   const sex = params.gender.toUpperCase().charAt(0);
-  return (
+  const reasonTag = params.reason ? `|DX:${params.reason.toUpperCase().slice(0, 20)}` : '';
+  const sms = (
     `SWASTHYASETU|REF:${params.referralNumber}|PATIENT:${cleanName}|` +
     `AGE:${params.age}|SEX:${sex}|FROM:${params.sourceFacilityCode}|` +
-    `TO:${params.destinationFacilityCode}|URG:${params.urgency.slice(0, 4)}`
+    `TO:${params.destinationFacilityCode}|URG:${params.urgency.slice(0, 4)}${reasonTag}`
   );
+  return sms.length > 160 ? sms.slice(0, 160) : sms;
 }

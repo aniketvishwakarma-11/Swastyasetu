@@ -69,7 +69,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Handler: Run OCR with a preset demo document (Ramesh Yadav STEMI Discharge)
+  // Handler: Run OCR with a clinical preset document
   const handleLoadPresetDemo = async (presetKey: string) => {
     setIsProcessing(true);
     setErrorMessage(null);
@@ -271,7 +271,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
               disabled={isProcessing}
               className="px-2.5 py-1 rounded bg-teal-700 text-white font-medium hover:bg-teal-800 transition shadow-sm disabled:opacity-50"
             >
-              Ramesh Yadav STEMI Discharge
+              Cardiology STEMI Discharge
             </button>
             <button
               onClick={() => handleLoadPresetDemo('DENGUE_MONITORING')}
@@ -411,7 +411,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
                   <ScanLine className="w-12 h-12 mx-auto text-slate-600 mb-2" />
                   <p className="text-sm font-semibold text-slate-300">No Document Loaded</p>
                   <p className="text-xs text-slate-500 mt-1 max-w-xs">
-                    Click <strong>Ramesh Yadav STEMI Discharge</strong> above or upload a photo of a prescription slip to begin extraction.
+                    Select a document preset above or upload an image/PDF file to begin clinical OCR extraction.
                   </p>
                 </div>
               )}

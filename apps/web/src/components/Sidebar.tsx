@@ -105,7 +105,7 @@ export const Sidebar: React.FC = () => {
             role: 'PHC_USER',
             status: 'BUILT',
             badgeLabel: 'Active in Production',
-            clinicalPurpose: 'Generates structured referrals with 3 urgency tiers (Routine, Urgent, Emergency), clinical notes, vitals, pre-referral medication, and 1-click Ramesh Yadav STEMI demo autofill.',
+            clinicalPurpose: 'Generates structured referrals with 3 urgency tiers (Routine, Urgent, Emergency), clinical notes, vitals, and pre-referral medication.',
             targetUsers: 'PHC Medical Officers and frontline health workers',
             safetyRule: 'Urgency tier triggers instant visual red alerts across receiving district hospitals.',
             technicalSpecs: {

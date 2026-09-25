@@ -164,29 +164,29 @@ const DashboardIllustration: React.FC = () => (
         </div>
       </div>
 
-      {/* Demo scenario preview */}
+      {/* Active referral card preview */}
       <div className="bg-white rounded-xl border border-slate-200 p-2.5 shadow-2xs">
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center space-x-1">
-            <FileText className="w-3 h-3 text-amber-600" />
-            <span className="text-[11px] font-bold text-slate-800">Active Test Case</span>
+            <FileText className="w-3 h-3 text-teal-600" />
+            <span className="text-[11px] font-bold text-slate-800">Recent Outbound Record</span>
           </div>
-          <span className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.2 uppercase">
-            Demo
+          <span className="text-[9px] font-bold text-teal-800 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.2 uppercase">
+            Dispatched
           </span>
         </div>
         <div className="grid grid-cols-2 gap-1.5 text-[10px] mb-2">
           <div className="bg-slate-50 rounded p-1.5 border border-slate-100">
             <span className="text-slate-400 block text-[8px] uppercase font-semibold">Patient</span>
-            <span className="font-bold text-slate-700 truncate block">Ramesh Yadav, 47</span>
+            <span className="font-bold text-slate-700 truncate block">Anand Joshi, 52</span>
           </div>
           <div className="bg-rose-50/60 rounded p-1.5 border border-rose-100">
             <span className="text-rose-400 block text-[8px] uppercase font-semibold">Urgency</span>
             <span className="font-bold text-rose-700 truncate block">EMERGENCY (STEMI)</span>
           </div>
         </div>
-        <div className="w-full bg-amber-50 border border-amber-200 rounded-md py-1 text-center text-[10px] font-bold text-amber-800">
-          Load Sample Case
+        <div className="w-full bg-slate-50 border border-slate-200 rounded-md py-1 text-center text-[10px] font-bold text-slate-700">
+          Inbound to District Hospital
         </div>
       </div>
     </div>

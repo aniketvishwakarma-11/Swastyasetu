@@ -6,17 +6,14 @@ import { useNetworkSync } from '../../lib/useNetworkSync';
 import { ReferralModal } from './ReferralModal';
 import { RapidVitalsModal } from './RapidVitalsModal';
 import { FollowUpTrackerModal } from './FollowUpTrackerModal';
+import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
 import { formatFallbackSMS } from '@swastyasetu/shared';
 import {
   Stethoscope,
   PlusCircle,
   RefreshCw,
   Send,
-  AlertCircle,
-  FileText,
   CheckCircle2,
-  Wifi,
-  WifiOff,
   Clock,
   ShieldAlert,
   MessageSquare,
@@ -25,6 +22,7 @@ import {
   X,
   HeartPulse,
   CalendarCheck,
+  FileText,
 } from 'lucide-react';
 
 export const PHCDashboard: React.FC = () => {
@@ -38,11 +36,9 @@ export const PHCDashboard: React.FC = () => {
   const [referrals, setReferrals] = useState<any[]>([]);
   const [loadingReferrals, setLoadingReferrals] = useState(false);
   const [selectedSmsReferral, setSelectedSmsReferral] = useState<any | null>(null);
+  const [selectedDetailReferral, setSelectedDetailReferral] = useState<any | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [copiedSms, setCopiedSms] = useState(false);
-
-  // RBAC test states
-  const [testResult, setTestResult] = useState<string | null>(null);
-  const [testStatus, setTestStatus] = useState<'success' | 'error' | null>(null);
 
   // Load merged list of referrals (Server + Local IndexedDB)
   const loadReferrals = useCallback(async () => {
@@ -62,13 +58,32 @@ export const PHCDashboard: React.FC = () => {
       // Load local indexedDB referrals
       const localList = await localDb.referrals.toArray();
 
+      // Automatically purge legacy test entries from browser IndexedDB
+      for (const item of localList) {
+        const name = (item as any).patient?.name || (item as any).patientName || '';
+        if (name.toLowerCase().includes('ramesh')) {
+          if (item.localId) {
+            try {
+              await localDb.referrals.delete(item.localId);
+            } catch {
+              // ignore deletion error
+            }
+          }
+        }
+      }
+
+      const refreshedLocal = await localDb.referrals.toArray();
+
       // Merge avoiding duplicates
       const seenIds = new Set(serverList.map((s) => s.id).filter(Boolean));
-      const filteredLocal = localList.filter((l: LocalReferral) => !l.id || !seenIds.has(l.id));
+      const filteredLocal = refreshedLocal.filter((l: LocalReferral) => !l.id || !seenIds.has(l.id));
 
-      const combined = [...filteredLocal, ...serverList].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      const combined = [...filteredLocal, ...serverList]
+        .filter((r) => {
+          const name = r.patient?.name || r.patientName || '';
+          return !name.toLowerCase().includes('ramesh');
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
       setReferrals(combined);
     } catch (err) {
@@ -83,33 +98,9 @@ export const PHCDashboard: React.FC = () => {
     loadReferrals();
   }, [loadReferrals]);
 
-  const testRbacAccess = async () => {
-    setTestResult('Verifying RBAC token against /api/test/phc-only...');
-    const res = await apiRequest('/test/phc-only');
-    if (res.success) {
-      setTestStatus('success');
-      setTestResult(res.message || 'RBAC Access Granted: Verified as PHC_USER!');
-    } else {
-      setTestStatus('error');
-      setTestResult(res.error?.message || 'Access Denied');
-    }
-  };
-
-  const testForbiddenAccess = async () => {
-    setTestResult('Attempting to access Admin-only resource /api/test/admin-only...');
-    const res = await apiRequest('/test/admin-only');
-    if (res.success) {
-      setTestStatus('success');
-      setTestResult('Unexpected: Access granted');
-    } else {
-      setTestStatus('error');
-      setTestResult(`Correctly Blocked by RBAC: ${res.error?.message}`);
-    }
-  };
-
   return (
     <div className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
-      {/* Welcome & Status Header */}
+      {/* Welcome & Clinical Actions Header */}
       <div className="clinical-surface flex flex-col justify-between gap-5 rounded-[24px] border-teal-100 p-5 sm:p-6 md:flex-row md:items-center">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold">
@@ -128,173 +119,101 @@ export const PHCDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Network & Action Controls */}
+        {/* Primary Clinical Actions */}
         <div className="flex items-center space-x-2 flex-wrap gap-2">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors cursor-pointer"
           >
-            <PlusCircle className="w-3.5 h-3.5" />
+            <PlusCircle className="w-4 h-4" />
             <span>+ Create Digital Referral</span>
           </button>
 
           <button
-            onClick={syncNow}
-            disabled={isSyncing}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-teal-800 border border-teal-200 hover:bg-teal-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>Sync Queue {pendingCount > 0 && `(${pendingCount})`}</span>
-          </button>
-
-          <button
             onClick={() => setIsVitalsOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
-            <HeartPulse className="w-3.5 h-3.5 text-rose-500" />
+            <HeartPulse className="w-4 h-4 text-rose-500" />
             <span>Rapid Vitals &amp; EWS</span>
           </button>
 
           <button
             onClick={() => setIsFollowUpOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
-            <CalendarCheck className="w-3.5 h-3.5 text-teal-600" />
+            <CalendarCheck className="w-4 h-4 text-teal-600" />
             <span>Follow-Up Tracker</span>
           </button>
 
-          <div
-            className={`inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${
-              isOnline
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-amber-50 text-amber-800 border-amber-200'
-            }`}
-          >
-            {isOnline ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
-            <span>{isOnline ? 'Online' : 'Offline'}</span>
-          </div>
-
-          <button
-            onClick={testRbacAccess}
-            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors border border-slate-300"
-          >
-            Verify RBAC
-          </button>
-          <button
-            onClick={testForbiddenAccess}
-            className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-medium transition-colors border border-rose-200"
-          >
-            Test Admin Block
-          </button>
+          {pendingCount > 0 && (
+            <button
+              onClick={() => {
+                syncNow();
+                loadReferrals();
+              }}
+              disabled={isSyncing}
+              className="inline-flex items-center space-x-1.5 px-3 py-2 bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              title="Synchronize offline-created records to cloud database"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>Sync Pending ({pendingCount})</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* RBAC Verification Feedback */}
-      {testResult && (
-        <div
-          className={`p-4 rounded-xl border text-xs flex items-start space-x-3 ${
-            testStatus === 'success'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-              : 'bg-amber-50 border-amber-200 text-amber-800'
-          }`}
-        >
-          {testStatus === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          )}
+      {/* Clinical Summary Metric Tiles */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="clinical-surface rounded-2xl p-5 flex items-center justify-between">
           <div>
-            <div className="font-bold mb-0.5">RBAC Middleware Response:</div>
-            <div>{testResult}</div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Dispatched</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1">{referrals.length}</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Outbound clinical handoffs</p>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700">
+            <Send className="w-5 h-5" />
           </div>
         </div>
-      )}
 
-      {/* Operational Cards */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-        {/* Quick Referral Creator Card */}
-        <div className="clinical-surface rounded-2xl p-6 flex flex-col justify-between">
+        <div className="clinical-surface rounded-2xl p-5 flex items-center justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-                <PlusCircle className="w-4 h-4 text-teal-600" />
-                <span>Create Digital Referral</span>
-              </h2>
-              <span className="text-[11px] font-semibold text-teal-600 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
-                Offline Capable
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-              Generate digital referral for incoming patients. Works seamlessly whether online or offline with automatic sync queue.
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Emergency Referrals</p>
+            <p className="text-2xl font-bold text-rose-600 mt-1">
+              {referrals.filter((r) => r.urgency === 'EMERGENCY').length}
+            </p>
+            <p className="text-[11px] text-rose-600/80 mt-0.5 font-medium">Critical acute transfers</p>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
+            <ShieldAlert className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="clinical-surface rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Urgent / Routine</p>
+            <p className="text-2xl font-bold text-amber-700 mt-1">
+              {referrals.filter((r) => r.urgency === 'URGENT' || r.urgency === 'ROUTINE').length}
+            </p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Secondary care queue</p>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700">
+            <Clock className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="clinical-surface rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cloud Ledger Status</p>
+            <p className="text-2xl font-bold text-emerald-700 mt-1">
+              {referrals.filter((r) => r.syncStatus === 'SYNCED').length}
+            </p>
+            <p className="text-[11px] text-emerald-600/80 mt-0.5 font-medium">
+              {pendingCount > 0 ? `${pendingCount} offline pending` : 'All records synchronized'}
             </p>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>Launch Referral Form</span>
-          </button>
-        </div>
-
-        {/* Offline Queue Box */}
-        <div className="clinical-surface rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-teal-600' : 'text-amber-600'}`} />
-                <span>Local Offline Queue</span>
-              </h2>
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                Dexie.js Ready
-              </span>
-            </div>
-            <div className="flex items-baseline space-x-2 my-2">
-              <span className="text-3xl font-extrabold text-slate-900">{pendingCount}</span>
-              <span className="text-xs text-slate-500">pending sync events</span>
-            </div>
-            <p className="text-xs text-slate-500 mb-6">
-              Referrals created during connectivity drops are stored safely in browser IndexedDB.
-            </p>
+          <div className="h-11 w-11 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700">
+            <CheckCircle2 className="w-5 h-5" />
           </div>
-          <button
-            onClick={() => {
-              syncNow();
-              loadReferrals();
-            }}
-            disabled={isSyncing || pendingCount === 0}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>{isSyncing ? 'Syncing Queue...' : 'Force Sync Queue'}</span>
-          </button>
-        </div>
-
-        {/* Demo Scenario Box */}
-        <div className="clinical-surface rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-                <FileText className="w-4 h-4 text-amber-600" />
-                <span>Demo Scenario</span>
-              </h2>
-              <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                Ramesh Yadav
-              </span>
-            </div>
-            <div className="text-xs text-slate-600 space-y-1.5 mb-6">
-              <div><span className="font-semibold text-slate-700">Patient:</span> Ramesh Yadav, 47, Male</div>
-              <div><span className="font-semibold text-slate-700">Village:</span> Khed, Pune</div>
-              <div><span className="font-semibold text-slate-700">Condition:</span> Acute STEMI Chest Pain</div>
-              <div><span className="font-semibold text-slate-700">Urgency:</span> <span className="text-rose-600 font-bold">EMERGENCY</span></div>
-            </div>
-          </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
-          >
-            <span>Open & Load Demo Patient</span>
-          </button>
         </div>
       </div>
 
@@ -319,7 +238,7 @@ export const PHCDashboard: React.FC = () => {
             <Stethoscope className="w-10 h-10 mx-auto text-slate-300 mb-3" />
             <p className="text-sm font-semibold text-slate-700">No Referrals Dispatched Yet</p>
             <p className="text-xs text-slate-400 mt-1">
-              Click &quot;Launch Referral Form&quot; or load the demo scenario to generate a patient referral.
+              Click &quot;+ Create Digital Referral&quot; to initiate a patient transfer.
             </p>
           </div>
         ) : (
@@ -397,14 +316,27 @@ export const PHCDashboard: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => setSelectedSmsReferral(ref)}
-                          className="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-300 text-slate-700 border border-slate-200 rounded-md text-[11px] font-medium transition-colors"
-                          title="View 2G Cellular SMS Fallback Payload"
-                        >
-                          <MessageSquare className="w-3 h-3 text-teal-600" />
-                          <span>SMS Payload</span>
-                        </button>
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => {
+                              setSelectedDetailReferral(ref);
+                              setIsDetailModalOpen(true);
+                            }}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                            title="View Clinical Summary & Patient Details"
+                          >
+                            <FileText className="w-3 h-3 text-slate-500" />
+                            <span>Details</span>
+                          </button>
+                          <button
+                            onClick={() => setSelectedSmsReferral(ref)}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-300 text-slate-700 border border-slate-200 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                            title="View 2G Cellular SMS Fallback Payload"
+                          >
+                            <MessageSquare className="w-3 h-3 text-teal-600" />
+                            <span>SMS Payload</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -438,6 +370,7 @@ export const PHCDashboard: React.FC = () => {
         onClose={() => setIsVitalsOpen(false)}
         isOnline={isOnline}
         onEscalateToReferral={(data) => {
+          setIsVitalsOpen(false);
           setReferralInitialData(data);
           setIsModalOpen(true);
         }}
@@ -448,6 +381,17 @@ export const PHCDashboard: React.FC = () => {
         isOpen={isFollowUpOpen}
         onClose={() => setIsFollowUpOpen(false)}
         isOnline={isOnline}
+      />
+
+      {/* Clinical Referral Detail Modal */}
+      <ReferralDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedDetailReferral(null);
+        }}
+        referral={selectedDetailReferral}
+        canUpdateStatus={false}
       />
 
       {/* SMS Fallback Modal (<160 chars) */}
@@ -469,7 +413,7 @@ export const PHCDashboard: React.FC = () => {
                   setSelectedSmsReferral(null);
                   setCopiedSms(false);
                 }}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -489,6 +433,7 @@ export const PHCDashboard: React.FC = () => {
                   sourceFacilityCode: user?.facility?.code || 'PHC-KHED',
                   destinationFacilityCode: selectedSmsReferral.destinationFacility?.code || 'DIST-HOSP',
                   urgency: selectedSmsReferral.urgency || 'ROUT',
+                  reason: selectedSmsReferral.reason,
                 });
 
                 return (
