@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { HomeRedirect } from './features/HomeRedirect';
@@ -17,47 +17,24 @@ import { MobileQuickBar } from './components/MobileQuickBar';
 import { usePageMeta } from './hooks/usePageMeta';
 
 function AppLayout() {
-  const { user } = useAuth();
   const location = useLocation();
 
   // Apply dynamic SEO title and meta descriptions on route change
   usePageMeta();
 
   const isHomePage = location.pathname === '/';
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
-  const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms';
 
-  // Public Home Page OR Unauthenticated / Auth Pages View
-  if (isHomePage || !user || isAuthPage || isLegalPage) {
-    return (
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white pb-14 md:pb-0">
-        {(isAuthPage || isLegalPage) && <Navbar />}
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomeRedirect />} />
-            <Route path="/login" element={<LoginView />} />
-            <Route path="/signup" element={<SignupView />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </main>
-        <CookieConsentBanner />
-        <MobileQuickBar />
-      </div>
-    );
-  }
-
-  // Authenticated Portal View (Full-Width Workspace - Sidebar Removed)
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white pb-14 md:pb-0">
-      {/* Top Header with Global Search, Navigation & User Controls */}
-      <Navbar />
+      {/* Top Header with Navigation & Controls (except on homepage which has its own hero PublicHeader) */}
+      {!isHomePage && <Navbar />}
 
       {/* Main Content Viewport */}
       <main className="flex-1 overflow-y-auto">
         <Routes>
           <Route path="/" element={<HomeRedirect />} />
+          <Route path="/login" element={<LoginView />} />
+          <Route path="/signup" element={<SignupView />} />
 
           <Route
             path="/phc"
@@ -97,6 +74,7 @@ function AppLayout() {
 
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

@@ -30,6 +30,14 @@ export const NotFoundPage: React.FC = () => {
     }
   };
 
+  const handleGoBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate(getRoleLandingRoute());
+    }
+  };
+
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div className="max-w-xl w-full text-center space-y-6">
@@ -60,7 +68,7 @@ export const NotFoundPage: React.FC = () => {
         {/* Actions Grid */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <button
-            onClick={() => navigate(-1)}
+            onClick={handleGoBack}
             className="w-full sm:w-auto px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center justify-center space-x-2 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 text-slate-500" />
@@ -74,6 +82,15 @@ export const NotFoundPage: React.FC = () => {
             <Home className="w-4 h-4" />
             <span>Return to {user ? 'Your Dashboard' : 'Home'}</span>
           </Link>
+
+          {!user && (
+            <Link
+              to="/login"
+              className="w-full sm:w-auto px-5 py-2.5 bg-teal-50 border border-teal-200 hover:bg-teal-100 text-teal-800 rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
+            >
+              <span>Staff Login</span>
+            </Link>
+          )}
         </div>
 
         {/* Emergency Assistance Footer */}

@@ -50,10 +50,19 @@ export function getDefaultDashboard(role?: UserRole): string {
   }
 }
 
+function getStoredUser(): UserProfile | null {
+  try {
+    const raw = localStorage.getItem('swastyasetu_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('swastyasetu_auth_token'));
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<UserProfile | null>(getStoredUser);
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('swastyasetu_auth_token'));
+  const [isLoading, setIsLoading] = useState<boolean>(() => !localStorage.getItem('swastyasetu_user') && !!localStorage.getItem('swastyasetu_auth_token'));
 
   const handleOAuthSync = async (email: string, name?: string) => {
     try {
@@ -64,6 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (res.success && res.data) {
         localStorage.setItem('swastyasetu_auth_token', res.data.token);
+        localStorage.setItem('swastyasetu_user', JSON.stringify(res.data.user));
         setToken(res.data.token);
         setUser(res.data.user);
         return true;
@@ -103,9 +113,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await apiRequest<UserProfile>('/auth/me');
         if (isMounted) {
           if (res.success && res.data) {
+            localStorage.setItem('swastyasetu_user', JSON.stringify(res.data));
             setUser(res.data);
           } else {
             localStorage.removeItem('swastyasetu_auth_token');
+            localStorage.removeItem('swastyasetu_user');
             setToken(null);
             setUser(null);
           }
@@ -132,6 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else if (event === 'SIGNED_OUT') {
           if (isMounted) {
             localStorage.removeItem('swastyasetu_auth_token');
+            localStorage.removeItem('swastyasetu_user');
             setToken(null);
             setUser(null);
             setIsLoading(false);
@@ -157,6 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
     if (res.success && res.data) {
       localStorage.setItem('swastyasetu_auth_token', res.data.token);
+      localStorage.setItem('swastyasetu_user', JSON.stringify(res.data.user));
       setToken(res.data.token);
       setUser(res.data.user);
       return { success: true };
@@ -184,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
     if (res.success && res.data) {
       localStorage.setItem('swastyasetu_auth_token', res.data.token);
+      localStorage.setItem('swastyasetu_user', JSON.stringify(res.data.user));
       setToken(res.data.token);
       setUser(res.data.user);
       return { success: true };
@@ -197,6 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('swastyasetu_auth_token');
+    localStorage.removeItem('swastyasetu_user');
     setToken(null);
     setUser(null);
     import('../lib/supabaseClient').then(({ supabase }) => {

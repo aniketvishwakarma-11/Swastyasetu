@@ -28,7 +28,18 @@ export async function apiRequest<T = any>(
       headers,
     });
 
-    const data: ApiResponse<T> = await response.json();
+    const text = await response.text();
+    let data: any = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = {
+        error: {
+          code: `HTTP_${response.status}`,
+          message: text?.slice(0, 150) || `Request failed with status ${response.status}`,
+        },
+      };
+    }
 
     if (!response.ok) {
       return {

@@ -56,6 +56,17 @@ app.use('/api/discharge-summaries', dischargeRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/test', rbacTestRoutes);
 
+// Explicit JSON 404 handler for unmatched API routes
+app.all('/api/*', (_req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    error: {
+      code: 'NOT_FOUND',
+      message: 'Requested API endpoint not found.',
+    },
+  });
+});
+
 // Check if frontend build exists to serve full-stack monolith
 const candidatePaths = [
   path.resolve(__dirname, '../../web/dist'),
