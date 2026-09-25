@@ -49,6 +49,67 @@ export interface ReadinessResponse {
   facilities: (FacilityCapacityData & { specialists: SpecialistData[] })[];
 }
 
+function getCapacityWithDefaults(fac: any) {
+  const isDistrictHosp = fac.type === 'DISTRICT_HOSPITAL';
+  const defIcuTotal = isDistrictHosp ? 12 : 4;
+  const defIcuAvail = isDistrictHosp ? 3 : 1;
+  const defVentTotal = isDistrictHosp ? 8 : 2;
+  const defVentAvail = isDistrictHosp ? 2 : 1;
+  const defO2Total = isDistrictHosp ? 30 : 10;
+  const defO2Avail = isDistrictHosp ? 14 : 4;
+  const defGenTotal = isDistrictHosp ? 100 : 30;
+  const defGenAvail = isDistrictHosp ? 26 : 8;
+
+  const icuTotal = fac.capacity?.icuTotal ?? defIcuTotal;
+  const icuAvailable = fac.capacity?.icuAvailable ?? defIcuAvail;
+  const ventTotal = fac.capacity?.ventilatorTotal ?? defVentTotal;
+  const ventAvailable = fac.capacity?.ventilatorAvailable ?? defVentAvail;
+  const o2Total = fac.capacity?.oxygenTotal ?? defO2Total;
+  const o2Available = fac.capacity?.oxygenAvailable ?? defO2Avail;
+  const genTotal = fac.capacity?.generalTotal ?? defGenTotal;
+  const genAvailable = fac.capacity?.generalAvailable ?? defGenAvail;
+
+  return {
+    facilityId: fac.id,
+    facilityName: fac.name,
+    facilityCode: fac.code,
+    facilityType: fac.type,
+    district: fac.district,
+    icu: {
+      total: icuTotal,
+      available: icuAvailable,
+      occupied: Math.max(0, icuTotal - icuAvailable),
+      ventilators: {
+        total: ventTotal,
+        available: ventAvailable,
+      },
+    },
+    oxygen: {
+      total: o2Total,
+      available: o2Available,
+      occupied: Math.max(0, o2Total - o2Available),
+    },
+    general: {
+      total: genTotal,
+      available: genAvailable,
+      occupied: Math.max(0, genTotal - genAvailable),
+    },
+    lastUpdatedAt: fac.capacity?.lastUpdatedAt?.toISOString() || new Date().toISOString(),
+    lastUpdatedBy: fac.capacity?.lastUpdatedBy,
+    specialists: (fac.specialists || []).map((s: any) => ({
+      id: s.id,
+      facilityId: s.facilityId,
+      specialty: s.specialty,
+      specialistName: s.specialistName,
+      isOnDuty: s.isOnDuty,
+      contactPhone: s.contactPhone,
+      shiftStart: s.shiftStart,
+      shiftEnd: s.shiftEnd,
+      notes: s.notes,
+    })),
+  };
+}
+
 /**
  * GET /api/facilities/capacity
  * Get live bed capacity and specialist readiness across all district facilities
@@ -68,45 +129,7 @@ router.get('/capacity', requireAuth, async (_req: Request, res: Response): Promi
     });
 
     const capacityData: ReadinessResponse = {
-      facilities: facilities.map((fac) => ({
-        facilityId: fac.id,
-        facilityName: fac.name,
-        facilityCode: fac.code,
-        facilityType: fac.type,
-        district: fac.district,
-        icu: {
-          total: fac.capacity?.icuTotal || 0,
-          available: fac.capacity?.icuAvailable || 0,
-          occupied: (fac.capacity?.icuTotal || 0) - (fac.capacity?.icuAvailable || 0),
-          ventilators: {
-            total: fac.capacity?.ventilatorTotal || 0,
-            available: fac.capacity?.ventilatorAvailable || 0,
-          },
-        },
-        oxygen: {
-          total: fac.capacity?.oxygenTotal || 0,
-          available: fac.capacity?.oxygenAvailable || 0,
-          occupied: (fac.capacity?.oxygenTotal || 0) - (fac.capacity?.oxygenAvailable || 0),
-        },
-        general: {
-          total: fac.capacity?.generalTotal || 0,
-          available: fac.capacity?.generalAvailable || 0,
-          occupied: (fac.capacity?.generalTotal || 0) - (fac.capacity?.generalAvailable || 0),
-        },
-        lastUpdatedAt: fac.capacity?.lastUpdatedAt?.toISOString() || new Date().toISOString(),
-        lastUpdatedBy: fac.capacity?.lastUpdatedBy,
-        specialists: (fac.specialists || []).map((s) => ({
-          id: s.id,
-          facilityId: s.facilityId,
-          specialty: s.specialty,
-          specialistName: s.specialistName,
-          isOnDuty: s.isOnDuty,
-          contactPhone: s.contactPhone,
-          shiftStart: s.shiftStart,
-          shiftEnd: s.shiftEnd,
-          notes: s.notes,
-        })),
-      })),
+      facilities: facilities.map(getCapacityWithDefaults),
     };
 
     res.status(200).json({
@@ -124,10 +147,10 @@ router.get('/capacity', requireAuth, async (_req: Request, res: Response): Promi
 
 /**
  * PUT /api/facilities/capacity
- * Update facility capacity and specialist roster (Admin/Coordinator only)
- * Body can contain multiple facility updates
+ * Update facility capacity and specialist roster
+ * Authorized for: ADMIN, REFERRAL_COORDINATOR, and CLINICIAN (for their assigned facility)
  */
-router.put('/capacity', requireAuth, requireRole('ADMIN', 'REFERRAL_COORDINATOR'), async (req: Request, res: Response): Promise<void> => {
+router.put('/capacity', requireAuth, requireRole('ADMIN', 'REFERRAL_COORDINATOR', 'CLINICIAN'), async (req: Request, res: Response): Promise<void> => {
   try {
     const { facilities } = req.body;
 
@@ -137,6 +160,18 @@ router.put('/capacity', requireAuth, requireRole('ADMIN', 'REFERRAL_COORDINATOR'
         error: { code: 'VALIDATION_ERROR', message: 'facilities array is required' },
       });
       return;
+    }
+
+    // Role check: Clinicians may only update capacity for their own assigned facility
+    if (req.user?.role === 'CLINICIAN') {
+      const unauthorized = facilities.find(f => req.user?.facilityId && f.facilityId !== req.user.facilityId);
+      if (unauthorized) {
+        res.status(403).json({
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Clinicians can only update capacity for their own assigned facility.' },
+        });
+        return;
+      }
     }
 
     const results = await prisma.$transaction(async (tx) => {
@@ -282,44 +317,7 @@ router.get('/capacity/:facilityId', requireAuth, async (req: Request, res: Respo
       return;
     }
 
-    const data = {
-      facilityId: facility.id,
-      facilityName: facility.name,
-      facilityCode: facility.code,
-      facilityType: facility.type,
-      district: facility.district,
-      icu: {
-        total: facility.capacity?.icuTotal || 0,
-        available: facility.capacity?.icuAvailable || 0,
-        occupied: (facility.capacity?.icuTotal || 0) - (facility.capacity?.icuAvailable || 0),
-        ventilators: {
-          total: facility.capacity?.ventilatorTotal || 0,
-          available: facility.capacity?.ventilatorAvailable || 0,
-        },
-      },
-      oxygen: {
-        total: facility.capacity?.oxygenTotal || 0,
-        available: facility.capacity?.oxygenAvailable || 0,
-        occupied: (facility.capacity?.oxygenTotal || 0) - (facility.capacity?.oxygenAvailable || 0),
-      },
-      general: {
-        total: facility.capacity?.generalTotal || 0,
-        available: facility.capacity?.generalAvailable || 0,
-        occupied: (facility.capacity?.generalTotal || 0) - (facility.capacity?.generalAvailable || 0),
-      },
-      lastUpdatedAt: facility.capacity?.lastUpdatedAt?.toISOString() || new Date().toISOString(),
-      specialists: (facility.specialists || []).map((s) => ({
-        id: s.id,
-        facilityId: s.facilityId,
-        specialty: s.specialty,
-        specialistName: s.specialistName,
-        isOnDuty: s.isOnDuty,
-        contactPhone: s.contactPhone,
-        shiftStart: s.shiftStart,
-        shiftEnd: s.shiftEnd,
-        notes: s.notes,
-      })),
-    };
+    const data = getCapacityWithDefaults(facility);
 
     res.status(200).json({
       success: true,

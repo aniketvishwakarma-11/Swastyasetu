@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
+import { HospitalReadinessRadarModal } from './HospitalReadinessRadarModal';
 import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
 import { COORDINATOR_BLUEPRINTS } from '../../lib/featureBlueprints';
 import {
@@ -32,6 +33,9 @@ export const CoordinatorDashboard: React.FC = () => {
   // Detail Modal state
   const [selectedReferral, setSelectedReferral] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Bed & ICU Readiness Radar Modal state
+  const [isRadarOpen, setIsRadarOpen] = useState(false);
 
   const loadReferrals = useCallback(async () => {
     setLoading(true);
@@ -135,7 +139,7 @@ export const CoordinatorDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.readiness)}
+            onClick={() => setIsRadarOpen(true)}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
             <Building2 className="w-3.5 h-3.5 text-blue-600" />
@@ -400,6 +404,12 @@ export const CoordinatorDashboard: React.FC = () => {
           setIsDetailModalOpen(false);
           setSelectedReferral(null);
         }}
+      />
+
+      {/* Bed & ICU Readiness Radar Modal */}
+      <HospitalReadinessRadarModal
+        isOpen={isRadarOpen}
+        onClose={() => setIsRadarOpen(false)}
       />
 
       {/* Feature Blueprint Modal */}

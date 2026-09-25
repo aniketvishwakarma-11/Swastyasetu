@@ -7,6 +7,7 @@ import { ReferralModal } from './ReferralModal';
 import { RapidVitalsModal } from './RapidVitalsModal';
 import { FollowUpTrackerModal } from './FollowUpTrackerModal';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
+import { CareContinuityTimelineModal } from '../hospital/CareContinuityTimelineModal';
 import { formatFallbackSMS } from '@swastyasetu/shared';
 import {
   Stethoscope,
@@ -23,6 +24,7 @@ import {
   HeartPulse,
   CalendarCheck,
   FileText,
+  Activity,
 } from 'lucide-react';
 
 export const PHCDashboard: React.FC = () => {
@@ -39,6 +41,8 @@ export const PHCDashboard: React.FC = () => {
   const [selectedDetailReferral, setSelectedDetailReferral] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [copiedSms, setCopiedSms] = useState(false);
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  const [timelinePatient, setTimelinePatient] = useState<{ id: string; name: string } | null>(null);
 
   // Load merged list of referrals (Server + Local IndexedDB)
   const loadReferrals = useCallback(async () => {
@@ -329,6 +333,19 @@ export const PHCDashboard: React.FC = () => {
                             <span>Details</span>
                           </button>
                           <button
+                            onClick={() => {
+                              const pid = ref.patientId || ref.patient?.id || ref.id;
+                              const pname = ref.patient?.name || ref.patientName || 'Patient';
+                              setTimelinePatient({ id: pid, name: pname });
+                              setIsTimelineOpen(true);
+                            }}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                            title="View Longitudinal Care Continuity Timeline"
+                          >
+                            <Activity className="w-3 h-3 text-teal-600" />
+                            <span>Timeline</span>
+                          </button>
+                          <button
                             onClick={() => setSelectedSmsReferral(ref)}
                             className="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-300 text-slate-700 border border-slate-200 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
                             title="View 2G Cellular SMS Fallback Payload"
@@ -393,6 +410,28 @@ export const PHCDashboard: React.FC = () => {
         referral={selectedDetailReferral}
         canUpdateStatus={false}
       />
+
+      {/* Care Continuity Longitudinal Timeline Modal */}
+      {isTimelineOpen && timelinePatient && (
+        <CareContinuityTimelineModal
+          isOpen={isTimelineOpen}
+          onClose={() => {
+            setIsTimelineOpen(false);
+            setTimelinePatient(null);
+          }}
+          patientId={timelinePatient.id}
+          patientName={timelinePatient.name}
+          availablePatients={referrals
+            .map((ref) => ({
+              id: ref.patientId || ref.patient?.id || ref.id,
+              name: ref.patient?.name || ref.patientName || 'Unknown Patient',
+            }))
+            .filter((p, i, arr) => p.id && arr.findIndex((x) => x.id === p.id) === i)}
+          onSwitchPatient={(patient) => {
+            setTimelinePatient(patient);
+          }}
+        />
+      )}
 
       {/* SMS Fallback Modal (<160 chars) */}
       {selectedSmsReferral && (

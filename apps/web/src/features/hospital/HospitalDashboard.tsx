@@ -247,13 +247,10 @@ export const HospitalDashboard: React.FC = () => {
                   id: ref.patientId || ref.patient?.id || 'target-patient',
                   name: ref.patient?.name || 'Patient Record',
                 });
+                setIsTimelineOpen(true);
               } else {
-                setTimelineTarget({
-                  id: '00000000-0000-0000-0000-000000000001',
-                  name: 'Ramesh Yadav',
-                });
+                setActionSuccessMsg('No active referred patients available in triage queue to construct timeline.');
               }
-              setIsTimelineOpen(true);
             }}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
