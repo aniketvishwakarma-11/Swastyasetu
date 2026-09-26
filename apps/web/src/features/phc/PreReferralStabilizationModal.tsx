@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 import {
   X,
   Pill,
@@ -76,6 +77,8 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
   referral,
   onStabilizationSaved,
 }) => {
+  useModalA11y(isOpen, onClose);
+
   const { user } = useAuth();
   const [protocolType, setProtocolType] = useState<string>('STEMI');
   const [items, setItems] = useState<StabilizationItemInput[]>([]);
@@ -178,7 +181,15 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stabilization-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-3xl my-6 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Top Header */}
@@ -189,12 +200,12 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-base tracking-tight text-white">Pre-Referral Emergency Stabilization</span>
+                <span id="stabilization-modal-title" className="font-extrabold text-base tracking-tight text-white">Pre-Referral Emergency Stabilization</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
                   Audit Verified
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-300">
                 Frontline loading protocol checklist for patient: <strong className="text-white">{referral?.patient?.name || 'Patient'}</strong> ({referral?.referralNumber || 'Referral'})
               </p>
             </div>
@@ -344,7 +355,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
                     <p className="text-[11px] text-slate-600 font-semibold mt-0.5">
                       Dosage: {item.dosage} • Route: {item.route}
                     </p>
-                    {item.notes && <p className="text-[10px] text-slate-400 italic mt-0.5">{item.notes}</p>}
+                    {item.notes && <p className="text-[10px] text-slate-500 italic mt-0.5">{item.notes}</p>}
                   </div>
                 </div>
               ))}
@@ -354,7 +365,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
           {/* Doctor Signature */}
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
             <div>
-              <span className="text-slate-400 text-[11px] block font-medium">Attending Clinician Sign-Off</span>
+              <span className="text-slate-600 text-[11px] block font-semibold">Attending Clinician Sign-Off</span>
               <input
                 type="text"
                 value={doctorName}
@@ -363,7 +374,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
               />
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 block">SHA-256 Audit Stamp</span>
+              <span className="text-[10px] text-slate-500 font-semibold block">SHA-256 Audit Stamp</span>
               <span className="font-mono text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded">
                 AUD-STAB-VERIFIED
               </span>

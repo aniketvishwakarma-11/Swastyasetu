@@ -3,6 +3,7 @@ import { X, Send, ShieldAlert, HeartPulse, MapPin, UserCheck, AlertTriangle, Spa
 import { apiRequest } from '../../lib/api';
 import { localDb } from '../../lib/db';
 import { useAuth } from '../../context/AuthContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface ReferralModalProps {
   isOpen: boolean;
@@ -35,6 +36,8 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
   isOnline,
   initialData,
 }) => {
+  useModalA11y(isOpen, onClose);
+
   const { user } = useAuth();
   const [facilities, setFacilities] = useState<FacilityOption[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -251,8 +254,19 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl my-8 overflow-hidden">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="referral-creation-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          resetForm();
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl my-8 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Modal Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -260,7 +274,7 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
               <HeartPulse className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900">Create Digital Referral</h2>
+              <h2 id="referral-creation-title" className="text-base font-bold text-slate-900">Create Digital Referral</h2>
               <p className="text-xs text-slate-500">
                 Primary Health Centre: <span className="font-semibold text-slate-700">{user?.facility?.name || 'PHC Khed'}</span>
               </p>

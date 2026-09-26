@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
 import { localDb } from '../../lib/db';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface RapidVitalsModalProps {
   isOpen: boolean;
@@ -35,6 +36,8 @@ export const RapidVitalsModal: React.FC<RapidVitalsModalProps> = ({
   onEscalateToReferral,
   isOnline,
 }) => {
+  useModalA11y(isOpen, onClose);
+
   // Patient details
   const [patientName, setPatientName] = useState('');
   const [age, setAge] = useState('');
@@ -246,7 +249,15 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rapid-vitals-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -256,7 +267,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-base font-bold text-slate-900">Frontline Rapid Vitals &amp; EWS Intake</h3>
+                <h3 id="rapid-vitals-title" className="text-base font-bold text-slate-900">Frontline Rapid Vitals &amp; EWS Intake</h3>
                 <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
                   LIVE WORKFLOW
                 </span>
@@ -358,7 +369,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
                 <HeartPulse className="w-3.5 h-3.5 text-teal-600" />
                 <span>Frontline Clinical Measurements</span>
               </span>
-              <span className="text-[11px] text-slate-400">Values trigger live EWS evaluation</span>
+              <span className="text-[11px] text-slate-500 font-medium">Values trigger live EWS evaluation</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
@@ -370,7 +381,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               >
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-700">Systolic BP</label>
-                  <span className="text-[10px] text-slate-400">mmHg</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">mmHg</span>
                 </div>
                 <input
                   type="number"
@@ -389,7 +400,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               >
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-700">Diastolic BP</label>
-                  <span className="text-[10px] text-slate-400">mmHg</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">mmHg</span>
                 </div>
                 <input
                   type="number"
@@ -408,7 +419,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               >
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-700">SpO2 Oxygen</label>
-                  <span className="text-[10px] text-slate-400">%</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">%</span>
                 </div>
                 <input
                   type="number"
@@ -429,7 +440,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               >
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-700">Pulse / Rate</label>
-                  <span className="text-[10px] text-slate-400">bpm</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">bpm</span>
                 </div>
                 <input
                   type="number"
@@ -444,7 +455,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/60">
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-700">Random Glucose</label>
-                  <span className="text-[10px] text-slate-400">mg/dL</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">mg/dL</span>
                 </div>
                 <input
                   type="number"
@@ -460,7 +471,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/60">
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-700">Resp. Rate</label>
-                  <span className="text-[10px] text-slate-400">/min</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">/min</span>
                 </div>
                 <input
                   type="number"
@@ -476,7 +487,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/60">
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-700">Temperature</label>
-                  <span className="text-[10px] text-slate-400">°F</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">°F</span>
                 </div>
                 <input
                   type="number"
@@ -493,7 +504,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
               <div className={`p-3 rounded-xl border ${gender === 'Female' ? 'bg-purple-50/40 border-purple-200' : 'bg-slate-50/40 border-slate-200 opacity-60'}`}>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-700">Gestation</label>
-                  <span className="text-[10px] text-slate-400">weeks</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">weeks</span>
                 </div>
                 <input
                   type="number"
@@ -588,7 +599,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
                 <div className="p-3 flex items-center justify-between">
                   <div>
                     <span className="font-bold text-slate-800">Santosh Shinde (52, M)</span>
-                    <span className="text-slate-400 ml-2">BP: 175/105 · SpO2: 89% · Pulse: 118</span>
+                    <span className="text-slate-500 font-medium ml-2">BP: 175/105 · SpO2: 89% · Pulse: 118</span>
                   </div>
                   <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold text-[10px]">
                     CRITICAL (EWS 9)
@@ -597,7 +608,7 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
                 <div className="p-3 flex items-center justify-between">
                   <div>
                     <span className="font-bold text-slate-800">Sunita Devi (28, F)</span>
-                    <span className="text-slate-400 ml-2">BP: 142/92 · SpO2: 97% · 32w Gestation</span>
+                    <span className="text-slate-500 font-medium ml-2">BP: 142/92 · SpO2: 97% · 32w Gestation</span>
                   </div>
                   <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold text-[10px]">
                     MODERATE (EWS 2)

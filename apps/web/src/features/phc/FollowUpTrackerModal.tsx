@@ -14,6 +14,7 @@ import {
   Check,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface FollowUpItem {
   id: string;
@@ -121,6 +122,8 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
   onClose,
   isOnline,
 }) => {
+  useModalA11y(isOpen, onClose);
+
   const [items, setItems] = useState<FollowUpItem[]>(INITIAL_FOLLOWUPS);
   const [filter, setFilter] = useState<'ALL' | 'DUE_TODAY' | 'UPCOMING' | 'OVERDUE' | 'COMPLETED'>('ALL');
   const [search, setSearch] = useState('');
@@ -233,7 +236,15 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="followup-tracker-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -243,7 +254,7 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-base font-bold text-slate-900">Post-Discharge Return &amp; Follow-Up Tracker</h3>
+                <h3 id="followup-tracker-title" className="text-base font-bold text-slate-900">Post-Discharge Return &amp; Follow-Up Tracker</h3>
                 <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
                   CLOSED-LOOP CONTINUITY
                 </span>
@@ -310,9 +321,9 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
         <div className="p-6 max-h-[70vh] overflow-y-auto space-y-4">
           {filteredItems.length === 0 ? (
             <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-xl">
-              <CalendarCheck className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <CalendarCheck className="w-8 h-8 text-slate-400 mx-auto mb-2" />
               <p className="text-sm font-semibold text-slate-700">No follow-up consultations in this view</p>
-              <p className="text-xs text-slate-400 mt-1">All scheduled hospital returns are up to date.</p>
+              <p className="text-xs text-slate-500 mt-1">All scheduled hospital returns are up to date.</p>
             </div>
           ) : (
             filteredItems.map((item) => (
@@ -339,15 +350,15 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
                     </div>
                     <div className="flex items-center space-x-3 text-xs text-slate-500 mt-1">
                       <span className="flex items-center space-x-1">
-                        <MapPin className="w-3 h-3 text-slate-400" />
+                        <MapPin className="w-3 h-3 text-slate-500" />
                         <span>{item.village}</span>
                       </span>
                       <span className="flex items-center space-x-1">
-                        <Phone className="w-3 h-3 text-slate-400" />
+                        <Phone className="w-3 h-3 text-slate-500" />
                         <span>{item.phone}</span>
                       </span>
                       <span className="flex items-center space-x-1">
-                        <Building className="w-3 h-3 text-slate-400" />
+                        <Building className="w-3 h-3 text-slate-500" />
                         <span>{item.dischargingHospital}</span>
                       </span>
                     </div>

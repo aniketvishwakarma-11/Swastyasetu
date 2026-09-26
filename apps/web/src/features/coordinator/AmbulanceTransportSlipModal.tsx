@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { apiRequest } from '../../lib/api';
+import { useModalA11y } from '../../hooks/useModalA11y';
 import {
   X,
   Ambulance,
@@ -30,6 +31,8 @@ export const AmbulanceTransportSlipModal: React.FC<AmbulanceTransportSlipModalPr
   referralNumber,
   onStatusUpdated,
 }) => {
+  useModalA11y(isOpen, onClose);
+
   const [slipData, setSlipData] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -98,7 +101,15 @@ export const AmbulanceTransportSlipModal: React.FC<AmbulanceTransportSlipModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="transport-slip-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-4xl my-6 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Top Header */}
@@ -109,7 +120,7 @@ export const AmbulanceTransportSlipModal: React.FC<AmbulanceTransportSlipModalPr
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-base tracking-tight text-white">108 EMRI Transport Slip</span>
+                <span id="transport-slip-title" className="font-extrabold text-base tracking-tight text-white">108 EMRI Transport Slip</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase animate-pulse">
                   Emergency Transit
                 </span>

@@ -13,6 +13,7 @@ import {
   Hash,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export interface AuditEventItem {
   id: string;
@@ -37,6 +38,8 @@ interface AuditTrailModalProps {
 }
 
 export const AuditTrailModal: React.FC<AuditTrailModalProps> = ({ isOpen, onClose }) => {
+  useModalA11y(isOpen, onClose);
+
   const [events, setEvents] = useState<AuditEventItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -126,7 +129,15 @@ export const AuditTrailModal: React.FC<AuditTrailModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="audit-trail-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200"
+    >
       <div className="relative w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className="px-6 py-4 bg-linear-to-r from-slate-900 via-slate-800 to-teal-950 text-white flex items-center justify-between shrink-0">
@@ -136,7 +147,7 @@ export const AuditTrailModal: React.FC<AuditTrailModalProps> = ({ isOpen, onClos
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold">Immutable Clinical Audit Trail Explorer</h2>
+                <h2 id="audit-trail-title" className="text-base font-bold">Immutable Clinical Audit Trail Explorer</h2>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-400/30">
                   ABDM AUDIT COMPLIANT
                 </span>

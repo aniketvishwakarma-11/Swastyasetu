@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export interface DischargeMedicationItem {
   name: string;
@@ -39,6 +40,8 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
   referral,
   onDischargeComplete,
 }) => {
+  useModalA11y(isOpen, onClose);
+
   const { user } = useAuth();
 
   const [submitting, setSubmitting] = useState(false);
@@ -360,7 +363,15 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="discharge-summary-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200"
+    >
       <div className="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className="px-6 py-4 bg-linear-to-r from-teal-900 via-teal-800 to-slate-900 text-white flex items-center justify-between shrink-0">
@@ -370,7 +381,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold">Standardized Clinical Discharge Summary</h2>
+                <h2 id="discharge-summary-title" className="text-base font-bold">Standardized Clinical Discharge Summary</h2>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                   CLOSING THE LOOP
                 </span>

@@ -14,6 +14,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface TimelineEvent {
   id: string;
@@ -68,6 +69,7 @@ export const CareContinuityTimelineModal: React.FC<CareContinuityTimelineModalPr
   availablePatients,
   onSwitchPatient,
 }) => {
+  useModalA11y({ isOpen, onClose });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [data, setData] = useState<TimelineResponse | null>(null);
@@ -136,8 +138,17 @@ export const CareContinuityTimelineModal: React.FC<CareContinuityTimelineModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="care-continuity-title"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150"
+      >
         
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -147,7 +158,7 @@ export const CareContinuityTimelineModal: React.FC<CareContinuityTimelineModalPr
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-base font-bold text-slate-900">Unified Patient Care Continuity Timeline (EHR)</h3>
+                <h3 id="care-continuity-title" className="text-base font-bold text-slate-900">Unified Patient Care Continuity Timeline (EHR)</h3>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                   SYNCED LEDGER
                 </span>
@@ -227,19 +238,19 @@ export const CareContinuityTimelineModal: React.FC<CareContinuityTimelineModalPr
               {/* Patient Core Summary Pill Card */}
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                 <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Patient full name</span>
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold">Patient full name</span>
                   <span className="font-bold text-slate-900 text-sm">{data.patient.name}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Age &amp; Gender</span>
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold">Age &amp; Gender</span>
                   <span className="font-semibold text-slate-800 text-xs">{data.patient.age} yrs • {data.patient.gender}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Origin Village</span>
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold">Origin Village</span>
                   <span className="font-semibold text-slate-800 text-xs">{data.patient.village}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Unified Registry ID</span>
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold">Unified Registry ID</span>
                   <span className="font-mono text-slate-700 text-xs block truncate" title={data.patient.id}>
                     {data.patient.id.slice(0, 8)}... (Verified)
                   </span>

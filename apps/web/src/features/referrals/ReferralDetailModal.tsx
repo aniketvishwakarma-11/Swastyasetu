@@ -13,6 +13,7 @@ import {
   Check,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface ReferralDetailModalProps {
   isOpen: boolean;
@@ -29,6 +30,8 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({
   onStatusUpdated,
   canUpdateStatus = true,
 }) => {
+  useModalA11y(isOpen, onClose);
+
   const [updating, setUpdating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [statusNote, setStatusNote] = useState('');
@@ -71,7 +74,15 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Referral Details ${referral.referralNumber}`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl my-8 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -128,25 +139,25 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
               <div>
-                <span className="text-slate-400 block text-[11px]">Full Name</span>
+                <span className="text-slate-500 block text-[11px] font-medium">Full Name</span>
                 <span className="font-semibold text-slate-900 text-sm">{patient.name || 'Unknown'}</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[11px]">Age &amp; Gender</span>
+                <span className="text-slate-500 block text-[11px] font-medium">Age &amp; Gender</span>
                 <span className="font-medium text-slate-800">
                   {patient.age ? `${patient.age} yrs` : 'N/A'}, {patient.gender || 'Unknown'}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[11px] flex items-center space-x-1">
-                  <Phone className="w-3 h-3 text-slate-400" />
+                <span className="text-slate-500 block text-[11px] font-medium flex items-center space-x-1">
+                  <Phone className="w-3 h-3 text-slate-500" />
                   <span>Phone</span>
                 </span>
                 <span className="font-medium text-slate-800">{patient.phone || 'Not provided'}</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[11px] flex items-center space-x-1">
-                  <MapPin className="w-3 h-3 text-slate-400" />
+                <span className="text-slate-500 block text-[11px] font-medium flex items-center space-x-1">
+                  <MapPin className="w-3 h-3 text-slate-500" />
                   <span>Village / Area</span>
                 </span>
                 <span className="font-medium text-slate-800">{patient.village || 'N/A'}</span>
@@ -322,7 +333,7 @@ export const ReferralDetailModal: React.FC<ReferralDetailModalProps> = ({
 
         {/* Footer */}
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400 font-mono">
+          <span className="text-[11px] text-slate-500 font-medium font-mono">
             ID: {referral.id || referral.localId || 'N/A'}
           </span>
           <button

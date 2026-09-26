@@ -770,13 +770,15 @@ export const Sidebar: React.FC = () => {
 
             {!isCollapsed && (
               <div className="min-w-0">
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-1.5">
                   <span className="text-base font-extrabold text-slate-900 tracking-tight leading-none">
                     SwasthyaSetu
                   </span>
-                  <span className="text-[10px] font-black text-teal-600 uppercase">AI</span>
+                  <span className="text-[9px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-1 py-0.2 rounded uppercase">
+                    EHR
+                  </span>
                 </div>
-                <span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase block mt-1 truncate">
+                <span className="text-[9px] font-bold text-slate-500 tracking-widest uppercase block mt-1 truncate">
                   CLINICAL HEALTH PORTAL
                 </span>
               </div>
@@ -795,7 +797,7 @@ export const Sidebar: React.FC = () => {
         {/* Section Heading (Matches Reference Screenshot) */}
         {!isCollapsed && (
           <div className="px-6 pt-5 pb-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
               {currentConfig.sectionHeader}
             </span>
           </div>

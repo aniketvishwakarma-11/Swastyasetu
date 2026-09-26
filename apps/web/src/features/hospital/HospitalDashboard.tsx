@@ -437,7 +437,7 @@ export const HospitalDashboard: React.FC = () => {
           <div className="p-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
             <UserCheck className="w-8 h-8 mx-auto text-slate-400 mb-2" />
             <p className="text-xs font-semibold text-slate-700">No Pending Identity Matches</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
               All incoming patient identities are confirmed and reconciled.
             </p>
           </div>
@@ -511,9 +511,9 @@ export const HospitalDashboard: React.FC = () => {
 
         {referrals.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
-            <Stethoscope className="w-10 h-10 mx-auto text-slate-300 mb-3" />
+            <Stethoscope className="w-10 h-10 mx-auto text-slate-400 mb-3" />
             <p className="text-sm font-semibold text-slate-700">No Incoming Referrals Yet</p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Referrals dispatched from PHC centres will appear here immediately for triage.
             </p>
           </div>
@@ -545,7 +545,7 @@ export const HospitalDashboard: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-slate-900">{ref.patient?.name}</div>
-                        <div className="text-[11px] text-slate-400">
+                        <div className="text-[11px] text-slate-500 font-medium">
                           {ref.patient?.age} yrs, {ref.patient?.gender} • {ref.patient?.village}
                         </div>
                       </td>
@@ -585,7 +585,7 @@ export const HospitalDashboard: React.FC = () => {
                           <span>{isConfirmed ? 'CONFIRMED' : 'MATCH PENDING'}</span>
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-400 text-[11px] whitespace-nowrap">
+                      <td className="px-6 py-4 text-slate-500 text-[11px] whitespace-nowrap font-medium">
                         <span className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
                           <span>{new Date(ref.createdAt).toLocaleDateString()}</span>

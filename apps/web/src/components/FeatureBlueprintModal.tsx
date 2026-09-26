@@ -9,6 +9,7 @@ import {
   Layers,
   ArrowRight,
 } from 'lucide-react';
+import { useModalA11y } from '../hooks/useModalA11y';
 
 export interface FeatureBlueprint {
   id: string;
@@ -38,6 +39,8 @@ export const FeatureBlueprintModal: React.FC<FeatureBlueprintModalProps> = ({
   onClose,
   onStartBuilding,
 }) => {
+  useModalA11y({ isOpen: !!blueprint, onClose });
+
   if (!blueprint) return null;
 
   const getStatusBadge = (status: FeatureBlueprint['status']) => {
@@ -71,8 +74,17 @@ export const FeatureBlueprintModal: React.FC<FeatureBlueprintModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm">
-      <div className="clinical-surface my-8 flex w-full max-w-2xl flex-col overflow-hidden rounded-[24px]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="blueprint-modal-title"
+      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="clinical-surface my-8 flex w-full max-w-2xl flex-col overflow-hidden rounded-[24px]"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/90 px-6 py-4">
           <div className="flex items-center space-x-3">
@@ -81,7 +93,7 @@ export const FeatureBlueprintModal: React.FC<FeatureBlueprintModalProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold text-slate-900">{blueprint.title}</h2>
+                <h2 id="blueprint-modal-title" className="text-base font-bold text-slate-900">{blueprint.title}</h2>
                 {getStatusBadge(blueprint.status)}
               </div>
               <p className="text-xs text-slate-500 mt-0.5">

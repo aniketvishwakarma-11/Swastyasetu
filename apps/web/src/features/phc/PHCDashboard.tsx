@@ -193,7 +193,7 @@ export const PHCDashboard: React.FC = () => {
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Dispatched</p>
             <p className="text-2xl font-bold text-slate-900 mt-1">{referrals.length}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Outbound clinical handoffs</p>
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Outbound clinical handoffs</p>
           </div>
           <div className="h-11 w-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700">
             <Send className="w-5 h-5" />
@@ -219,7 +219,7 @@ export const PHCDashboard: React.FC = () => {
             <p className="text-2xl font-bold text-amber-700 mt-1">
               {referrals.filter((r) => r.urgency === 'URGENT' || r.urgency === 'ROUTINE').length}
             </p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Secondary care queue</p>
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Secondary care queue</p>
           </div>
           <div className="h-11 w-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700">
             <Clock className="w-5 h-5" />
@@ -264,9 +264,9 @@ export const PHCDashboard: React.FC = () => {
 
         {referrals.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
-            <Stethoscope className="w-10 h-10 mx-auto text-slate-300 mb-3" />
+            <Stethoscope className="w-10 h-10 mx-auto text-slate-400 mb-3" />
             <p className="text-sm font-semibold text-slate-700">No Referrals Dispatched Yet</p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Click &quot;+ Create Digital Referral&quot; to initiate a patient transfer.
             </p>
           </div>
@@ -298,7 +298,7 @@ export const PHCDashboard: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-slate-900">{ref.patient?.name || 'Unknown'}</div>
-                        <div className="text-[11px] text-slate-400">
+                        <div className="text-[11px] text-slate-500 font-medium">
                           {ref.patient?.age} yrs, {ref.patient?.gender} • {ref.patient?.village}
                         </div>
                       </td>
@@ -348,7 +348,7 @@ export const PHCDashboard: React.FC = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-slate-400 text-[11px] whitespace-nowrap">
+                      <td className="px-6 py-4 text-slate-500 text-[11px] whitespace-nowrap font-medium">
                         <span className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
                           <span>{new Date(ref.createdAt).toLocaleDateString()}</span>
@@ -548,7 +548,7 @@ export const PHCDashboard: React.FC = () => {
                     </div>
 
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400">Standard GSM SMS Compatible</span>
+                      <span className="text-[11px] text-slate-500 font-medium">Standard GSM SMS Compatible</span>
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(smsText);

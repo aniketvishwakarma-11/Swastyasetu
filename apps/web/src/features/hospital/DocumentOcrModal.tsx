@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export interface ClinicalFieldItem {
   id: string;
@@ -47,6 +48,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
   referralId,
   onSuccess,
 }) => {
+  useModalA11y({ isOpen, onClose });
   // Extraction states
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -219,8 +221,17 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
   const autoAcceptedCount = fields.filter((f) => f.reviewStatus === 'AUTO_ACCEPTED' || f.reviewStatus === 'VERIFIED').length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ocr-modal-title"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -229,7 +240,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 id="ocr-modal-title" className="text-lg font-bold text-slate-900">
                   Clinical Document &amp; Prescription Scanner
                 </h3>
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-teal-100 text-teal-800">

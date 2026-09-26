@@ -9,6 +9,7 @@ import {
   Info,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface FieldScore {
   field: string;
@@ -55,6 +56,8 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [clinicalNotes, setClinicalNotes] = useState('');
+
+  useModalA11y({ isOpen, onClose });
 
   if (!isOpen || !referral || !candidateMatch) return null;
 
@@ -141,8 +144,17 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="identity-reconciliation-title"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col"
+      >
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -151,7 +163,7 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold text-slate-900">Side-by-Side Identity Reconciliation</h2>
+                <h2 id="identity-reconciliation-title" className="text-base font-bold text-slate-900">Side-by-Side Identity Reconciliation</h2>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
                   {evaluation.percentage}% Similarity
                 </span>
@@ -211,7 +223,7 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
               {/* Demographics */}
               <div className="space-y-3 text-xs">
                 <div>
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Full Name</span>
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Full Name</span>
                   <div className="text-sm font-bold text-slate-900 mt-0.5">
                     {incoming.name}
                   </div>
@@ -219,22 +231,22 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Age & Gender</span>
+                    <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Age & Gender</span>
                     <span className="font-semibold text-slate-800">{incoming.age} yrs • {incoming.gender}</span>
                   </div>
                   <div>
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Mobile Phone</span>
+                    <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Mobile Phone</span>
                     <span className="font-mono text-slate-800">{incoming.phone || 'None'}</span>
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Village / Locality</span>
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Village / Locality</span>
                   <span className="font-semibold text-slate-800">{incoming.village}</span>
                 </div>
 
                 <div className="pt-2 border-t border-slate-200">
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Clinical Complaint</span>
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Clinical Complaint</span>
                   <p className="text-xs text-slate-700 mt-0.5 italic">{referral.reason}</p>
                 </div>
               </div>
@@ -258,7 +270,7 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
               <div className="space-y-3 text-xs">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Full Name</span>
+                    <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Full Name</span>
                     {renderMatchBadge('name')}
                   </div>
                   <div className="text-sm font-bold text-slate-900 mt-0.5">
@@ -269,7 +281,7 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Age & Gender</span>
+                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Age & Gender</span>
                       {renderMatchBadge('age')}
                     </div>
                     <span className="font-semibold text-slate-800 mt-0.5 block">
@@ -278,7 +290,7 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Phone</span>
+                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Phone</span>
                       {renderMatchBadge('phone')}
                     </div>
                     <span className="font-mono text-slate-800 mt-0.5 block">{candidate.phone || 'None'}</span>
@@ -287,14 +299,14 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
 
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Village</span>
+                    <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Village</span>
                     {renderMatchBadge('village')}
                   </div>
                   <span className="font-semibold text-slate-800 mt-0.5 block">{candidate.village}</span>
                 </div>
 
                 <div className="pt-2 border-t border-slate-200">
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Address</span>
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Address</span>
                   <p className="text-xs text-slate-600 mt-0.5">{candidate.address || 'Khed District, Pune'}</p>
                 </div>
               </div>

@@ -12,6 +12,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface SpecialistRosterItem {
   id: string;
@@ -64,6 +65,7 @@ export const HospitalReadinessRadarModal: React.FC<HospitalReadinessRadarModalPr
   isOpen,
   onClose,
 }) => {
+  useModalA11y({ isOpen, onClose });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [facilities, setFacilities] = useState<FacilityCapacityData[]>([]);
@@ -149,8 +151,17 @@ export const HospitalReadinessRadarModal: React.FC<HospitalReadinessRadarModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="hospital-readiness-title"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150"
+      >
         
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -160,7 +171,7 @@ export const HospitalReadinessRadarModal: React.FC<HospitalReadinessRadarModalPr
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-base font-bold text-slate-900">Hospital Bed &amp; ICU Readiness Radar</h3>
+                <h3 id="hospital-readiness-title" className="text-base font-bold text-slate-900">Hospital Bed &amp; ICU Readiness Radar</h3>
                 <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
                   DISTRICT MONITOR
                 </span>
