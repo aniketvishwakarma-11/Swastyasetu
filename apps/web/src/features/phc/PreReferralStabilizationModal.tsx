@@ -157,7 +157,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
       });
 
       if (res.success && res.data) {
-        setSuccessMsg(`Pre-referral stabilization checklist saved under Rule 4 audit.`);
+        setSuccessMsg(`Pre-referral stabilization checklist recorded and audit-logged.`);
         if (onStabilizationSaved) {
           onStabilizationSaved(res.data);
         }
@@ -191,7 +191,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-base tracking-tight text-white">Pre-Referral Emergency Stabilization</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
-                  Rule 4 Audit Logged
+                  Audit Verified
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">

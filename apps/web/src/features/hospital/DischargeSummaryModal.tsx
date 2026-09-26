@@ -101,7 +101,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
       : 'Day-7 Post-Discharge review.'
   );
 
-  // Clinician Sign-Off (Hard Rule 3)
+  // Clinician Electronic Sign-Off Protocol
   const [isSigned, setIsSigned] = useState(false);
   const [clinicianNotes, setClinicianNotes] = useState('');
 
@@ -284,7 +284,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
     }
 
     if (!isSigned) {
-      setErrorMsg('Attending clinician verification and sign-off is mandatory under Clinical Rule 3.');
+      setErrorMsg('Attending clinician verification and sign-off is mandatory prior to generating discharge summary.');
       return;
     }
 
@@ -794,7 +794,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
             </div>
           </div>
 
-          {/* Clinical Attestation & Safety Directive (Rule 1 & Rule 3) */}
+          {/* Clinical Attestation & Electronic Sign-off Protocol */}
           <div className="border border-slate-300 bg-slate-50 rounded-xl p-4 space-y-2">
             <label className="flex items-start space-x-3 cursor-pointer">
               <input
@@ -805,7 +805,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
               />
               <div className="text-xs">
                 <span className="font-bold text-slate-900">
-                  Attending Clinician Certification &amp; Sign-Off (Hard Rule 3 Enforced)
+                  Attending Clinician Certification &amp; Electronic Sign-Off
                 </span>
                 <p className="text-slate-600 text-[11px] mt-0.5">
                   I certify that I have personally evaluated the patient, verified all take-home medication dosages, reviewed discharge vitals, and established the post-discharge village PHC care plan.
@@ -831,7 +831,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
         {/* Modal Footer */}
         <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
           <div className="text-[11px] text-slate-500">
-            Enforces <strong className="text-slate-700">Hard Rule 4</strong>: Generates an immutable <code className="text-teal-700 font-mono">DISCHARGE_SUMMARY_CREATED</code> audit event.
+            Audit Verified: Generates an immutable <code className="text-teal-700 font-mono">DISCHARGE_SUMMARY_CREATED</code> ledger entry under ABDM clinical governance.
           </div>
 
           <div className="flex items-center space-x-3">

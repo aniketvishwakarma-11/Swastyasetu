@@ -78,29 +78,27 @@ export const SignupView: React.FC = () => {
         </aside>
 
         <div className="p-6 sm:p-10 lg:p-12">
-        <div className="mx-auto max-w-lg">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-600 text-white mb-3 shadow-md shadow-teal-600/20 lg:hidden">
-            <Activity className="w-8 h-8" />
-          </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">Secure staff onboarding</p>
-          <h1 className="mt-2 text-3xl font-semibold text-slate-950 tracking-tight">Create your workspace.</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Register your role in the SwasthyaSetu continuity network
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="clinical-surface rounded-2xl p-6 sm:p-8">
-          {errorMessage && (
-            <div className="mb-6 p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start space-x-2.5 text-xs text-rose-700">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <span>{errorMessage}</span>
+          <div className="mx-auto max-w-lg">
+            {/* Header */}
+            <div className="mb-8">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-700 mb-3 lg:hidden">
+                <Activity className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">Secure staff onboarding</p>
+              <h1 className="mt-2 text-3xl font-semibold text-slate-950 tracking-tight">Create your workspace.</h1>
+              <p className="text-xs text-slate-500 mt-1">
+                Register your role in the SwasthyaSetu continuity network
+              </p>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMessage && (
+              <div className="mb-6 p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start space-x-2.5 text-xs text-rose-700">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -255,9 +253,8 @@ export const SignupView: React.FC = () => {
             </Link>
           </div>
         </div>
-        </div>
       </div>
-      </div>
+    </div>
     </div>
   );
 };

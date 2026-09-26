@@ -86,7 +86,7 @@ export const PrivacyPolicyPage: React.FC = () => {
           <section className="space-y-2">
             <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
               <FileText className="w-4 h-4 text-teal-600" />
-              <span>4. Immutable Auditability (Hard Rule 4)</span>
+              <span>4. Tamper-Evident Immutable Audit Ledger</span>
             </h2>
             <p>
               Every access, identity reconciliation confirmation, dosage verification, and referral status transition generates

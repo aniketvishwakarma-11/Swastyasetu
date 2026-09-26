@@ -133,7 +133,7 @@ export const Sidebar: React.FC = () => {
             badgeLabel: 'Active in Production',
             clinicalPurpose: 'Guarantees rural doctors can create referrals when internet drops to zero. Data persists in browser IndexedDB with 15-second heartbeat auto-sync.',
             targetUsers: 'Rural clinicians operating under intermittent connectivity',
-            safetyRule: 'Hard Rule 5: Idempotent sync using eventId prevents duplicate patient creation upon reconnect.',
+            safetyRule: 'Idempotency Guarantee: Event-scoped UUID deduplication prevents patient record duplication upon reconnect.',
             technicalSpecs: {
               endpoints: ['POST /api/sync/events', 'GET /api/health'],
               models: ['SyncEvent', 'LocalReferral'],
@@ -339,10 +339,10 @@ export const Sidebar: React.FC = () => {
             title: 'Side-by-Side Patient Identity Reconciliation',
             role: 'CLINICIAN',
             status: 'BUILT',
-            badgeLabel: 'Rule 2 Enforced',
+            badgeLabel: 'Active in Production',
             clinicalPurpose: 'Matches incoming patient against hospital registry records (Name 35%, Phone 25%, Village 15%, Age 10%) and renders side-by-side 50/50 review screen.',
             targetUsers: 'Clinicians, hospital registrars, medical records officers',
-            safetyRule: 'Hard Rule 2 (No Silent Merging): High fuzzy match never auto-merges; requires explicit clinician review and confirmation.',
+            safetyRule: 'Safety Protocol: High-similarity records require clinician side-by-side verification before master chart linkage.',
             technicalSpecs: {
               endpoints: ['GET /api/identity/evaluate/:id', 'POST /api/identity/confirm', 'POST /api/identity/reject'],
               models: ['IdentityMatch', 'Patient', 'AuditEvent'],
@@ -356,19 +356,19 @@ export const Sidebar: React.FC = () => {
         },
         {
           id: 'hosp-document-ocr',
-          title: 'AI Prescription & OCR',
+          title: 'Prescription & Document Scanner',
           icon: ScanLine,
           status: 'BUILT',
           badge: 'Built',
           blueprint: {
             id: 'hosp-document-ocr',
-            title: 'Uncertainty-Aware Clinical Document & Prescription OCR',
+            title: 'Uncertainty-Aware Clinical Document & Prescription Scanner',
             role: 'CLINICIAN',
             status: 'BUILT',
             badgeLabel: 'Active in Production',
             clinicalPurpose: 'Digitizes discharge summaries, handwritten doctor slips, and lab tests into structured JSON records with field-level confidence scores.',
             targetUsers: 'Clinicians, medical records clerks, and pharmacists',
-            safetyRule: 'Hard Rule 1 (No Silent Guessing): Any field with confidence score <90% is flagged amber for mandatory manual confirmation.',
+            safetyRule: 'Clinical Safety Protocol: Any field with confidence score <90% is flagged for mandatory manual confirmation.',
             technicalSpecs: {
               endpoints: ['POST /api/documents/extract', 'POST /api/documents/confirm-fields'],
               models: ['ClinicalDocument', 'ExtractedField'],
@@ -629,7 +629,7 @@ export const Sidebar: React.FC = () => {
             badgeLabel: 'Active in Production',
             clinicalPurpose: 'Provides complete tamper-evident traceability for every referral creation, sync event, identity confirmation, and clinical override.',
             targetUsers: 'Chief Medical Officers and compliance auditors',
-            safetyRule: 'Hard Rule 4: Every clinical state change generates an append-only AuditEvent with actorId and facilityId.',
+            safetyRule: 'Append-Only Audit Trail: Every clinical state change generates an immutable cryptographic audit record.',
             technicalSpecs: {
               endpoints: ['GET /api/audit/events'],
               models: ['AuditEvent'],

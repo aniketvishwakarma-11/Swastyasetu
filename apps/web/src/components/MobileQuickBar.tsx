@@ -39,6 +39,9 @@ export const MobileQuickBar: React.FC = () => {
     }
   };
 
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  if (isAuthPage) return null;
+
   const isPortalRoute = ['/phc', '/hospital', '/triage', '/admin'].includes(location.pathname);
 
   return (

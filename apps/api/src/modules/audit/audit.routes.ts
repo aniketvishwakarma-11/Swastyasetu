@@ -105,7 +105,7 @@ const fallbackAuditLog: Array<Omit<EnrichedAuditEvent, 'hash' | 'prevHash'>> = [
     metadata: {
       referralId: 'ref-stemi-01',
       candidateScore: 0.94,
-      ruleEnforced: 'Hard Rule 2 (No Silent Merging) - Clinician explicit biometric confirmation',
+      ruleEnforced: 'Clinical Safety Protocol (No Silent Merging) - Clinician explicit biometric confirmation',
       mergedFields: ['name', 'phone', 'village'],
     },
     timestamp: new Date(Date.now() - 3600000 * 3.8).toISOString(),
@@ -126,7 +126,7 @@ const fallbackAuditLog: Array<Omit<EnrichedAuditEvent, 'hash' | 'prevHash'>> = [
       modelUsed: 'Hugging Face Space Aniketvis11/medivault-ocr',
       fieldsExtracted: 6,
       manualCorrections: 1,
-      ruleEnforced: 'Hard Rule 1 (No Silent Guessing) - Verified by attending clinician',
+      ruleEnforced: 'Clinical Safety Protocol (Mandatory Verification) - Verified by attending clinician',
     },
     timestamp: new Date(Date.now() - 3600000 * 2.2).toISOString(),
   },
@@ -376,7 +376,7 @@ router.get('/verify', requireAuth, async (_req: Request, res: Response): Promise
       breakPoint,
       rootHash: fullChain[fullChain.length - 1]?.hash,
       algorithm: 'SHA-256 (Append-Only Merkle Link)',
-      enforcedRule: 'Hard Rule 4 (Auditability): Clinical state changes are strictly append-only and cryptographically sealed.',
+      enforcedRule: 'Clinical Safety Protocol (Auditability): Clinical state changes are strictly append-only and cryptographically sealed.',
     });
   } catch (error: any) {
     res.status(500).json({

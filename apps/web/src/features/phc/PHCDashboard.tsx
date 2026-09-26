@@ -119,7 +119,7 @@ export const PHCDashboard: React.FC = () => {
             className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>+ Create Digital Referral</span>
+            <span>Create Digital Referral</span>
           </button>
 
           <button

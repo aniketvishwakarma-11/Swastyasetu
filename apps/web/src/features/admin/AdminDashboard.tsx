@@ -77,6 +77,13 @@ export const AdminDashboard: React.FC = () => {
             <span>Run RBAC Audit</span>
           </button>
 
+          <button
+            onClick={() => setIsAuditModalOpen(true)}
+            className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center space-x-1.5 cursor-pointer"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+            <span>Audit Trail Explorer</span>
+          </button>
         </div>
       </div>
 

@@ -9,6 +9,7 @@ export const PWAInstallBanner: React.FC = () => {
   const { isInstallable, isInstalled, isIOS, installApp } = usePWA();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
   // Session-level dismiss: resets whenever the user visits or refreshes the homepage
   const [sessionDismissed, setSessionDismissed] = useState<boolean>(false);
@@ -25,6 +26,9 @@ export const PWAInstallBanner: React.FC = () => {
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [showDesktopInstructions, setShowDesktopInstructions] = useState(false);
 
+  // Check if cookie consent is pending (avoid stacking two bottom banners)
+  const isCookiePending = !localStorage.getItem('swasthyasetu_consent_v1');
+
   // Reset session dismissal when navigating to the homepage so it displays every time
   useEffect(() => {
     if (isHomePage) {
@@ -32,8 +36,18 @@ export const PWAInstallBanner: React.FC = () => {
     }
   }, [location.pathname, isHomePage]);
 
+  // Never display on authentication pages (login / signup)
+  if (isAuthPage) {
+    return null;
+  }
+
   // If already installed, never show the banner
   if (isInstalled) {
+    return null;
+  }
+
+  // If cookie consent banner is still pending, don't double-stack banners
+  if (isCookiePending) {
     return null;
   }
 

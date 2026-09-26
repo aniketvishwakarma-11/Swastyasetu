@@ -153,10 +153,10 @@ export const ADMIN_BLUEPRINTS: Record<string, FeatureBlueprint> = {
     title: 'Immutable Clinical Audit Trail Explorer',
     role: 'ADMIN',
     status: 'NEXT_UP',
-    badgeLabel: 'Rule 4 Enforced',
+    badgeLabel: 'Audit Verified',
     clinicalPurpose: 'Searchable, tamper-evident ledger of every system event (REFERRAL_CREATED, IDENTITY_CONFIRMED, DOCUMENT_OCR_VERIFIED) with actorId, facilityId, and timestamps.',
     targetUsers: 'District Health Officers, Compliance Auditors, Chief Medical Officers',
-    safetyRule: 'Hard Rule 4 (Auditability): Audit log is strictly append-only; records cannot be updated or deleted.',
+    safetyRule: 'Clinical Governance (Auditability): Audit log is strictly append-only; records cannot be updated or deleted.',
     technicalSpecs: {
       endpoints: ['GET /api/audit/events', 'GET /api/audit/verify'],
       models: ['AuditEvent'],

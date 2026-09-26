@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
   HeartPulse,
@@ -56,6 +56,28 @@ export const RapidVitalsModal: React.FC<RapidVitalsModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+
+  // Clear form state on modal open so previous patient data does not bleed into new entry
+  useEffect(() => {
+    if (isOpen) {
+      setPatientName('');
+      setAge('');
+      setGender('Male');
+      setPhone('');
+      setVillage('');
+      setSystolicBp('');
+      setDiastolicBp('');
+      setSpo2('');
+      setHeartRate('');
+      setBloodSugar('');
+      setRespiratoryRate('');
+      setTemperature('');
+      setGestationalWeeks('');
+      setIsSubmitting(false);
+      setFeedback(null);
+      setShowHistory(false);
+    }
+  }, [isOpen]);
 
   // Real-time Early Warning Score (EWS) and Safety Evaluation
   const evaluation = useMemo(() => {

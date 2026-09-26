@@ -71,6 +71,7 @@ export const HospitalDashboard: React.FC = () => {
     lastPushPayload,
   } = usePushNotifications();
   const [activeEmergencyAlert, setActiveEmergencyAlert] = useState<EmergencyAlertItem | null>(null);
+  const [dismissedAlertIds, setDismissedAlertIds] = useState<Set<string>>(new Set());
   const [showPermModal, setShowPermModal] = useState<boolean>(false);
 
   // Auto prompt permission modal once for clinicians if supported and not yet decided
@@ -87,6 +88,7 @@ export const HospitalDashboard: React.FC = () => {
   // Sync incoming emergency alert from push payload or referral queue
   useEffect(() => {
     if (lastPushPayload) {
+      if (dismissedAlertIds.has(lastPushPayload.referralId)) return;
       setActiveEmergencyAlert({
         id: lastPushPayload.referralId,
         referralNumber: lastPushPayload.referralNumber || 'EMERGENCY',
@@ -102,7 +104,7 @@ export const HospitalDashboard: React.FC = () => {
       });
     } else if (referrals.length > 0) {
       const activeEmergency = referrals.find(
-        (r) => r.urgency === 'EMERGENCY' && (r.status === 'SENT' || r.status === 'VALIDATED')
+        (r) => r.urgency === 'EMERGENCY' && (r.status === 'SENT' || r.status === 'VALIDATED') && !dismissedAlertIds.has(r.id)
       );
       if (activeEmergency) {
         setActiveEmergencyAlert({
@@ -120,7 +122,7 @@ export const HospitalDashboard: React.FC = () => {
         });
       }
     }
-  }, [lastPushPayload, referrals]);
+  }, [lastPushPayload, referrals, dismissedAlertIds]);
 
   // Fetch referrals for this hospital and run identity candidate evaluation
   const loadHospitalData = useCallback(async () => {
@@ -272,7 +274,12 @@ export const HospitalDashboard: React.FC = () => {
       {/* High-Visibility Emergency Alert Banner */}
       <EmergencyAlertBanner
         alert={activeEmergencyAlert}
-        onDismiss={() => setActiveEmergencyAlert(null)}
+        onDismiss={() => {
+          if (activeEmergencyAlert?.id) {
+            setDismissedAlertIds((prev) => new Set(prev).add(activeEmergencyAlert.id));
+          }
+          setActiveEmergencyAlert(null);
+        }}
         onViewDetails={(referralId) => {
           const target = referrals.find((r) => r.id === referralId);
           if (target) {
@@ -349,7 +356,7 @@ export const HospitalDashboard: React.FC = () => {
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
           >
             <ScanLine className="w-3.5 h-3.5" />
-            <span>AI Document &amp; Prescription OCR</span>
+            <span>Prescription &amp; Document Scanner</span>
           </button>
 
           <button

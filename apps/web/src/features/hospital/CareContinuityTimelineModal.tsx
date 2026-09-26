@@ -307,7 +307,7 @@ export const CareContinuityTimelineModal: React.FC<CareContinuityTimelineModalPr
                               <div className="mt-3 p-3 bg-slate-950 text-slate-300 rounded-lg font-mono text-[11px] space-y-2 border border-slate-800 overflow-x-auto">
                                 <div className="text-[10px] text-slate-500 font-bold border-b border-slate-800 pb-1 mb-1 flex items-center justify-between">
                                   <span>IMMUTABLE SCHEMATIC DATA (AUDIT)</span>
-                                  <span>RULE 4 VERIFIED</span>
+                                  <span>AUDIT VERIFIED</span>
                                 </div>
                                 {evt.metadata.referralNumber && (
                                   <div>

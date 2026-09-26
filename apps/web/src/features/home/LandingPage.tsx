@@ -199,7 +199,7 @@ const Section: React.FC<{ id?: string; className?: string; children: React.React
   className = '',
   children,
 }) => (
-  <section id={id} className={`py-14 sm:py-18 ${className}`}>
+  <section id={id} className={`scroll-mt-16 sm:scroll-mt-20 py-14 sm:py-18 ${className}`}>
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">{children}</div>
   </section>
 );
@@ -415,7 +415,7 @@ export const LandingPage: React.FC = () => (
       <p className="text-slate-600 text-sm mb-8 max-w-2xl leading-relaxed">
         Every capability shows its current implementation status. <strong className="text-slate-800">Live in Demo</strong> means
         demonstrably working in the current repository. <strong className="text-slate-800">In Development</strong> means
-        specified on the hackathon roadmap.
+        specified on the engineering roadmap.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -696,7 +696,7 @@ export const LandingPage: React.FC = () => (
                   to="/terms"
                   className="text-teal-400 hover:text-teal-300 focus:outline-none focus:underline hover:underline transition-colors"
                 >
-                  Terms &amp; Protocols (Rule 3)
+                  Terms &amp; Clinical Protocols
                 </Link>
               </li>
             </ul>

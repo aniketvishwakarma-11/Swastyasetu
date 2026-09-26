@@ -40,7 +40,12 @@ export const AmbulanceTransportSlipModal: React.FC<AmbulanceTransportSlipModalPr
     setLoading(true);
     setErrorMsg(null);
     try {
-      const targetId = referralId || referralNumber || 'ref-stemi-01';
+      const targetId = referralId || referralNumber;
+      if (!targetId) {
+        setErrorMsg('No active referral selected. Please select a patient transfer from the triage pipeline.');
+        setLoading(false);
+        return;
+      }
       const res = await apiRequest(`/referrals/${targetId}/transport-slip`);
       if (res.success && res.data) {
         setSlipData(res.data);

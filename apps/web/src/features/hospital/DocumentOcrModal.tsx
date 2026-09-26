@@ -173,7 +173,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
     );
   };
 
-  // Handler: Clinician commits and confirms all fields (Hard Rule 4: Audit Event)
+  // Handler: Clinician commits and confirms all fields (Clinical Audit Trail)
   const handleConfirmCareRecord = async () => {
     if (!documentId) return;
 
@@ -230,14 +230,14 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="text-lg font-bold text-slate-900">
-                  AI Clinical Document & Prescription OCR Scanner
+                  Clinical Document &amp; Prescription Scanner
                 </h3>
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-teal-100 text-teal-800">
-                  Step 7 & 8 Handoff
+                  Digital Records Handoff
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Patient: <span className="font-semibold text-slate-800">{patientName}</span> • ABHA: <span className="font-mono text-slate-700">{patientAbha || '91-4829-1029-4401'}</span> • TrOCR Vision Model
+                Patient: <span className="font-semibold text-slate-800">{patientName}</span> • ABHA: <span className="font-mono text-slate-700">{patientAbha || '91-4829-1029-4401'}</span> • Optical Document Transcription
               </p>
             </div>
           </div>
@@ -246,7 +246,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
             {ocrEngine && (
               <span className="hidden md:inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-300">
                 <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                <span>{ocrEngine === 'HUGGINGFACE_MEDIVAULT_TROCR' ? 'HF Space: TrOCR Active' : 'Resilient Fallback Mode'}</span>
+                <span>{ocrEngine === 'HUGGINGFACE_MEDIVAULT_TROCR' ? 'High-Precision OCR' : 'Local Fallback Engine'}</span>
               </span>
             )}
             <button
@@ -322,16 +322,16 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
           </div>
         )}
 
-        {/* Hard Rule 1 Banner (if items need review) */}
+        {/* Low-Confidence Extraction Review Banner */}
         {fields.length > 0 && needsReviewCount > 0 && !successMessage && (
           <div className="mx-6 mt-3 p-3 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-start space-x-2.5">
             <AlertTriangle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">
-                Hard Clinical Safety Rule 1: No Silent Guessing Enforced
+                Clinical Safety Protocol: Verification Required
               </p>
               <p className="text-amber-800 mt-0.5">
-                {needsReviewCount} field(s) have extraction confidence &lt; 90% due to cursive handwriting. Review the original scan on the left and edit or verify the dosage before saving.
+                {needsReviewCount} field(s) have extraction confidence &lt; 90% due to handwriting variation. Inspect the original document on the left and confirm or adjust values before saving.
               </p>
             </div>
           </div>
@@ -547,7 +547,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
             {fields.length > 0 && (
               <div className="p-3 bg-white border-t border-slate-200 flex items-center justify-between">
                 <span className="text-xs text-slate-500">
-                  Enforces <strong>Rule 4</strong> (Immutable Audit Log)
+                  Enforces <strong>Clinical Safety Protocol</strong> (Immutable Audit Log)
                 </span>
                 <button
                   onClick={handleConfirmCareRecord}

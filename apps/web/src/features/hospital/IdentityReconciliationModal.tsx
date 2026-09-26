@@ -157,7 +157,7 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Referral <span className="font-mono font-semibold text-slate-700">{referral.referralNumber}</span> • Clinician confirmation required (No Silent Merging)
+                Referral <span className="font-mono font-semibold text-slate-700">{referral.referralNumber}</span> • Clinician verification required before merging records
               </p>
             </div>
           </div>
@@ -174,7 +174,7 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
         <div className="bg-amber-50/70 border-b border-amber-200/80 px-6 py-2.5 flex items-center space-x-2 text-xs text-amber-900">
           <Info className="w-4 h-4 shrink-0 text-amber-700" />
           <span>
-            <strong>Hard Safety Rule:</strong> High fuzzy similarity is never automatically merged. Review character differences below before confirming patient record linkage.
+            <strong>Clinical Safety Protocol:</strong> High-similarity records require clinician side-by-side verification before master chart linkage. Inspect character differences below.
           </span>
         </div>
 

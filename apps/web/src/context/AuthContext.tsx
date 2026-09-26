@@ -50,6 +50,59 @@ export function getDefaultDashboard(role?: UserRole): string {
   }
 }
 
+const DEMO_FALLBACK_PROFILES: Record<string, UserProfile> = {
+  'phc_doctor@swastyasetu.gov.in': {
+    id: 'user-phc-khed',
+    name: 'Dr. Rajesh Sharma',
+    email: 'phc_doctor@swastyasetu.gov.in',
+    role: 'PHC_USER',
+    facilityId: 'fac-phc-khed',
+    facility: {
+      id: 'fac-phc-khed',
+      code: 'PHC-KHED',
+      name: 'Primary Health Centre Khed',
+      type: 'PHC',
+      district: 'Pune',
+    },
+  },
+  'hospital_doctor@swastyasetu.gov.in': {
+    id: 'user-hosp-aundh',
+    name: 'Dr. Priya Deshmukh',
+    email: 'hospital_doctor@swastyasetu.gov.in',
+    role: 'CLINICIAN',
+    facilityId: 'fac-dist-hosp',
+    facility: {
+      id: 'fac-dist-hosp',
+      code: 'DIST-HOSP',
+      name: 'Aundh District Hospital',
+      type: 'DISTRICT_HOSPITAL',
+      district: 'Pune',
+    },
+  },
+  'coordinator@swastyasetu.gov.in': {
+    id: 'user-coord-aundh',
+    name: 'Vikram Solanki',
+    email: 'coordinator@swastyasetu.gov.in',
+    role: 'REFERRAL_COORDINATOR',
+    facilityId: 'fac-dist-hosp',
+    facility: {
+      id: 'fac-dist-hosp',
+      code: 'DIST-HOSP',
+      name: 'Aundh District Hospital',
+      type: 'DISTRICT_HOSPITAL',
+      district: 'Pune',
+    },
+  },
+  'admin@swastyasetu.gov.in': {
+    id: 'user-admin-pune',
+    name: 'System Admin',
+    email: 'admin@swastyasetu.gov.in',
+    role: 'ADMIN',
+    facilityId: null,
+    facility: null,
+  },
+};
+
 function getStoredUser(): UserProfile | null {
   try {
     const raw = localStorage.getItem('swastyasetu_user');
@@ -110,12 +163,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // 2. Check existing local storage JWT
       const storedToken = localStorage.getItem('swastyasetu_auth_token');
       if (storedToken) {
+        // If it's an offline session token, preserve local credentials directly
+        if (storedToken.startsWith('offline_demo_token_')) {
+          const cachedUser = getStoredUser();
+          if (cachedUser && isMounted) {
+            setUser(cachedUser);
+            setIsLoading(false);
+            return;
+          }
+        }
+
         const res = await apiRequest<UserProfile>('/auth/me');
         if (isMounted) {
           if (res.success && res.data) {
             localStorage.setItem('swastyasetu_user', JSON.stringify(res.data));
             setUser(res.data);
+          } else if (res.error?.code === 'NETWORK_ERROR') {
+            // Keep local user cached when network is down instead of clearing session
+            const cachedUser = getStoredUser();
+            if (cachedUser) {
+              setUser(cachedUser);
+            }
           } else {
+            // Token is explicitly invalid (e.g. 401 or revoked)
             localStorage.removeItem('swastyasetu_auth_token');
             localStorage.removeItem('swastyasetu_user');
             setToken(null);
@@ -173,6 +243,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('swastyasetu_user', JSON.stringify(res.data.user));
       setToken(res.data.token);
       setUser(res.data.user);
+      return { success: true };
+    }
+
+    // Offline field fallback for recognized demo accounts
+    if (res.error?.code === 'NETWORK_ERROR' && DEMO_FALLBACK_PROFILES[email]) {
+      const demoUser = DEMO_FALLBACK_PROFILES[email];
+      const offlineToken = `offline_demo_token_${demoUser.role.toLowerCase()}`;
+      localStorage.setItem('swastyasetu_auth_token', offlineToken);
+      localStorage.setItem('swastyasetu_user', JSON.stringify(demoUser));
+      setToken(offlineToken);
+      setUser(demoUser);
       return { success: true };
     }
 

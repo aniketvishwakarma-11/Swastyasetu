@@ -34,7 +34,7 @@ export const TermsPage: React.FC = () => {
           <section className="space-y-2">
             <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
               <Stethoscope className="w-4 h-4 text-teal-600" />
-              <span>1. Professional Clinical Authority (Hard Rule 3 Enforced)</span>
+              <span>1. Professional Clinical Authority &amp; Prescribing Mandate</span>
             </h2>
             <p>
               SwasthyaSetu is designed as an infrastructure continuity and administrative tracking layer; it is
@@ -47,12 +47,12 @@ export const TermsPage: React.FC = () => {
           <section className="space-y-2">
             <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <span>2. AI Document OCR Verification Mandate (Hard Rule 1)</span>
+              <span>2. Prescription &amp; Clinical Document Verification Mandate</span>
             </h2>
             <p>
-              Medical staff utilizing the AI Clinical Document &amp; Prescription OCR Scanner acknowledge that machine
+              Medical staff utilizing the Clinical Document &amp; Prescription Scanner acknowledge that machine
               recognition of cursive handwriting or damaged paper slips is inherently probabilistic. In accordance with
-              <strong> Hard Rule 1 (No Silent Guessing)</strong>, clinicians are required to manually inspect the scan in
+              <strong> Clinical Safety Protocol (Mandatory Verification)</strong>, clinicians are required to manually inspect the scan in
               the split-screen review window and verify any dosage or medicine marked with confidence &lt; 90% before
               committing the data to the electronic health record.
             </p>

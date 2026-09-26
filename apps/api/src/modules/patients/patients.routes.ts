@@ -262,7 +262,7 @@ async function buildTimelineResponse(patient: any, res: Response) {
         id: `evt-id-confirm-${ref.id}`,
         eventType: 'IDENTITY_CONFIRMED',
         category: 'IDENTITY_RECONCILIATION',
-        title: 'Multi-Vector Identity Reconciled (Hard Rule 2 Sign-off)',
+        title: 'Multi-Vector Identity Reconciled (Clinician Verification Sign-off)',
         facility: ref.destinationFacility?.name || 'Aundh District Hospital',
         actor: idAudit?.metadata?.clinicianName || idActor?.name || 'Hospital Clinician',
         actorRole: idActor?.role || 'CLINICIAN',

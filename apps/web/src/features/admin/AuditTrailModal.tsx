@@ -138,7 +138,7 @@ export const AuditTrailModal: React.FC<AuditTrailModalProps> = ({ isOpen, onClos
               <div className="flex items-center space-x-2">
                 <h2 className="text-base font-bold">Immutable Clinical Audit Trail Explorer</h2>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-400/30">
-                  RULE 4 ENFORCED
+                  ABDM AUDIT COMPLIANT
                 </span>
               </div>
               <p className="text-xs text-slate-300">

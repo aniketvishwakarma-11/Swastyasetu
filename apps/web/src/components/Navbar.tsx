@@ -80,25 +80,28 @@ export const Navbar: React.FC = () => {
           {!isInstalled && (isInstallable || isIOS) && (
             <button
               onClick={installApp}
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl transition-colors cursor-pointer"
+              className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl transition-colors cursor-pointer"
               title="Install SwasthyaSetu as an offline mobile app"
             >
               <Download className="w-3.5 h-3.5 text-teal-600" />
-              <span className="hidden sm:inline">Install App</span>
+              <span>Install App</span>
             </button>
           )}
-          <Link
-            to="/login"
-            className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-teal-700 transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/signup"
-            className="px-4 py-1.5 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-xs transition-colors"
-          >
-            Register
-          </Link>
+          {location.pathname === '/login' ? (
+            <Link
+              to="/signup"
+              className="px-3.5 py-1.5 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-xs transition-colors"
+            >
+              Create Account
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="px-3.5 py-1.5 text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-xs transition-colors"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </header>
     );
@@ -106,7 +109,7 @@ export const Navbar: React.FC = () => {
 
   // Render authenticated topbar with navigation & action controls
   return (
-    <header className="sticky top-0 z-30 flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 bg-white/95 px-4 py-2.5 backdrop-blur sm:px-6">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur sm:px-6">
       {/* Left: Branding & Portal Tabs */}
       <div className="flex items-center space-x-6">
         <Link to="/" className="flex items-center space-x-2.5 group">

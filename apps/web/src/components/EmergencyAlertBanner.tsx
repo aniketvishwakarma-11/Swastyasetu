@@ -91,9 +91,9 @@ export const EmergencyAlertBanner: React.FC<EmergencyAlertBannerProps> = ({
     <div
       role="alert"
       aria-live="assertive"
-      className="sticky top-0 z-50 w-full bg-rose-50 border-b border-rose-300 shadow-md animate-in slide-in-from-top-4 duration-300"
+      className="w-full bg-rose-50/90 border-2 border-rose-300 rounded-2xl shadow-md animate-in slide-in-from-top-4 duration-300 overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6">
+      <div className="px-4 py-3 sm:px-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           {/* Left: Urgent indicator & Clinical summary */}
           <div className="flex items-start space-x-3 min-w-0">
