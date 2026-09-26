@@ -112,6 +112,16 @@ function getStoredUser(): UserProfile | null {
   }
 }
 
+function isNetworkOrProxyFailure(code?: string): boolean {
+  return (
+    code === 'NETWORK_ERROR' ||
+    code === 'HTTP_500' ||
+    code === 'HTTP_502' ||
+    code === 'HTTP_503' ||
+    code === 'HTTP_504'
+  );
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(getStoredUser);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('swastyasetu_auth_token'));
@@ -178,8 +188,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (res.success && res.data) {
             localStorage.setItem('swastyasetu_user', JSON.stringify(res.data));
             setUser(res.data);
-          } else if (res.error?.code === 'NETWORK_ERROR') {
-            // Keep local user cached when network is down instead of clearing session
+          } else if (isNetworkOrProxyFailure(res.error?.code)) {
+            // Keep local user cached when network or backend gateway is down instead of clearing session
             const cachedUser = getStoredUser();
             if (cachedUser) {
               setUser(cachedUser);
@@ -247,7 +257,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Offline field fallback for recognized demo accounts
-    if (res.error?.code === 'NETWORK_ERROR' && DEMO_FALLBACK_PROFILES[email]) {
+    if (isNetworkOrProxyFailure(res.error?.code) && DEMO_FALLBACK_PROFILES[email]) {
       const demoUser = DEMO_FALLBACK_PROFILES[email];
       const offlineToken = `offline_demo_token_${demoUser.role.toLowerCase()}`;
       localStorage.setItem('swastyasetu_auth_token', offlineToken);
