@@ -35,10 +35,10 @@ In tiered public healthcare networks (Sub-Centres → Primary Health Centres [PH
 
 ```mermaid
 flowchart TD
-    A["Failure 1: The Lost Referral"] -->|Paper slips lost in transit| E["Ambulance arrives unannounced; ICU & OT unprepared"]
-    B["Failure 2: The Frontline Identity Gap"] -->|Spelling variances, no universal ID| F["Fragmented history, duplicate workups & lost allergies"]
-    C["Failure 3: The Unreadable Discharge"] -->|Cursive summaries & hospital jargon| G["30-day readmissions & unmanaged chronic mortality"]
-    D["Failure 4: Intermittent Connectivity"] -->|Cloud EHRs freeze during power cuts| H["Doctors abandon digital tools & revert to paper ledgers"]
+    A["Failure 1: The Lost Referral"] -->|Paper slips lost in transit| E["Ambulance arrives unannounced - ICU and OT unprepared"]
+    B["Failure 2: The Frontline Identity Gap"] -->|Spelling variances, no universal ID| F["Fragmented history, duplicate workups and lost allergies"]
+    C["Failure 3: The Unreadable Discharge"] -->|Cursive summaries and hospital jargon| G["30-day readmissions and unmanaged chronic mortality"]
+    D["Failure 4: Intermittent Connectivity"] -->|Cloud EHRs freeze during power cuts| H["Doctors abandon digital tools and revert to paper ledgers"]
 ```
 
 ### 1. The Lost Referral & Transit Blind Spot
@@ -160,27 +160,27 @@ sequenceDiagram
     actor Hosp as Hospital Emergency Clinician
     participant SW as Service Worker (PWA)
 
-    PHC->>LocalDB: Record Vitals & Pre-Referral Stabilization Protocol
+    PHC->>LocalDB: Record Vitals and Pre-Referral Stabilization
     PHC->>LocalDB: Create EMERGENCY Referral (Offline Capable)
     Note over PHC,LocalDB: Stored instantly in Dexie.js (REF-LOC-XXXXXX)
     
     SyncWorker->>API: POST /api/referrals (or POST /api/sync/events)
-    API->>DB: Commit Referral, Patient & AuditEvent
+    API->>DB: Commit Referral, Patient and AuditEvent
     
     rect rgb(254, 242, 242)
     Note over API,Hosp: Emergency Alert Engine (VAPID Web Push)
-    API->>SW: High-Priority Web Push (Urgent Vibration Cadence)
-    SW->>Hosp: Lock-Screen Notification ("🚨 EMERGENCY REFERRAL INCOMING")
-    API->>Hosp: In-App Dashboard Banner + Clinical Audio Chime
-    Hosp->>API: POST /api/referrals/:id/acknowledge ("Acknowledge & Prepare Bed")
+    API->>SW: High-Priority Web Push Alert
+    SW->>Hosp: Lock-Screen Notification with Urgent Vibration
+    API->>Hosp: In-App Dashboard Banner and Clinical Audio Chime
+    Hosp->>API: POST /api/referrals/:id/acknowledge
     end
 
-    API->>DB: Status -> RECEIVED; Log EMERGENCY_ACKNOWLEDGED
-    API-->>PHC: Status Update -> BED READY (Real-time feedback)
+    API->>DB: Update status to RECEIVED and log AuditEvent
+    API-->>PHC: Real-time update to BED READY
     
-    Hosp->>API: Upload Handwritten Discharge Summary & OCR Scan
+    Hosp->>API: Upload Handwritten Discharge Summary
     API->>DB: Schedule Day-7 PHC Follow-Up
-    PHC->>API: Inspect Follow-Up Log & 1-Click Dispatch Village ASHA Worker
+    PHC->>API: Inspect Follow-Up Log and Dispatch ASHA Worker
 ```
 
 ---
