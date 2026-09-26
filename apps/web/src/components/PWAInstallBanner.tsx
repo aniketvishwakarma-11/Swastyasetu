@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { usePWA } from '../hooks/usePWA';
 import { Download, X, Share, PlusSquare } from 'lucide-react';
 
@@ -6,42 +7,73 @@ const DISMISS_KEY = 'swasthya_pwa_banner_dismissed_v1';
 
 export const PWAInstallBanner: React.FC = () => {
   const { isInstallable, isInstalled, isIOS, installApp } = usePWA();
-  const [isDismissed, setIsDismissed] = useState<boolean>(() => {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  // Session-level dismiss: resets whenever the user visits or refreshes the homepage
+  const [sessionDismissed, setSessionDismissed] = useState<boolean>(false);
+
+  // Persistent dismiss for non-homepage views
+  const [persistedDismissed, setPersistedDismissed] = useState<boolean>(() => {
     try {
       return localStorage.getItem(DISMISS_KEY) === 'true';
     } catch {
       return false;
     }
   });
-  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
-  // If already installed or user dismissed it previously, don't show
-  if (isInstalled || isDismissed) {
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  const [showDesktopInstructions, setShowDesktopInstructions] = useState(false);
+
+  // Reset session dismissal when navigating to the homepage so it displays every time
+  useEffect(() => {
+    if (isHomePage) {
+      setSessionDismissed(false);
+    }
+  }, [location.pathname, isHomePage]);
+
+  // If already installed, never show the banner
+  if (isInstalled) {
     return null;
   }
 
-  // Only display if install prompt is captured or on iOS Safari outside standalone mode
-  if (!isInstallable && !isIOS) {
-    return null;
+  // On homepage: show every time (unless dismissed during current page view)
+  // On other pages: respect persistent dismiss or non-installable state
+  if (isHomePage) {
+    if (sessionDismissed) {
+      return null;
+    }
+  } else {
+    if (persistedDismissed || (!isInstallable && !isIOS)) {
+      return null;
+    }
   }
 
   const handleDismiss = () => {
-    setIsDismissed(true);
-    try {
-      localStorage.setItem(DISMISS_KEY, 'true');
-    } catch {
-      // ignore storage error
+    if (isHomePage) {
+      // On homepage, dismiss is temporary for this view; refreshing will show it again
+      setSessionDismissed(true);
+    } else {
+      setPersistedDismissed(true);
+      try {
+        localStorage.setItem(DISMISS_KEY, 'true');
+      } catch {
+        // ignore storage error
+      }
     }
   };
 
   const handleInstallClick = async () => {
-    if (isIOS) {
-      setShowIOSInstructions(true);
-    } else {
+    if (isInstallable) {
       const outcome = await installApp();
       if (outcome) {
         handleDismiss();
       }
+    } else if (isIOS) {
+      setShowIOSInstructions(true);
+    } else {
+      // Desktop / Android browser without immediate deferred prompt
+      setShowDesktopInstructions(true);
     }
   };
 
@@ -70,7 +102,7 @@ export const PWAInstallBanner: React.FC = () => {
 
             <button
               onClick={handleDismiss}
-              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors shrink-0"
+              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors shrink-0 cursor-pointer"
               title="Close"
               aria-label="Close"
             >
@@ -107,7 +139,7 @@ export const PWAInstallBanner: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowIOSInstructions(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -138,9 +170,59 @@ export const PWAInstallBanner: React.FC = () => {
 
             <button
               onClick={() => setShowIOSInstructions(false)}
-              className="w-full py-1.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              className="w-full py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
             >
               Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Clean Desktop / Browser Instructions Modal */}
+      {showDesktopInstructions && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white text-slate-900 rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <img src="/icons/pwa-192x192.png" alt="App Icon" className="w-7 h-7 rounded-lg border border-slate-200" />
+                <h3 className="font-bold text-xs text-slate-900">Install SwasthyaSetu</h3>
+              </div>
+              <button
+                onClick={() => setShowDesktopInstructions(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-[11px] text-slate-600 leading-normal">
+              To install SwasthyaSetu for standalone clinical desktop access:
+            </p>
+
+            <ol className="text-xs space-y-2.5 text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <li className="flex items-start space-x-2">
+                <span className="font-bold text-teal-800 bg-teal-100/80 rounded-full w-4 h-4 flex items-center justify-center shrink-0 text-[10px]">
+                  1
+                </span>
+                <span className="text-[11px]">
+                  Look for the <strong className="text-slate-800 inline-flex items-center"><Download className="w-3 h-3 mx-1 text-teal-700" /> Install</strong> icon on the right side of your browser address bar.
+                </span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="font-bold text-teal-800 bg-teal-100/80 rounded-full w-4 h-4 flex items-center justify-center shrink-0 text-[10px]">
+                  2
+                </span>
+                <span className="text-[11px]">
+                  Or open your browser menu (⋮) and click <strong className="text-slate-800">"Install SwasthyaSetu"</strong> or <strong className="text-slate-800">"Save and Share → Install"</strong>.
+                </span>
+              </li>
+            </ol>
+
+            <button
+              onClick={() => setShowDesktopInstructions(false)}
+              className="w-full py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Got it
             </button>
           </div>
         </div>

@@ -2,8 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { localDb } from './db';
 import { apiRequest } from './api';
 
+const isSimulatedOffline = () => {
+  try {
+    return localStorage.getItem('swasthya_simulated_offline') === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const getEffectiveOnline = () => {
+  return navigator.onLine && !isSimulatedOffline();
+};
+
 export function useNetworkSync() {
-  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+  const [isOnline, setIsOnline] = useState<boolean>(getEffectiveOnline);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [failedCount, setFailedCount] = useState<number>(0);
@@ -31,7 +43,7 @@ export function useNetworkSync() {
 
   // Flush queued events to backend API
   const syncNow = useCallback(async () => {
-    if (!navigator.onLine || isSyncing) return;
+    if (!getEffectiveOnline() || isSyncing) return;
 
     try {
       setIsSyncing(true);
@@ -94,7 +106,7 @@ export function useNetworkSync() {
 
   // Retry FAILED events — resets their status to PENDING and re-syncs
   const retryFailed = useCallback(async () => {
-    if (!navigator.onLine) return;
+    if (!getEffectiveOnline()) return;
     try {
       // Reset all FAILED items back to PENDING
       await localDb.syncQueue
@@ -112,20 +124,24 @@ export function useNetworkSync() {
   useEffect(() => {
     refreshPendingCount();
 
-    const handleOnline = () => {
-      setIsOnline(true);
-      syncNow();
+    const handleConnectivityChange = () => {
+      const online = getEffectiveOnline();
+      setIsOnline(online);
+      if (online) {
+        syncNow();
+      }
     };
 
-    const handleOffline = () => {
-      setIsOnline(false);
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleConnectivityChange);
+    window.addEventListener('offline', handleConnectivityChange);
+    window.addEventListener('swasthya:connectivity-change', handleConnectivityChange);
 
     // Heartbeat check every 15s to verify server connectivity
     const interval = setInterval(async () => {
+      if (isSimulatedOffline()) {
+        setIsOnline(false);
+        return;
+      }
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -146,8 +162,9 @@ export function useNetworkSync() {
     }, 15000);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleConnectivityChange);
+      window.removeEventListener('offline', handleConnectivityChange);
+      window.removeEventListener('swasthya:connectivity-change', handleConnectivityChange);
       clearInterval(interval);
     };
   }, [isOnline, refreshPendingCount, syncNow]);

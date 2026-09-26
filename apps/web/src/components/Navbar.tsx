@@ -21,8 +21,26 @@ export const Navbar: React.FC = () => {
   const { isInstallable, isInstalled, isIOS, installApp } = usePWA();
   const location = useLocation();
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
-  const [simulatedOffline, setSimulatedOffline] = useState<boolean>(false);
+  const [simulatedOffline, setSimulatedOffline] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('swasthya_simulated_offline') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [searchQuery, setSearchQuery] = useState('');
+
+  const toggleSimulatedOffline = (offline: boolean) => {
+    setSimulatedOffline(offline);
+    try {
+      if (offline) {
+        localStorage.setItem('swasthya_simulated_offline', 'true');
+      } else {
+        localStorage.removeItem('swasthya_simulated_offline');
+      }
+    } catch {}
+    window.dispatchEvent(new CustomEvent('swasthya:connectivity-change', { detail: { isOnline: !offline } }));
+  };
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -208,7 +226,7 @@ export const Navbar: React.FC = () => {
         {/* Offline Simulation Switcher */}
         <div className="hidden items-center space-x-1 rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-[10px] font-bold sm:flex">
           <button
-            onClick={() => setSimulatedOffline(false)}
+            onClick={() => toggleSimulatedOffline(false)}
             className={`flex items-center space-x-1 px-2 py-1 rounded-md transition-colors cursor-pointer ${
               activeOnline ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
             }`}
@@ -218,7 +236,7 @@ export const Navbar: React.FC = () => {
             <span>ONLINE</span>
           </button>
           <button
-            onClick={() => setSimulatedOffline(true)}
+            onClick={() => toggleSimulatedOffline(true)}
             className={`flex items-center space-x-1 px-2 py-1 rounded-md transition-colors cursor-pointer ${
               !activeOnline ? 'bg-amber-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
             }`}
