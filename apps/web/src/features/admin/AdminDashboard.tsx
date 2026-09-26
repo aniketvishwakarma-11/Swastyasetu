@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/api';
-import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
-import { ADMIN_BLUEPRINTS } from '../../lib/featureBlueprints';
 import { AuditTrailModal } from './AuditTrailModal';
 import {
   ShieldCheck,
@@ -19,7 +17,6 @@ import {
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
   const [testLog, setTestLog] = useState<Array<{ endpoint: string; status: 'ok' | 'fail'; message: string }>>([]);
-  const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
 
   const runFullRbacAudit = async () => {
@@ -80,14 +77,6 @@ export const AdminDashboard: React.FC = () => {
           >
             <Activity className="w-3.5 h-3.5" />
             <span>Run RBAC Audit</span>
-          </button>
-
-          <button
-            onClick={() => setIsAuditModalOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Audit Trail Explorer</span>
           </button>
 
           <button
@@ -177,11 +166,6 @@ export const AdminDashboard: React.FC = () => {
         onClose={() => setIsAuditModalOpen(false)}
       />
 
-      {/* Feature Blueprint Modal */}
-      <FeatureBlueprintModal
-        blueprint={activeBlueprint}
-        onClose={() => setActiveBlueprint(null)}
-      />
     </div>
   );
 };

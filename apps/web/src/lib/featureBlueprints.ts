@@ -39,24 +39,6 @@ export const PHC_BLUEPRINTS: Record<string, FeatureBlueprint> = {
 };
 
 export const HOSPITAL_BLUEPRINTS: Record<string, FeatureBlueprint> = {
-  consultation: {
-    id: 'hosp-consultation-intake',
-    title: 'Specialist Consultation & Ward Admission Intake',
-    role: 'CLINICIAN',
-    status: 'NEXT_UP',
-    badgeLabel: 'Roadmap Sprint 1',
-    clinicalPurpose: 'Documents specialist findings, ICD-10 provisional and confirmed diagnoses, ICU/Ward bed allocation, and inpatient treatment orders.',
-    targetUsers: 'Hospital specialists (Cardiologists, Surgeons, Obstetricians)',
-    safetyRule: 'Hard Rule 3 (No Clinical Decisions): System provides decision support; clinician has sole prescribing authority.',
-    technicalSpecs: {
-      endpoints: ['POST /api/consultations', 'PUT /api/referrals/:id/status'],
-      models: ['Consultation', 'Prescription', 'WardStay'],
-    },
-    acceptanceCriteria: [
-      'Updates referral status to CONSULTED or ADMITTED',
-      'Attaches clinical orders to the master patient record',
-    ],
-  },
   timeline: {
     id: 'hosp-timeline',
     title: 'Unified Patient Care Continuity Timeline (EHR)',

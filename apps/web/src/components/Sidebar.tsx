@@ -356,31 +356,6 @@ export const Sidebar: React.FC = () => {
           },
         },
         {
-          id: 'hosp-consultation-intake',
-          title: 'Consultation & Ward Intake',
-          icon: Stethoscope,
-          status: 'NEXT_UP',
-          badge: 'Next',
-          blueprint: {
-            id: 'hosp-consultation-intake',
-            title: 'Specialist Consultation & Ward Admission Intake',
-            role: 'CLINICIAN',
-            status: 'NEXT_UP',
-            badgeLabel: 'Roadmap Sprint 1',
-            clinicalPurpose: 'Documents specialist findings, ICD-10 provisional and confirmed diagnoses, ICU/Ward bed allocation, and inpatient treatment orders.',
-            targetUsers: 'Hospital specialists (Cardiologists, Surgeons, Obstetricians)',
-            safetyRule: 'Hard Rule 3 (No Clinical Decisions): System provides decision support; clinician has sole prescribing authority.',
-            technicalSpecs: {
-              endpoints: ['POST /api/consultations', 'PUT /api/referrals/:id/status'],
-              models: ['Consultation', 'Prescription', 'WardStay'],
-            },
-            acceptanceCriteria: [
-              'Updates referral status to CONSULTED or ADMITTED',
-              'Attaches clinical orders to the master patient record',
-            ],
-          },
-        },
-        {
           id: 'hosp-document-ocr',
           title: 'AI Prescription & OCR',
           icon: ScanLine,
@@ -829,7 +804,7 @@ export const Sidebar: React.FC = () => {
 
         {/* Navigation Item List for Current Role */}
         <nav className="flex-1 overflow-y-auto px-3 py-1 space-y-1">
-          {currentConfig.items.map((item) => {
+          {currentConfig.items.filter((item) => item.status === 'BUILT').map((item) => {
             const isActive = item.route && location.pathname === item.route;
             const Icon = item.icon;
             const isBuilt = item.status === 'BUILT';

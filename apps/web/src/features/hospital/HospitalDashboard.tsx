@@ -4,8 +4,6 @@ import { apiRequest } from '../../lib/api';
 import { IdentityReconciliationModal } from './IdentityReconciliationModal';
 import { DocumentOcrModal } from './DocumentOcrModal';
 import { CareContinuityTimelineModal } from './CareContinuityTimelineModal';
-import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
-import { HOSPITAL_BLUEPRINTS } from '../../lib/featureBlueprints';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
 import { DischargeSummaryModal } from './DischargeSummaryModal';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
@@ -20,7 +18,6 @@ import {
   Clock,
   RefreshCw,
   UserCheck,
-  Stethoscope,
   Check,
   ScanLine,
   FileText,
@@ -53,9 +50,6 @@ export const HospitalDashboard: React.FC = () => {
     patientAbha?: string;
     referralId?: string;
   } | null>(null);
-
-  // Feature blueprint modal state
-  const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
 
   // Care Continuity Timeline state
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
@@ -374,14 +368,6 @@ export const HospitalDashboard: React.FC = () => {
           >
             <Clock className="w-3.5 h-3.5 text-teal-600" />
             <span>Care Continuity Timeline</span>
-          </button>
-
-          <button
-            onClick={() => setActiveBlueprint(HOSPITAL_BLUEPRINTS.consultation)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-          >
-            <Stethoscope className="w-3.5 h-3.5 text-blue-600" />
-            <span>Consultation &amp; Intake</span>
           </button>
 
           <button
@@ -757,11 +743,6 @@ export const HospitalDashboard: React.FC = () => {
         onClose={() => setShowPermModal(false)}
       />
 
-      {/* Feature Blueprint Modal */}
-      <FeatureBlueprintModal
-        blueprint={activeBlueprint}
-        onClose={() => setActiveBlueprint(null)}
-      />
     </div>
   );
 };

@@ -4,8 +4,6 @@ import { apiRequest } from '../../lib/api';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
 import { HospitalReadinessRadarModal } from './HospitalReadinessRadarModal';
 import { AmbulanceTransportSlipModal } from './AmbulanceTransportSlipModal';
-import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/FeatureBlueprintModal';
-import { COORDINATOR_BLUEPRINTS } from '../../lib/featureBlueprints';
 import {
   Network,
   CheckCircle2,
@@ -24,8 +22,6 @@ import {
 
 export const CoordinatorDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [activeBlueprint, setActiveBlueprint] = useState<FeatureBlueprint | null>(null);
-
   // Live referrals state
   const [referrals, setReferrals] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -133,14 +129,6 @@ export const CoordinatorDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.kanban)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Transfer Kanban</span>
-          </button>
-
-          <button
             onClick={() => setIsRadarOpen(true)}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
@@ -157,14 +145,6 @@ export const CoordinatorDashboard: React.FC = () => {
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-teal-600" />
             <span>108 Transport Slip</span>
-          </button>
-
-          <button
-            onClick={() => setActiveBlueprint(COORDINATOR_BLUEPRINTS.metrics)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-          >
-            <BarChart3 className="w-3.5 h-3.5 text-amber-600" />
-            <span>Transit Analytics</span>
           </button>
         </div>
       </div>
@@ -445,11 +425,6 @@ export const CoordinatorDashboard: React.FC = () => {
         onClose={() => setIsRadarOpen(false)}
       />
 
-      {/* Feature Blueprint Modal */}
-      <FeatureBlueprintModal
-        blueprint={activeBlueprint}
-        onClose={() => setActiveBlueprint(null)}
-      />
 
       {/* 108 Ambulance Digital Transport Slip Modal */}
       <AmbulanceTransportSlipModal

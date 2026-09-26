@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Sparkles,
@@ -69,8 +70,8 @@ export const FeatureBlueprintModal: React.FC<FeatureBlueprintModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/55 p-4 backdrop-blur-sm">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm">
       <div className="clinical-surface my-8 flex w-full max-w-2xl flex-col overflow-hidden rounded-[24px]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/90 px-6 py-4">
@@ -218,6 +219,7 @@ export const FeatureBlueprintModal: React.FC<FeatureBlueprintModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
