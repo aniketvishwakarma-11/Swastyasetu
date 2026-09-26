@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r dotenv/config src/server.ts dotenv_config_path=../../.env",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "build:web": "npm run build --workspace=apps/web && node -e \"const fs=require('fs'); fs.cpSync('../web/dist', './dist', {recursive:true});\"",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
@@ -24,6 +24,7 @@
     "@types/multer": "^1.4.11",
     "@types/node": "^20.12.12",
     "@types/uuid": "^9.0.8",
+    "@types/web-push": "^3.6.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -37,7 +38,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/web-push": "^3.6.4",
     "ts-node-dev": "^2.0.0"
   }
 }

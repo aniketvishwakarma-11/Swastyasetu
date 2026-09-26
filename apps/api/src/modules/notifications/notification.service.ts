@@ -105,7 +105,7 @@ export async function dispatchEmergencyNotification(referralId: string): Promise
     let failedCount = 0;
 
     await Promise.allSettled(
-      subscriptions.map(async (sub) => {
+      subscriptions.map(async (sub: any) => {
         try {
           const pushSubscription = {
             endpoint: sub.endpoint,
