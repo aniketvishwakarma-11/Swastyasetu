@@ -3,16 +3,30 @@ import { ApiResponse } from '@swastyasetu/shared';
 const envApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 const API_BASE = envApiUrl ? (envApiUrl.endsWith('/api') ? envApiUrl : `${envApiUrl}/api`) : '/api';
 
+export function getApiAssetUrl(assetPath: string): string {
+  if (!assetPath) return '';
+  if (/^https?:\/\//i.test(assetPath)) return assetPath;
+
+  const apiOrigin = envApiUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
+  const normalizedPath = assetPath.startsWith('/') ? assetPath : `/${assetPath}`;
+  return apiOrigin ? `${apiOrigin}${normalizedPath}` : normalizedPath;
+}
+
 export async function apiRequest<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   const token = localStorage.getItem('swastyasetu_auth_token');
 
+  const isMultipartRequest = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(isMultipartRequest ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers as Record<string, string> || {}),
   };
+
+  if (isMultipartRequest) {
+    delete headers['Content-Type'];
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;

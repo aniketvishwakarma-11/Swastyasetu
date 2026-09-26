@@ -18,6 +18,19 @@ export interface OcrProcessingResult {
 const HF_SPACE_URL = process.env.HF_OCR_SPACE_URL || 'https://aniketvis11-medivault-ocr.hf.space';
 const HF_TIMEOUT_MS = 15000;
 
+async function readJsonResponse<T>(response: Response, label: string): Promise<T> {
+  const body = await response.text();
+  if (!body.trim()) {
+    throw new Error(`${label} returned an empty response (HTTP ${response.status})`);
+  }
+
+  try {
+    return JSON.parse(body) as T;
+  } catch {
+    throw new Error(`${label} returned invalid JSON (HTTP ${response.status})`);
+  }
+}
+
 /**
  * Calls the Hugging Face Space (chinmays18/medical-prescription-ocr on Gradio 5)
  * Endpoint: gradio_extract
@@ -46,7 +59,7 @@ export async function extractTextViaHuggingFace(
       throw new Error(`HF Upload failed with HTTP ${uploadResponse.status}`);
     }
 
-    const uploadData = (await uploadResponse.json()) as string[];
+    const uploadData = await readJsonResponse<string[]>(uploadResponse, 'HF upload');
     if (!uploadData || !uploadData.length) {
       throw new Error('HF Upload returned no file path');
     }
@@ -65,7 +78,7 @@ export async function extractTextViaHuggingFace(
       throw new Error(`HF Call failed with HTTP ${callResponse.status}`);
     }
 
-    const callData = (await callResponse.json()) as { event_id: string };
+    const callData = await readJsonResponse<{ event_id: string }>(callResponse, 'HF OCR request');
     if (!callData?.event_id) {
       throw new Error('HF Call did not return an event_id');
     }
@@ -422,13 +435,7 @@ export async function processClinicalDocumentOcr(
 
     // If HF returned standard dots / empty placeholders
     if (!hfText || hfText.replace(/[.\s]/g, '').length < 3) {
-      console.log('[OCR Service] HF Space returned empty/placeholder text, invoking clinical fallback');
-      const fallback = CLINICAL_DEMO_PRESETS.STEMI_DISCHARGE;
-      return {
-        engine: 'RESILIENT_CLINICAL_FALLBACK',
-        rawOcrText: fallback.rawText,
-        fields: fallback.fields,
-      };
+      throw new Error('Clinical OCR service returned no usable text');
     }
 
     const fields = parseClinicalText(hfText);
@@ -438,12 +445,7 @@ export async function processClinicalDocumentOcr(
       fields,
     };
   } catch (error: any) {
-    console.warn(`[OCR Service] HF Space error/timeout (${error.message}). Activating Clinical Fallback.`);
-    const fallback = CLINICAL_DEMO_PRESETS.STEMI_DISCHARGE;
-    return {
-      engine: 'RESILIENT_CLINICAL_FALLBACK',
-      rawOcrText: fallback.rawText,
-      fields: fallback.fields,
-    };
+    console.warn(`[OCR Service] HF Space error/timeout (${error.message}).`);
+    throw new Error(`Clinical OCR service unavailable: ${error.message}`);
   }
 }

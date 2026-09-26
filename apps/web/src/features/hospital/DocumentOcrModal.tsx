@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   X,
   FileText,
@@ -16,7 +16,7 @@ import {
   Layers,
   Sparkles,
 } from 'lucide-react';
-import { apiRequest } from '../../lib/api';
+import { apiRequest, getApiAssetUrl } from '../../lib/api';
 
 export interface ClinicalFieldItem {
   id: string;
@@ -59,6 +59,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
   const [fields, setFields] = useState<ClinicalFieldItem[]>([]);
   const [ocrEngine, setOcrEngine] = useState<string | null>(null);
   const [clinicianNotes, setClinicianNotes] = useState('');
+  const [documentMimeType, setDocumentMimeType] = useState<string | null>(null);
 
   // Image viewer transform states
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -66,6 +67,32 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
 
   // File upload input ref
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen || documentId || fields.length > 0) return;
+
+    let cancelled = false;
+
+    async function restoreLatestDocument() {
+      const response = await apiRequest<any[]>(`/documents/patient/${patientId}`);
+      if (cancelled || !response.success || !response.data?.length) return;
+
+      const latest = response.data[0];
+      setDocumentId(latest.id);
+      setDocumentFileUrl(latest.originalFileUrl || null);
+      setDocumentMimeType(latest.originalFileUrl?.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/*');
+      setFields(latest.extractedFields || []);
+      setOcrEngine(latest.ocrEngine || 'RESILIENT_CLINICAL_FALLBACK');
+    }
+
+    restoreLatestDocument().catch(() => {
+      // A missing history must not prevent a new OCR capture.
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [documentId, fields.length, isOpen, patientId]);
 
   if (!isOpen) return null;
 
@@ -93,6 +120,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
         const doc = res.data.document;
         setDocumentId(doc.id);
         setDocumentFileUrl(doc.originalFileUrl);
+        setDocumentMimeType('image/svg+xml');
         setFields(doc.extractedFields || []);
         setOcrEngine(res.data.engine || 'HUGGINGFACE_MEDIVAULT_TROCR');
       } else {
@@ -123,26 +151,16 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
       if (referralId) formData.append('referralId', referralId);
       formData.append('documentType', 'PRESCRIPTION');
 
-      // Direct multipart fetch using api base
-      const token =
-        localStorage.getItem('swastyasetu_auth_token') ||
-        localStorage.getItem('token') ||
-        localStorage.getItem('auth_token') ||
-        localStorage.getItem('swasthya_token');
-      const response = await fetch('/api/documents/extract', {
+      const res = await apiRequest('/documents/extract', {
         method: 'POST',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
         body: formData,
       });
-
-      const res = await response.json();
 
       if (res.success && res.data?.document) {
         const doc = res.data.document;
         setDocumentId(doc.id);
         setDocumentFileUrl(doc.originalFileUrl);
+        setDocumentMimeType(file.type || 'image/*');
         setFields(doc.extractedFields || []);
         setOcrEngine(res.data.engine || 'HUGGINGFACE_MEDIVAULT_TROCR');
       } else {
@@ -396,15 +414,20 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
                     transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
                   }}
                 >
-                  <img
-                    src={
-                      documentFileUrl.startsWith('http')
-                        ? documentFileUrl
-                        : `${(import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '').replace(/\/$/, '')}${documentFileUrl}`
-                    }
-                    alt="Clinical Document"
-                    className="max-h-[500px] w-auto rounded shadow-lg object-contain bg-white"
-                  />
+                  {documentMimeType === 'application/pdf' ? (
+                    <iframe
+                      src={getApiAssetUrl(documentFileUrl)}
+                      title="Clinical Document"
+                      className="h-[500px] w-full rounded bg-white"
+                    />
+                  ) : (
+                    <img
+                      src={getApiAssetUrl(documentFileUrl)}
+                      alt="Clinical Document"
+                      className="max-h-[500px] w-auto rounded shadow-lg object-contain bg-white"
+                      onError={() => setErrorMessage('The document was processed, but its preview could not be loaded from the API storage.')}
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="text-center text-slate-400 p-8">

@@ -126,7 +126,7 @@ router.post(
       // 2. Persist ClinicalDocument in PostgreSQL
       const document = await prisma.clinicalDocument.create({
         data: {
-          patientId,
+          patientId: patient.id,
           referralId: referralId || null,
           documentType,
           originalFileUrl,
