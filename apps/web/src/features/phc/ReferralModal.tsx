@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Send, ShieldAlert, HeartPulse, MapPin, UserCheck, AlertTriangle } from 'lucide-react';
+import { X, Send, ShieldAlert, HeartPulse, MapPin, UserCheck, AlertTriangle, Sparkles } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
 import { localDb } from '../../lib/db';
 import { useAuth } from '../../context/AuthContext';
@@ -222,6 +222,21 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
     }
   };
 
+  const loadDemoCase = () => {
+    setName('Ramesh Yadav');
+    setAge('48');
+    setGender('Male');
+    setPhone('98220 12345');
+    setVillage('Khed Rural');
+    setUrgency('EMERGENCY');
+    setReason('Acute Anterior Wall ST-Elevation Myocardial Infarction (STEMI)');
+    setClinicalSummary(
+      'Patient presented with acute crushing retrosternal chest pain radiating to left shoulder and jaw for 2 hours with severe diaphoresis. 12-lead ECG confirms >2mm ST elevation in leads V1-V4 with reciprocal ST depression in inferior leads. Pre-referral loading dose administered: Aspirin 325mg + Clopidogrel 300mg + Atorvastatin 80mg. 18G IV line secured in left cubital fossa. 108 Ambulance dispatched with oxygen support.'
+    );
+    const dh = facilities.find((f) => f.type === 'DISTRICT_HOSPITAL');
+    if (dh) setDestinationFacilityId(dh.id);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl my-8 overflow-hidden">
@@ -240,6 +255,15 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={loadDemoCase}
+              className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
+              title="1-Click Load Acute STEMI Demo (Ramesh Yadav)"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-rose-500" />
+              <span>Load STEMI Demo</span>
+            </button>
             <button
               type="button"
               onClick={onClose}

@@ -29,6 +29,7 @@ import {
   Activity,
   Pill,
   Ambulance,
+  Sparkles,
 } from 'lucide-react';
 
 export const PHCDashboard: React.FC = () => {
@@ -70,31 +71,11 @@ export const PHCDashboard: React.FC = () => {
       // Load local indexedDB referrals
       const localList = await localDb.referrals.toArray();
 
-      // Automatically purge legacy test entries from browser IndexedDB
-      for (const item of localList) {
-        const name = (item as any).patient?.name || (item as any).patientName || '';
-        if (name.toLowerCase().includes('ramesh')) {
-          if (item.localId) {
-            try {
-              await localDb.referrals.delete(item.localId);
-            } catch {
-              // ignore deletion error
-            }
-          }
-        }
-      }
-
-      const refreshedLocal = await localDb.referrals.toArray();
-
       // Merge avoiding duplicates
       const seenIds = new Set(serverList.map((s) => s.id).filter(Boolean));
-      const filteredLocal = refreshedLocal.filter((l: LocalReferral) => !l.id || !seenIds.has(l.id));
+      const filteredLocal = localList.filter((l: LocalReferral) => !l.id || !seenIds.has(l.id));
 
       const combined = [...filteredLocal, ...serverList]
-        .filter((r) => {
-          const name = r.patient?.name || r.patientName || '';
-          return !name.toLowerCase().includes('ramesh');
-        })
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
       setReferrals(combined);
@@ -139,6 +120,27 @@ export const PHCDashboard: React.FC = () => {
           >
             <PlusCircle className="w-4 h-4" />
             <span>+ Create Digital Referral</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setReferralInitialData({
+                patientName: 'Ramesh Yadav',
+                age: '48',
+                gender: 'Male',
+                phone: '98220 12345',
+                village: 'Khed Rural',
+                urgency: 'EMERGENCY',
+                reason: 'Acute Anterior Wall ST-Elevation Myocardial Infarction (STEMI)',
+                clinicalSummary: 'Patient presented with acute crushing retrosternal chest pain radiating to left shoulder and jaw for 2 hours with severe diaphoresis. 12-lead ECG confirms >2mm ST elevation in leads V1-V4 with reciprocal ST depression in inferior leads. Pre-referral loading dose administered: Aspirin 325mg + Clopidogrel 300mg + Atorvastatin 80mg. 18G IV line secured in left cubital fossa. 108 Ambulance dispatched with oxygen support.',
+              });
+              setIsModalOpen(true);
+            }}
+            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            title="1-Click Load Acute STEMI Demo (Ramesh Yadav)"
+          >
+            <Sparkles className="w-4 h-4 text-rose-600" />
+            <span>Load Ramesh Yadav STEMI Demo</span>
           </button>
 
           <button

@@ -12,10 +12,13 @@ import {
   Stethoscope,
   Building,
   Network,
+  Download,
 } from 'lucide-react';
+import { usePWA } from '../hooks/usePWA';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { isInstallable, isInstalled, isIOS, installApp } = usePWA();
   const location = useLocation();
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [simulatedOffline, setSimulatedOffline] = useState<boolean>(false);
@@ -56,6 +59,16 @@ export const Navbar: React.FC = () => {
         </Link>
 
         <div className="flex items-center space-x-2">
+          {!isInstalled && (isInstallable || isIOS) && (
+            <button
+              onClick={installApp}
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl transition-colors cursor-pointer"
+              title="Install SwasthyaSetu as an offline mobile app"
+            >
+              <Download className="w-3.5 h-3.5 text-teal-600" />
+              <span className="hidden sm:inline">Install App</span>
+            </button>
+          )}
           <Link
             to="/login"
             className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-teal-700 transition-colors"
@@ -223,6 +236,18 @@ export const Navbar: React.FC = () => {
             {activeOnline ? 'SYNC READY' : 'OFFLINE MODE'}
           </span>
         </div>
+
+        {/* PWA Install Button */}
+        {!isInstalled && (isInstallable || isIOS) && (
+          <button
+            onClick={installApp}
+            className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-semibold transition-colors cursor-pointer"
+            title="Install SwasthyaSetu as an offline mobile app"
+          >
+            <Download className="w-3.5 h-3.5 text-teal-600" />
+            <span>Install App</span>
+          </button>
+        )}
 
         {/* Notifications */}
         <button

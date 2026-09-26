@@ -47,10 +47,7 @@ export const CoordinatorDashboard: React.FC = () => {
     try {
       const res = await apiRequest('/referrals');
       if (res.success && Array.isArray(res.data)) {
-        const cleanList = res.data.filter((ref: any) => {
-          const name = ref.patient?.name || '';
-          return !name.toLowerCase().includes('ramesh');
-        });
+        const cleanList = res.data;
         setReferrals(cleanList);
       }
     } catch (err) {

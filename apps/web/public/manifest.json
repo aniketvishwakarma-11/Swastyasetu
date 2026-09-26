@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "SwasthyaSetu — Healthcare Continuity Platform",
+  "short_name": "SwasthyaSetu",
+  "description": "Offline-first closed-loop healthcare referral, emergency triage, and clinical continuity platform for frontline health centers and district hospitals.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#0d9488",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": [
+    "medical",
+    "health",
+    "productivity",
+    "government"
+  ],
+  "icons": [
+    {
+      "src": "/icons/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create Referral",
+      "short_name": "Referral",
+      "description": "Quickly dispatch a new digital patient referral from frontline PHC",
+      "url": "/phc",
+      "icons": [{ "src": "/icons/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Emergency Triage",
+      "short_name": "Triage",
+      "description": "Open hospital emergency intake and incoming transfer queue",
+      "url": "/hospital",
+      "icons": [{ "src": "/icons/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ambulance Radar",
+      "short_name": "Ambulance",
+      "description": "Track 108 inter-facility transfers and hospital bed capacity",
+      "url": "/triage",
+      "icons": [{ "src": "/icons/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Audit & Compliance",
+      "short_name": "Audit",
+      "description": "Inspect immutable clinical audit ledger and SHA-256 verification",
+      "url": "/admin",
+      "icons": [{ "src": "/icons/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { PhoneCall, Wifi, WifiOff, ArrowRight } from 'lucide-react';
+import { PhoneCall, Wifi, WifiOff, ArrowRight, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePWA } from '../hooks/usePWA';
 
 export const MobileQuickBar: React.FC = () => {
   const { user } = useAuth();
+  const { isInstallable, isInstalled, isIOS, installApp } = usePWA();
   const location = useLocation();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -71,6 +73,18 @@ export const MobileQuickBar: React.FC = () => {
           <PhoneCall className="w-3 h-3 text-rose-600" />
           <span>Call 108</span>
         </a>
+
+        {/* PWA Mobile Install Action */}
+        {!isInstalled && (isInstallable || isIOS) && (
+          <button
+            onClick={installApp}
+            className="flex items-center space-x-1 px-2.5 py-1.5 bg-teal-50 border border-teal-200 text-teal-800 hover:bg-teal-100 rounded-lg text-[10px] font-bold transition-colors shrink-0 cursor-pointer"
+            title="Install App"
+          >
+            <Download className="w-3 h-3 text-teal-600" />
+            <span>Install</span>
+          </button>
+        )}
 
         {/* Primary Action Button */}
         {!isPortalRoute ? (

@@ -14,6 +14,7 @@ import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { TermsPage } from './features/legal/TermsPage';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { MobileQuickBar } from './components/MobileQuickBar';
+import { PWAInstallBanner } from './components/PWAInstallBanner';
 import { usePageMeta } from './hooks/usePageMeta';
 
 function AppLayout() {
@@ -81,6 +82,7 @@ function AppLayout() {
 
       <CookieConsentBanner />
       <MobileQuickBar />
+      <PWAInstallBanner />
     </div>
   );
 }
