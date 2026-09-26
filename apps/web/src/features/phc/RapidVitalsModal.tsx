@@ -11,6 +11,7 @@ import {
   User,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { localDb } from '../../lib/db';
 
 interface RapidVitalsModalProps {
   isOpen: boolean;
@@ -172,13 +173,22 @@ export const RapidVitalsModal: React.FC<RapidVitalsModalProps> = ({
           });
         }
       } else {
-        // Offline resilience: save to local storage
-        const offlineVitals = JSON.parse(localStorage.getItem('swasthya_offline_vitals') || '[]');
-        offlineVitals.unshift({ ...payload, ewsScore: evaluation.score, createdAt: new Date().toISOString() });
-        localStorage.setItem('swasthya_offline_vitals', JSON.stringify(offlineVitals));
+        // Offline resilience: save to IndexedDB syncQueue (syncs automatically when back online)
+        const offlineEventId = `VIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        await localDb.syncQueue.put({
+          id: offlineEventId,
+          eventId: offlineEventId,
+          entityType: 'VITALS',
+          entityId: offlineEventId,
+          operation: 'CREATE',
+          payload: { ...payload, ewsScore: evaluation.score, ewsCategory: evaluation.category },
+          status: 'PENDING',
+          retryCount: 0,
+          createdAt: new Date().toISOString(),
+        });
         setFeedback({
           type: 'success',
-          message: 'Saved to local device queue (OFFLINE MODE). Will sync automatically when network returns.',
+          message: 'Vitals saved to local device queue (OFFLINE MODE). Will sync automatically when network returns.',
         });
       }
     } catch (err: any) {

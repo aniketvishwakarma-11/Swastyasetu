@@ -34,7 +34,7 @@ import {
 
 export const PHCDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { isOnline, isSyncing, pendingCount, syncNow, refreshPendingCount } = useNetworkSync();
+  const { isOnline, isSyncing, pendingCount, failedCount, syncNow, refreshPendingCount } = useNetworkSync();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVitalsOpen, setIsVitalsOpen] = useState(false);
@@ -233,7 +233,11 @@ export const PHCDashboard: React.FC = () => {
               {referrals.filter((r) => r.syncStatus === 'SYNCED').length}
             </p>
             <p className="text-[11px] text-emerald-600/80 mt-0.5 font-medium">
-              {pendingCount > 0 ? `${pendingCount} offline pending` : 'All records synchronized'}
+              {failedCount > 0
+                ? `${failedCount} failed — retry sync`
+                : pendingCount > 0
+                ? `${pendingCount} offline pending`
+                : 'All records synchronized'}
             </p>
           </div>
           <div className="h-11 w-11 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700">

@@ -15,10 +15,14 @@ import { TermsPage } from './features/legal/TermsPage';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { MobileQuickBar } from './components/MobileQuickBar';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
+import { OfflineStatusBar } from './components/OfflineStatusBar';
 import { usePageMeta } from './hooks/usePageMeta';
+import { useNetworkSync } from './lib/useNetworkSync';
 
 function AppLayout() {
   const location = useLocation();
+  const { isOnline, isSyncing, pendingCount, failedCount, lastSyncTime, syncNow, retryFailed } =
+    useNetworkSync();
 
   // Apply dynamic SEO title and meta descriptions on route change
   usePageMeta();
@@ -27,6 +31,16 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white pb-14 md:pb-0">
+      {/* Global Offline / Sync Status Bar */}
+      <OfflineStatusBar
+        isOnline={isOnline}
+        isSyncing={isSyncing}
+        pendingCount={pendingCount}
+        failedCount={failedCount}
+        lastSyncTime={lastSyncTime}
+        onSyncNow={syncNow}
+        onRetryFailed={retryFailed}
+      />
       {/* Top Header with Navigation & Controls (except on homepage which has its own hero PublicHeader) */}
       {!isHomePage && <Navbar />}
 

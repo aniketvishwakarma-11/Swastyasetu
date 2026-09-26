@@ -6,15 +6,26 @@ export function useNetworkSync() {
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [failedCount, setFailedCount] = useState<number>(0);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
-  // Refresh pending count from Dexie
+  // Refresh pending and failed counts from Dexie
   const refreshPendingCount = useCallback(async () => {
     try {
-      const count = await localDb.syncQueue.count();
-      setPendingCount(count);
+      const [pending, failed] = await Promise.all([
+        localDb.syncQueue.where('status').equals('PENDING').count(),
+        localDb.syncQueue.where('status').equals('FAILED').count(),
+      ]);
+      setPendingCount(pending);
+      setFailedCount(failed);
     } catch (e) {
       console.error('[IndexedDB count error]', e);
+      // Fallback: count all queue items as pending
+      try {
+        const total = await localDb.syncQueue.count();
+        setPendingCount(total);
+        setFailedCount(0);
+      } catch {}
     }
   }, []);
 
@@ -24,7 +35,11 @@ export function useNetworkSync() {
 
     try {
       setIsSyncing(true);
-      const queuedEvents = await localDb.syncQueue.toArray();
+      // Only sync PENDING events (not FAILED — those need explicit retry)
+      const queuedEvents = await localDb.syncQueue
+        .where('status')
+        .equals('PENDING')
+        .toArray();
 
       if (queuedEvents.length === 0) {
         setIsSyncing(false);
@@ -59,6 +74,12 @@ export function useNetworkSync() {
               .where('localId')
               .equals(evtResult.eventId)
               .modify(updates);
+          } else if (evtResult.status === 'FAILED') {
+            // Mark as failed in the queue so it shows in failedCount
+            await localDb.syncQueue
+              .where('eventId')
+              .equals(evtResult.eventId)
+              .modify({ status: 'FAILED' });
           }
         }
         setLastSyncTime(new Date());
@@ -70,6 +91,22 @@ export function useNetworkSync() {
       await refreshPendingCount();
     }
   }, [isSyncing, refreshPendingCount]);
+
+  // Retry FAILED events — resets their status to PENDING and re-syncs
+  const retryFailed = useCallback(async () => {
+    if (!navigator.onLine) return;
+    try {
+      // Reset all FAILED items back to PENDING
+      await localDb.syncQueue
+        .where('status')
+        .equals('FAILED')
+        .modify({ status: 'PENDING', retryCount: 0 });
+      await refreshPendingCount();
+      await syncNow();
+    } catch (err) {
+      console.error('[Retry failed error]', err);
+    }
+  }, [refreshPendingCount, syncNow]);
 
   // Periodic heartbeat & online/offline listeners
   useEffect(() => {
@@ -104,7 +141,6 @@ export function useNetworkSync() {
           setIsOnline(false);
         }
       } catch {
-        // If ping fails
         if (isOnline) setIsOnline(false);
       }
     }, 15000);
@@ -120,8 +156,10 @@ export function useNetworkSync() {
     isOnline,
     isSyncing,
     pendingCount,
+    failedCount,
     lastSyncTime,
     syncNow,
+    retryFailed,
     refreshPendingCount,
   };
 }

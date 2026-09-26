@@ -84,7 +84,7 @@ export type SyncOperation = 'CREATE' | 'UPDATE' | 'DELETE';
 export interface SyncEvent<T = any> {
   id: string;
   eventId: string; // EVT-01J... Unique for idempotency
-  entityType: 'PATIENT' | 'REFERRAL' | 'CLINICAL_DOCUMENT' | 'FOLLOW_UP' | 'IDENTITY_MATCH';
+  entityType: 'PATIENT' | 'REFERRAL' | 'CLINICAL_DOCUMENT' | 'FOLLOW_UP' | 'IDENTITY_MATCH' | 'VITALS';
   entityId: string;
   operation: SyncOperation;
   payload: T;
