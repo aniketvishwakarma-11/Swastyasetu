@@ -10,8 +10,6 @@ import {
   Activity,
   CheckCircle2,
   AlertCircle,
-  FileText,
-  Network,
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
@@ -79,13 +77,6 @@ export const AdminDashboard: React.FC = () => {
             <span>Run RBAC Audit</span>
           </button>
 
-          <button
-            onClick={() => setActiveBlueprint(ADMIN_BLUEPRINTS.syncGateway)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-          >
-            <Network className="w-3.5 h-3.5 text-blue-600" />
-            <span>Sync &amp; Outbreak Radar</span>
-          </button>
         </div>
       </div>
 

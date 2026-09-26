@@ -16,7 +16,6 @@ import {
   ChevronRight,
   Send,
   CalendarCheck,
-  Stethoscope,
   WifiOff,
   MessageSquare,
   FileSpreadsheet,

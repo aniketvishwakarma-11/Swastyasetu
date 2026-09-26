@@ -18,6 +18,7 @@ import {
   Clock,
   RefreshCw,
   UserCheck,
+  Stethoscope,
   Check,
   ScanLine,
   FileText,
