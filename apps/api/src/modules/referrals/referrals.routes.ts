@@ -155,7 +155,10 @@ export async function resolveFacilityId(
   if (fallback) return fallback.id;
 
   const anyFacility = await prisma.facility.findFirst();
-  return anyFacility!.id;
+  if (!anyFacility) {
+    throw new Error('No facilities found in database. Please run the seed script first.');
+  }
+  return anyFacility.id;
 }
 
 function generateReferralNumber(): string {

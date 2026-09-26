@@ -94,6 +94,19 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
     }
   }, [user?.name]);
 
+  // Reset vitals and messages when modal opens with a (possibly different) referral
+  useEffect(() => {
+    if (isOpen) {
+      setBloodPressure('120/80');
+      setPulseRate('76');
+      setSpo2('98');
+      setBloodSugar('110');
+      setSuccessMsg(null);
+      setErrorMsg(null);
+      setProtocolType('STEMI');
+    }
+  }, [isOpen, referral?.id]);
+
   // Load protocol template
   useEffect(() => {
     const template = PROTOCOL_TEMPLATES[protocolType] || PROTOCOL_TEMPLATES.STEMI;

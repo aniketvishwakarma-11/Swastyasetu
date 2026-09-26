@@ -275,9 +275,9 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
           <div className="flex items-center space-x-1.5 text-xs font-semibold">
             {[
               { id: 'ALL', label: `All (${items.length})` },
-              { id: 'DUE_TODAY', label: 'Due Today (1)' },
-              { id: 'UPCOMING', label: 'Upcoming (1)' },
-              { id: 'OVERDUE', label: 'Overdue (1)' },
+              { id: 'DUE_TODAY', label: `Due Today (${items.filter((i) => { const d = new Date(i.dueAt).toDateString(); return d === new Date().toDateString() && i.status !== 'COMPLETED'; }).length})` },
+              { id: 'UPCOMING', label: `Upcoming (${items.filter((i) => new Date(i.dueAt).getTime() > Date.now() + 86400000 && i.status !== 'COMPLETED').length})` },
+              { id: 'OVERDUE', label: `Overdue (${items.filter((i) => i.status === 'OVERDUE').length})` },
               { id: 'COMPLETED', label: `Completed (${items.filter((i) => i.status === 'COMPLETED').length})` },
             ].map((tab) => (
               <button
@@ -363,7 +363,9 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
                     ) : item.status === 'OVERDUE' ? (
                       <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-300 text-xs font-bold animate-pulse">
                         <AlertTriangle className="w-3.5 h-3.5" />
-                        <span>OVERDUE BY 2 DAYS</span>
+                      <span>
+                        OVERDUE BY {Math.max(1, Math.floor((Date.now() - new Date(item.dueAt).getTime()) / 86400000))} DAYS
+                      </span>
                       </span>
                     ) : item.status === 'FLAGGED_ASHA' ? (
                       <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold">

@@ -113,7 +113,7 @@ export const PHCDashboard: React.FC = () => {
         </div>
 
         {/* Primary Clinical Actions */}
-        <div className="flex items-center space-x-2 flex-wrap gap-2">
+        <div className="flex items-center flex-wrap gap-2">
           <button
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors cursor-pointer"
