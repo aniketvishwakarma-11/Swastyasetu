@@ -8,6 +8,9 @@ import { FeatureBlueprintModal, FeatureBlueprint } from '../../components/Featur
 import { HOSPITAL_BLUEPRINTS } from '../../lib/featureBlueprints';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
 import { DischargeSummaryModal } from './DischargeSummaryModal';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
+import { EmergencyAlertBanner, EmergencyAlertItem } from '../../components/EmergencyAlertBanner';
+import { NotificationPermissionModal } from '../../components/NotificationPermissionModal';
 import {
   Building,
   ShieldCheck,
@@ -21,6 +24,7 @@ import {
   Check,
   ScanLine,
   FileText,
+  Bell,
 } from 'lucide-react';
 
 export const HospitalDashboard: React.FC = () => {
@@ -60,6 +64,68 @@ export const HospitalDashboard: React.FC = () => {
   // Structured Discharge Summary state
   const [isDischargeModalOpen, setIsDischargeModalOpen] = useState(false);
   const [dischargeReferralTarget, setDischargeReferralTarget] = useState<any | null>(null);
+
+  // Push Notifications & Emergency Alert State
+  const {
+    isSupported,
+    permission,
+    isSubscribed,
+    isLoading: isPushLoading,
+    subscribe: subscribePush,
+    sendTestAlert,
+    lastPushPayload,
+  } = usePushNotifications();
+  const [activeEmergencyAlert, setActiveEmergencyAlert] = useState<EmergencyAlertItem | null>(null);
+  const [showPermModal, setShowPermModal] = useState<boolean>(false);
+
+  // Auto prompt permission modal once for clinicians if supported and not yet decided
+  useEffect(() => {
+    if (isSupported && permission === 'default') {
+      const seen = sessionStorage.getItem('swasthya_push_modal_seen');
+      if (!seen) {
+        setShowPermModal(true);
+        sessionStorage.setItem('swasthya_push_modal_seen', 'true');
+      }
+    }
+  }, [isSupported, permission]);
+
+  // Sync incoming emergency alert from push payload or referral queue
+  useEffect(() => {
+    if (lastPushPayload) {
+      setActiveEmergencyAlert({
+        id: lastPushPayload.referralId,
+        referralNumber: lastPushPayload.referralNumber || 'EMERGENCY',
+        patientName: lastPushPayload.patientName || 'Emergency Patient',
+        patientAge: lastPushPayload.patientAge,
+        patientGender: lastPushPayload.patientGender,
+        sourceFacilityName: lastPushPayload.sourceFacility || 'Referring PHC',
+        reason: lastPushPayload.reason || 'Acute Emergency Transfer',
+        clinicalSummary: lastPushPayload.clinicalSummary,
+        timestamp: lastPushPayload.timestamp || new Date().toISOString(),
+        urgency: 'EMERGENCY',
+        status: 'SENT',
+      });
+    } else if (referrals.length > 0) {
+      const activeEmergency = referrals.find(
+        (r) => r.urgency === 'EMERGENCY' && (r.status === 'SENT' || r.status === 'VALIDATED')
+      );
+      if (activeEmergency) {
+        setActiveEmergencyAlert({
+          id: activeEmergency.id,
+          referralNumber: activeEmergency.referralNumber,
+          patientName: activeEmergency.patient?.name || 'Emergency Patient',
+          patientAge: activeEmergency.patient?.age,
+          patientGender: activeEmergency.patient?.gender,
+          sourceFacilityName: activeEmergency.sourceFacility?.name || 'Referring PHC',
+          reason: activeEmergency.reason,
+          clinicalSummary: activeEmergency.clinicalSummary,
+          timestamp: activeEmergency.createdAt,
+          urgency: 'EMERGENCY',
+          status: activeEmergency.status,
+        });
+      }
+    }
+  }, [lastPushPayload, referrals]);
 
   // Fetch referrals for this hospital and run identity candidate evaluation
   const loadHospitalData = useCallback(async () => {
@@ -208,6 +274,23 @@ export const HospitalDashboard: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
+      {/* High-Visibility Emergency Alert Banner */}
+      <EmergencyAlertBanner
+        alert={activeEmergencyAlert}
+        onDismiss={() => setActiveEmergencyAlert(null)}
+        onViewDetails={(referralId) => {
+          const target = referrals.find((r) => r.id === referralId);
+          if (target) {
+            setSelectedDetailReferral(target);
+            setIsDetailModalOpen(true);
+          }
+        }}
+        onAcknowledged={() => {
+          setActionSuccessMsg('Emergency referral acknowledged. Receiving trauma bay logged as prepared.');
+          loadHospitalData();
+        }}
+      />
+
       {/* Banner */}
       <div className="clinical-surface flex flex-col justify-between gap-5 rounded-[24px] border-teal-100 p-5 sm:p-6 sm:flex-row sm:items-center">
         <div className="flex items-center space-x-4">
@@ -216,7 +299,7 @@ export const HospitalDashboard: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-xl font-bold text-slate-900">District Hospital Triage & Identity Portal</h1>
+              <h1 className="text-xl font-bold text-slate-900">District Hospital Triage &amp; Identity Portal</h1>
               <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200 uppercase">
                 {user?.role}
               </span>
@@ -228,6 +311,44 @@ export const HospitalDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-2 flex-wrap gap-2">
+          {/* Notification Permission & Test Controls */}
+          {isSupported && (
+            <div className="flex items-center space-x-1.5">
+              {isSubscribed ? (
+                <>
+                  <span className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <Bell className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Alerts Active</span>
+                  </span>
+                  <button
+                    onClick={async () => {
+                      const res = await sendTestAlert();
+                      if (res?.success) {
+                        setActionSuccessMsg('Emergency test push dispatched to this device.');
+                      } else {
+                        const errMsg = typeof res?.error === 'string' ? res.error : res?.error?.message || 'Test alert failed.';
+                        setActionSuccessMsg(errMsg);
+                      }
+                    }}
+                    className="px-2 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
+                    title="Send a sample emergency alert to test lock-screen push and audio chime"
+                  >
+                    Test Push
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowPermModal(true)}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                  title="Enable lock-screen push notifications for incoming emergency transfers"
+                >
+                  <Bell className="w-3.5 h-3.5 text-rose-600 animate-pulse" />
+                  <span>Enable Emergency Alerts</span>
+                </button>
+              )}
+            </div>
+          )}
+
           <button
             onClick={() => handleOpenOcrScanner()}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
@@ -626,6 +747,14 @@ export const HospitalDashboard: React.FC = () => {
           );
           loadHospitalData();
         }}
+      />
+
+      {/* Notification Permission Modal */}
+      <NotificationPermissionModal
+        isOpen={showPermModal}
+        isLoading={isPushLoading}
+        onSubscribe={subscribePush}
+        onClose={() => setShowPermModal(false)}
       />
 
       {/* Feature Blueprint Modal */}

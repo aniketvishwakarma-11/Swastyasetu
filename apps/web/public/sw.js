@@ -174,3 +174,92 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// ----------------------------------------------------
+// Web Push Notifications & Emergency Alert Handler
+// ----------------------------------------------------
+
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  try {
+    const payload = event.data.json();
+    const title = payload.title || '🚨 EMERGENCY REFERRAL INCOMING';
+    const options = {
+      body: payload.body || 'High priority emergency patient transfer en route.',
+      icon: '/icons/pwa-192x192.png',
+      badge: '/icons/pwa-192x192.png',
+      tag: payload.referralId ? `emergency-referral-${payload.referralId}` : 'swasthya-emergency',
+      renotify: true,
+      requireInteraction: true, // Keep on screen until acknowledged by clinician
+      vibrate: [200, 100, 200, 100, 400], // Urgent medical cadence
+      data: {
+        url: payload.url || '/hospital?tab=incoming',
+        referralId: payload.referralId,
+      },
+      actions: [
+        { action: 'view', title: '📋 View Vitals' },
+        { action: 'acknowledge', title: '✅ Acknowledge' },
+      ],
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+
+    // Also broadcast to any active open browser client tabs so in-app banner can trigger
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage({
+          type: 'EMERGENCY_PUSH_RECEIVED',
+          payload,
+        });
+      });
+    });
+  } catch (err) {
+    console.error('[ServiceWorker] Push event handling error:', err);
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const notificationData = event.notification.data || {};
+  const action = event.action;
+
+  if (action === 'acknowledge' && notificationData.referralId) {
+    // Background acknowledgment from lock screen action
+    event.waitUntil(
+      fetch(`/api/referrals/${notificationData.referralId}/acknowledge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: 'Quick acknowledged from PWA Lock Screen Notification' }),
+      })
+        .then(() => {
+          return self.registration.showNotification('✅ Emergency Acknowledged', {
+            body: 'Trauma bay preparation logged on server.',
+            icon: '/icons/pwa-192x192.png',
+            tag: 'swasthya-ack-confirm',
+            vibrate: [100, 50, 100],
+          });
+        })
+        .catch((err) => console.warn('[ServiceWorker] Quick ack error:', err))
+    );
+    return;
+  }
+
+  // Open or focus the application window
+  const targetUrl = notificationData.url || '/hospital?tab=incoming';
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.includes('/hospital') && 'focus' in client) {
+            client.navigate(targetUrl);
+            return client.focus();
+          }
+        }
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(targetUrl);
+        }
+      })
+  );
+});

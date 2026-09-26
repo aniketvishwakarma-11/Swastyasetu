@@ -3,6 +3,7 @@ import { prisma } from '../../db';
 import { requireAuth } from '../../middleware/auth.middleware';
 import { ReferralUrgency, ReferralStatus, FacilityType } from '@prisma/client';
 import { randomUUID, createHash } from 'crypto';
+import { dispatchEmergencyNotification } from '../notifications/notification.service';
 
 const router = Router();
 
@@ -287,6 +288,13 @@ router.post('/', requireAuth, async (req: Request, res: Response): Promise<void>
         timeout: 30000,
       }
     );
+
+    // If EMERGENCY referral, dispatch high-priority Web Push alerts to destination hospital
+    if (result.urgency === ReferralUrgency.EMERGENCY) {
+      dispatchEmergencyNotification(result.id).catch((err) => {
+        console.warn('[Referrals] Background emergency dispatch warning:', err);
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -785,6 +793,85 @@ router.get('/:id/transport-slip', requireAuth, async (req: Request, res: Respons
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to generate 108 ambulance transport slip.',
+        details: error.message,
+      },
+    });
+  }
+});
+
+/**
+ * POST /api/referrals/:id/acknowledge
+ * Hospital clinician or triage coordinator acknowledges receipt of an emergency referral.
+ */
+router.post('/:id/acknowledge', requireAuth, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+    const user = (req as any).user;
+
+    const referral = await prisma.referral.findUnique({
+      where: { id },
+      include: {
+        patient: true,
+        sourceFacility: true,
+        destinationFacility: true,
+      },
+    });
+
+    if (!referral) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Referral record not found.' },
+      });
+      return;
+    }
+
+    const updatedReferral = await prisma.referral.update({
+      where: { id },
+      data: {
+        status: ReferralStatus.RECEIVED,
+      },
+      include: {
+        patient: true,
+        sourceFacility: true,
+        destinationFacility: true,
+      },
+    });
+
+    // Create AuditEvent (Hard Clinical Safety Rule 4: Auditability)
+    await prisma.auditEvent.create({
+      data: {
+        eventId: `EVT-${randomUUID()}`,
+        actorId: user.id,
+        actorRole: user.role,
+        facilityId: referral.destinationFacilityId,
+        eventType: 'EMERGENCY_ACKNOWLEDGED',
+        entityType: 'REFERRAL',
+        entityId: referral.id,
+        metadata: {
+          acknowledgedBy: user.name,
+          clinicianRole: user.role,
+          facilityName: referral.destinationFacility.name,
+          notes: notes || 'Trauma bay notified; ER team prepping for incoming emergency transfer.',
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+
+    console.log(`[Referrals] Emergency referral ${referral.referralNumber} acknowledged by ${user.name}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Emergency referral successfully acknowledged.',
+      data: updatedReferral,
+    });
+  } catch (error: any) {
+    console.error('[Referrals Acknowledge Error]', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to acknowledge referral.',
         details: error.message,
       },
     });

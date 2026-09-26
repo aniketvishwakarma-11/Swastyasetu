@@ -4,6 +4,7 @@ import { requireAuth } from '../../middleware/auth.middleware';
 import { SyncStatus, ReferralUrgency, ReferralStatus, FacilityType } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { resolveFacilityId } from '../referrals/referrals.routes';
+import { dispatchEmergencyNotification } from '../notifications/notification.service';
 
 const router = Router();
 
@@ -200,6 +201,13 @@ router.post('/events', requireAuth, async (req: Request, res: Response): Promise
             timeout: 30000,
           }
         );
+
+        // If newly synced event is an emergency referral, dispatch push notification
+        if (evt.entityType === 'REFERRAL' && (evt.payload?.urgency === 'EMERGENCY' || evt.payload?.urgency === ReferralUrgency.EMERGENCY)) {
+          dispatchEmergencyNotification(evt.entityId).catch((err) => {
+            console.warn('[Sync] Background emergency dispatch warning:', err);
+          });
+        }
       } catch (err: any) {
         console.error(`[Sync Failed for event ${evt.eventId}]`, err);
 

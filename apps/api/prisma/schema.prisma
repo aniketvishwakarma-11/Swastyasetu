@@ -92,9 +92,10 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  createdReferrals Referral[] @relation("ReferralCreatedBy")
-  reviewedMatches  IdentityMatch[]
-  reviewedFields   ClinicalField[]
+  createdReferrals  Referral[]          @relation("ReferralCreatedBy")
+  reviewedMatches   IdentityMatch[]
+  reviewedFields    ClinicalField[]
+  pushSubscriptions PushSubscription[]
 }
 
 model Facility {
@@ -313,4 +314,27 @@ model AuditEvent {
   @@index([eventId])
   @@index([entityType, entityId])
   @@index([timestamp])
+}
+
+// ----------------------------------------------------
+// Web Push Notifications & Device Registry
+// ----------------------------------------------------
+
+model PushSubscription {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  facilityId String?
+  endpoint   String   @unique
+  p256dhKey  String
+  authKey    String
+  userAgent  String?
+  deviceType String?  // "mobile", "desktop", "tablet"
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([facilityId])
+  @@index([isActive])
 }

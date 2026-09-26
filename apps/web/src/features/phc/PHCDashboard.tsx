@@ -323,20 +323,30 @@ export const PHCDashboard: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] border font-semibold ${
-                            isSynced
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : 'bg-amber-50 text-amber-800 border-amber-200'
-                          }`}
-                        >
+                        {ref.status === 'RECEIVED' ? (
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isSynced ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
+                            className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-300 shadow-2xs"
+                            title="Destination hospital acknowledged emergency alert and is preparing triage bay"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                            <span>BED READY</span>
+                          </span>
+                        ) : (
+                          <span
+                            className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] border font-semibold ${
+                              isSynced
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-amber-50 text-amber-800 border-amber-200'
                             }`}
-                          />
-                          <span>{ref.syncStatus || ref.status}</span>
-                        </span>
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                isSynced ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
+                              }`}
+                            />
+                            <span>{ref.syncStatus || ref.status}</span>
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-slate-400 text-[11px] whitespace-nowrap">
                         <span className="flex items-center space-x-1">
