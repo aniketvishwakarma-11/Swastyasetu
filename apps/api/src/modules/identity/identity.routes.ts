@@ -136,7 +136,7 @@ router.get(
       console.error('[Identity Evaluate Error]', error);
       res.status(500).json({
         success: false,
-        error: { code: 'INTERNAL_ERROR', message: 'Failed to evaluate identity matches.', details: error.message },
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to evaluate identity matches.', details: error.message, canRetry: true },
       });
     }
   }

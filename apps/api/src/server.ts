@@ -6,6 +6,21 @@ import dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../../../../.env') }); // fallback
 
+import dns from 'dns';
+import { Agent, setGlobalDispatcher } from 'undici';
+// Force IPv4 lookup first to prevent connection reset issues with IPv6 peering on Windows
+try {
+  dns.setDefaultResultOrder('ipv4first');
+  setGlobalDispatcher(
+    new Agent({
+      connect: {
+        family: 4,
+        timeout: 15000,
+      },
+    })
+  );
+} catch (e) {}
+
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import authRoutes from './modules/auth/auth.routes';

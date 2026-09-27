@@ -124,6 +124,75 @@ export interface IdentityMatch {
 
 export type DocumentProcessingStatus = 'UPLOADED' | 'PROCESSING' | 'PROCESSED' | 'FAILED';
 
+export interface GeminiPatientInfo {
+  name?: string;
+  age?: string | number;
+  gender?: string;
+  abhaId?: string;
+}
+
+export interface GeminiDiagnosis {
+  name: string;
+  icdCode?: string;
+  confidence: number;
+  severity?: 'MILD' | 'MODERATE' | 'SEVERE' | 'CRITICAL';
+}
+
+export interface GeminiMedication {
+  name: string;
+  genericName?: string;
+  dosage?: string;
+  frequency?: string;
+  duration?: string;
+  route?: string;
+  instructions?: string;
+  confidence: number;
+}
+
+export interface GeminiVitals {
+  bp?: string;
+  pulse?: string;
+  spo2?: string;
+  temperature?: string;
+  bloodGlucose?: string;
+  respiratoryRate?: string;
+}
+
+export interface GeminiLabFinding {
+  test: string;
+  value: string;
+  unit?: string;
+  normalRange?: string;
+  status?: 'NORMAL' | 'LOW' | 'HIGH' | 'CRITICAL';
+}
+
+export interface GeminiFollowUp {
+  when?: string;
+  where?: string;
+  purpose?: string;
+}
+
+export interface GeminiDocumentQuality {
+  legibilityScore: number;
+  completenessScore: number;
+  issues: string[];
+}
+
+export interface GeminiClinicalReport {
+  patientInfo?: GeminiPatientInfo;
+  clinicalSummary: string;
+  diagnoses: GeminiDiagnosis[];
+  medications: GeminiMedication[];
+  vitals?: GeminiVitals;
+  labFindings?: GeminiLabFinding[];
+  allergiesAndContraindications?: string[];
+  clinicalAdvice?: string[];
+  followUpInstructions?: GeminiFollowUp;
+  criticalAlerts?: string[];
+  documentQuality: GeminiDocumentQuality;
+  rawOcrText?: string;
+}
+
 export interface ClinicalDocument {
   id: string;
   patientId: string;
@@ -131,6 +200,8 @@ export interface ClinicalDocument {
   documentType: 'DISCHARGE_SUMMARY' | 'PRESCRIPTION' | 'LAB_REPORT' | 'OTHER';
   originalFileUrl: string;
   ocrText?: string;
+  geminiReport?: GeminiClinicalReport | null;
+  ocrEngine?: string;
   processingStatus: DocumentProcessingStatus;
   createdAt: string;
 }
