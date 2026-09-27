@@ -131,6 +131,8 @@ router.post(
           documentType,
           originalFileUrl,
           ocrText: ocrResult.rawOcrText,
+          geminiReport: ocrResult.geminiReport ? (ocrResult.geminiReport as any) : undefined,
+          ocrEngine: ocrResult.engine,
           processingStatus: 'PROCESSED',
           extractedFields: {
             create: ocrResult.fields.map((field) => ({
@@ -159,6 +161,7 @@ router.post(
           entityId: document.id,
           metadata: {
             engine: ocrResult.engine,
+            hasGeminiAnalysis: !!ocrResult.geminiReport,
             fieldsCount: ocrResult.fields.length,
             needsReviewCount: ocrResult.fields.filter((f) => f.confidence < 0.9).length,
             documentType,
@@ -173,6 +176,7 @@ router.post(
         data: {
           document,
           engine: ocrResult.engine,
+          geminiReport: ocrResult.geminiReport || null,
           summary: {
             totalFields: document.extractedFields.length,
             autoAcceptedCount: document.extractedFields.filter((f) => f.reviewStatus === 'AUTO_ACCEPTED').length,
@@ -186,7 +190,8 @@ router.post(
         success: false,
         error: {
           code: 'OCR_EXTRACTION_FAILED',
-          message: 'Failed to process document OCR.',
+          message: error.message || 'Document OCR extraction was interrupted. Please retry.',
+          canRetry: true,
           details: error.message,
         },
       });

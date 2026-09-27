@@ -215,6 +215,8 @@ model ClinicalDocument {
   documentType     String   // DISCHARGE_SUMMARY, PRESCRIPTION, LAB_REPORT
   originalFileUrl  String
   ocrText          String?  @db.Text
+  geminiReport     Json?
+  ocrEngine        String?
   processingStatus String   @default("UPLOADED") // UPLOADED, PROCESSING, PROCESSED, FAILED
   createdAt        DateTime @default(now())
 

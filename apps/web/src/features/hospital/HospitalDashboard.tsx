@@ -23,6 +23,7 @@ import {
   ScanLine,
   FileText,
   Bell,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const HospitalDashboard: React.FC = () => {
@@ -72,6 +73,7 @@ export const HospitalDashboard: React.FC = () => {
   } = usePushNotifications();
   const [activeEmergencyAlert, setActiveEmergencyAlert] = useState<EmergencyAlertItem | null>(null);
   const [showPermModal, setShowPermModal] = useState<boolean>(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Auto prompt permission modal once for clinicians if supported and not yet decided
   useEffect(() => {
@@ -125,27 +127,35 @@ export const HospitalDashboard: React.FC = () => {
   // Fetch referrals for this hospital and run identity candidate evaluation
   const loadHospitalData = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await apiRequest('/referrals');
       if (res.success && Array.isArray(res.data)) {
         const cleanList = res.data;
         setReferrals(cleanList);
 
-        // Run identity evaluation for pending referrals
+        // Run identity evaluation for pending referrals safely without blocking entire dashboard
         for (const ref of cleanList) {
           if (ref.status !== 'IDENTITY_CONFIRMED' && ref.status !== 'CONSULTED') {
-            const evalRes = await apiRequest(`/identity/evaluate/${ref.id}`);
-            if (evalRes.success && evalRes.data?.topCandidates?.length > 0) {
-              setCandidateMatches((prev) => ({
-                ...prev,
-                [ref.id]: evalRes.data.topCandidates[0],
-              }));
+            try {
+              const evalRes = await apiRequest(`/identity/evaluate/${ref.id}`);
+              if (evalRes.success && evalRes.data?.topCandidates?.length > 0) {
+                setCandidateMatches((prev) => ({
+                  ...prev,
+                  [ref.id]: evalRes.data.topCandidates[0],
+                }));
+              }
+            } catch (evalErr) {
+              console.warn(`[Identity evaluate skipped for referral ${ref.id} due to transient connection]`, evalErr);
             }
           }
         }
+      } else {
+        setLoadError(res.error?.message || 'Failed to fetch incoming hospital referrals.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[Load hospital referrals error]', err);
+      setLoadError(err?.message || 'Server connection was interrupted.');
     } finally {
       setLoading(false);
     }
@@ -387,6 +397,27 @@ export const HospitalDashboard: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Network / Connection Retry Alert */}
+      {loadError && (
+        <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl text-xs text-amber-900 flex items-center justify-between shadow-xs">
+          <div className="flex items-center space-x-2.5">
+            <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0" />
+            <div>
+              <p className="font-bold">Sync Interrupted</p>
+              <p className="text-amber-800 mt-0.5">{loadError}</p>
+            </div>
+          </div>
+          <button
+            onClick={loadHospitalData}
+            disabled={loading}
+            className="inline-flex items-center px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition shadow-xs disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
+            Retry Sync
+          </button>
+        </div>
+      )}
 
       {/* Action Success Alert */}
       {actionSuccessMsg && (
