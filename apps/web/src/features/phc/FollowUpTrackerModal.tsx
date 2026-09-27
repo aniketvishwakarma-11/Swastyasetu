@@ -14,6 +14,7 @@ import {
   Check,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { ModalPortal } from '../../components/ModalPortal';
 
 interface FollowUpItem {
   id: string;
@@ -233,7 +234,8 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -545,5 +547,6 @@ export const FollowUpTrackerModal: React.FC<FollowUpTrackerModalProps> = ({
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

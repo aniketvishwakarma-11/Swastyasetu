@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,24 +7,32 @@
 @layer base {
   :root {
     color-scheme: light;
-    --canvas: #f4f8f8;
-    --ink: #102a2b;
-    --muted: #607375;
-    --teal: #0d9488;
-    --teal-deep: #115e59;
-    --line: #d9e5e4;
+    --canvas: #f8fafc;
+    --ink: #0f172a;
+    --muted: #475569;
+    --brand: #0d9488;
+    --brand-deep: #115e59;
+    --brand-light: #ccfbf1;
+    --line: #e2e8f0;
   }
 
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
   }
 
   body {
-    @apply min-h-screen text-slate-900 font-sans antialiased;
-    background-color: var(--canvas);
-    background-image: linear-gradient(rgba(13, 148, 136, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(13, 148, 136, 0.035) 1px, transparent 1px);
-    background-size: 32px 32px;
+    @apply min-h-screen text-slate-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #f8fafc;
+    background-image:
+      radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.04) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.03) 0px, transparent 50%);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
 
   button,
@@ -33,39 +43,160 @@
   }
 
   :focus-visible {
-    outline: 3px solid rgba(13, 148, 136, 0.35);
-    outline-offset: 3px;
+    outline: 2px solid #0d9488;
+    outline-offset: 2px;
   }
 
   ::selection {
-    background: #99f6e4;
-    color: #134e4a;
+    background: #ccfbf1;
+    color: #115e59;
   }
 }
 
 @layer components {
+  /* Entry animations */
   .clinical-enter {
-    animation: clinical-enter 500ms ease-out both;
+    animation: clinical-enter 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .clinical-enter-delay {
-    animation: clinical-enter 500ms 100ms ease-out both;
+    animation: clinical-enter 400ms 100ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
+  /* Card surface */
   .clinical-surface {
-    @apply bg-white border border-slate-200 shadow-sm;
-    box-shadow: 0 18px 45px rgba(15, 78, 74, 0.06);
+    @apply bg-white border border-slate-200/90 shadow-sm rounded-2xl;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  }
+
+  .clinical-surface-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:border-slate-300;
+  }
+
+  /* Modal backdrop */
+  .modal-backdrop {
+    @apply fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 overflow-y-auto;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Modal container */
+  .modal-container {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-xl w-full my-6 overflow-hidden;
+    animation: modal-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Modal header - white with green accent */
+  .modal-header {
+    @apply px-5 py-4 bg-white border-b border-slate-200 flex items-center justify-between;
+  }
+
+  .modal-header-icon {
+    @apply w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center;
+  }
+
+  /* Primary brand button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center space-x-1.5 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center space-x-1.5 px-4 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold transition-colors cursor-pointer;
+  }
+
+  /* Danger/Emergency button */
+  .btn-danger {
+    @apply inline-flex items-center justify-center space-x-1.5 px-4 py-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-lg text-xs font-semibold transition-colors cursor-pointer;
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center space-x-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border;
+  }
+
+  .badge-emergency {
+    @apply bg-rose-50 text-rose-700 border-rose-200;
+  }
+
+  .badge-urgent {
+    @apply bg-amber-50 text-amber-800 border-amber-200;
+  }
+
+  .badge-success {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+  }
+
+  .badge-info {
+    @apply bg-teal-50 text-teal-700 border-teal-200;
+  }
+
+  .badge-neutral {
+    @apply bg-slate-50 text-slate-600 border-slate-200;
+  }
+
+  /* Telemetry pulse */
+  .telemetry-pulse {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Mobile-first responsive table wrapper */
+  .table-responsive {
+    @apply overflow-x-auto -mx-4 sm:mx-0;
+  }
+
+  .table-responsive table {
+    @apply min-w-[640px] sm:min-w-full;
+  }
+
+  /* Mobile card fallback for tables */
+  @media (max-width: 639px) {
+    .mobile-stack thead {
+      @apply hidden;
+    }
+    .mobile-stack tbody tr {
+      @apply block mb-3 p-4 rounded-xl border border-slate-200 bg-white;
+    }
+    .mobile-stack tbody td {
+      @apply block px-0 py-1 text-left;
+    }
+    .mobile-stack tbody td::before {
+      content: attr(data-label);
+      @apply font-semibold text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5;
+    }
   }
 }
 
 @keyframes clinical-enter {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.3;
   }
 }
 

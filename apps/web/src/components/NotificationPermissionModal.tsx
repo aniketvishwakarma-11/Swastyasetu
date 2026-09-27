@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bell, CheckCircle2, X } from 'lucide-react';
+import { ModalPortal } from './ModalPortal';
 
 interface NotificationPermissionModalProps {
   isOpen: boolean;
@@ -24,13 +25,14 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
-              <Bell className="w-5 h-5 animate-bounce" />
-            </div>
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center shrink-0">
+                <Bell className="w-5 h-5" />
+              </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900">Enable Emergency Triage Alerts</h3>
               <p className="text-xs text-slate-500 mt-0.5">District Referral Continuity Network</p>
@@ -82,5 +84,6 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

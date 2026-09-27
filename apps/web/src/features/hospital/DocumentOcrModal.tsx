@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { apiRequest, getApiAssetUrl } from '../../lib/api';
+import { ModalPortal } from '../../components/ModalPortal';
 
 export interface ClinicalFieldItem {
   id: string;
@@ -237,34 +238,35 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
   const autoAcceptedCount = fields.filter((f) => f.reviewStatus === 'AUTO_ACCEPTED' || f.reviewStatus === 'VERIFIED').length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
       <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-teal-600 flex items-center justify-center text-white shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700">
               <ScanLine className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-lg font-bold text-slate-900">
-                  AI Clinical Document & Prescription OCR Scanner
+                <h3 className="text-sm font-bold text-slate-900">
+                  Document Scanner
                 </h3>
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-teal-100 text-teal-800">
-                  Step 7 & 8 Handoff
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-200 uppercase">
+                  AI OCR
                 </span>
               </div>
-              <p className="text-xs text-slate-500">
-                Patient: <span className="font-semibold text-slate-800">{patientName}</span> • ABHA: <span className="font-mono text-slate-700">{patientAbha || '91-4829-1029-4401'}</span> • TrOCR Vision Model
+              <p className="text-[11px] text-slate-500">
+                Patient: <span className="font-semibold text-slate-700">{patientName}</span> • ABHA: <span className="font-mono text-slate-600">{patientAbha || '91-4829-1029-4401'}</span>
               </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-2">
             {ocrEngine && (
-              <span className="hidden md:inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-300">
+              <span className="hidden md:inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">
                 <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                <span>{ocrEngine === 'HUGGINGFACE_MEDIVAULT_TROCR' ? 'HF Space: TrOCR Active' : 'Resilient Fallback Mode'}</span>
+                <span>{ocrEngine === 'HUGGINGFACE_MEDIVAULT_TROCR' ? 'AI Model Active' : 'Fallback Mode'}</span>
               </span>
             )}
             <button
@@ -340,13 +342,13 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
           </div>
         )}
 
-        {/* Hard Rule 1 Banner (if items need review) */}
+        {/* Clinical Safety Verification Banner */}
         {fields.length > 0 && needsReviewCount > 0 && !successMessage && (
           <div className="mx-6 mt-3 p-3 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-start space-x-2.5">
             <AlertTriangle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">
-                Hard Clinical Safety Rule 1: No Silent Guessing Enforced
+                Clinical Safety Protocol: Mandatory Clinician Field Verification
               </p>
               <p className="text-amber-800 mt-0.5">
                 {needsReviewCount} field(s) have extraction confidence &lt; 90% due to cursive handwriting. Review the original scan on the left and edit or verify the dosage before saving.
@@ -358,31 +360,31 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
         {/* Split Screen Workspace */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 p-6 overflow-hidden min-h-[460px]">
           {/* Left Column: Original Scanned Document Viewer */}
-          <div className="border border-slate-200 rounded-lg flex flex-col bg-slate-900 overflow-hidden shadow-inner relative">
+          <div className="border border-slate-200 rounded-lg flex flex-col bg-slate-50 overflow-hidden relative">
             {/* Viewer Controls */}
-            <div className="bg-slate-800/90 border-b border-slate-700 px-3 py-1.5 flex items-center justify-between text-xs text-slate-300 z-10">
+            <div className="bg-white border-b border-slate-200 px-3 py-1.5 flex items-center justify-between text-xs text-slate-600 z-10">
               <span className="font-semibold flex items-center">
-                <FileText className="w-3.5 h-3.5 mr-1 text-teal-400" />
+                <FileText className="w-3.5 h-3.5 mr-1 text-teal-600" />
                 Original Document Scan
               </span>
               <div className="flex items-center space-x-1.5">
                 <button
                   onClick={() => setZoomLevel((z) => Math.min(z + 0.25, 2.5))}
-                  className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white"
+                  className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-700"
                   title="Zoom In"
                 >
                   <ZoomIn className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setZoomLevel((z) => Math.max(z - 0.25, 0.75))}
-                  className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white"
+                  className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-700"
                   title="Zoom Out"
                 >
                   <ZoomOut className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setRotation((r) => (r + 90) % 360)}
-                  className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white"
+                  className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-700"
                   title="Rotate 90°"
                 >
                   <RotateCw className="w-3.5 h-3.5" />
@@ -392,7 +394,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
                     setZoomLevel(1);
                     setRotation(0);
                   }}
-                  className="px-1.5 py-0.5 text-[10px] rounded hover:bg-slate-700 text-slate-300"
+                  className="px-1.5 py-0.5 text-[10px] rounded hover:bg-slate-100 text-slate-500"
                 >
                   Reset
                 </button>
@@ -400,12 +402,12 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
             </div>
 
             {/* Document Render Area */}
-            <div className="flex-1 flex items-center justify-center p-4 overflow-auto bg-slate-950/70">
+            <div className="flex-1 flex items-center justify-center p-4 overflow-auto bg-white">
               {isProcessing ? (
                 <div className="text-center text-slate-400 space-y-3">
-                  <RefreshCw className="w-8 h-8 mx-auto animate-spin text-teal-500" />
-                  <p className="text-sm font-medium">Running Vision OCR on Space...</p>
-                  <p className="text-xs text-slate-500">Transcribing cursive handwriting with TrOCR</p>
+                  <RefreshCw className="w-8 h-8 mx-auto animate-spin text-teal-600" />
+                  <p className="text-sm font-medium text-slate-600">Processing document...</p>
+                  <p className="text-xs text-slate-400">Extracting text with AI OCR</p>
                 </div>
               ) : documentFileUrl ? (
                 <div
@@ -570,7 +572,7 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
             {fields.length > 0 && (
               <div className="p-3 bg-white border-t border-slate-200 flex items-center justify-between">
                 <span className="text-xs text-slate-500">
-                  Enforces <strong>Rule 4</strong> (Immutable Audit Log)
+                  <span className="font-semibold text-slate-700">ABHA / DISHA Compliant</span> (Immutable Clinical Audit Record)
                 </span>
                 <button
                   onClick={handleConfirmCareRecord}
@@ -595,5 +597,6 @@ export const DocumentOcrModal: React.FC<DocumentOcrModalProps> = ({
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
 import { localDb } from '../../lib/db';
+import { ModalPortal } from '../../components/ModalPortal';
 
 interface RapidVitalsModalProps {
   isOpen: boolean;
@@ -224,14 +225,15 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150">
-        {/* Header */}
-        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center shadow-xs">
-              <HeartPulse className="w-5 h-5 text-rose-500" />
-            </div>
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150">
+          {/* Header */}
+          <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center shadow-xs">
+                <HeartPulse className="w-5 h-5 text-teal-600" />
+              </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="text-base font-bold text-slate-900">Frontline Rapid Vitals &amp; EWS Intake</h3>
@@ -628,5 +630,6 @@ ${evaluation.alerts.map((a) => `* WARNING: ${a}`).join('\n')}`;
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

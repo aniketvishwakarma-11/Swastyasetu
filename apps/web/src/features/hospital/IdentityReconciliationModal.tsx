@@ -9,6 +9,7 @@ import {
   Info,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { ModalPortal } from '../../components/ModalPortal';
 
 interface FieldScore {
   field: string;
@@ -141,7 +142,8 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -346,5 +348,6 @@ export const IdentityReconciliationModal: React.FC<IdentityReconciliationModalPr
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

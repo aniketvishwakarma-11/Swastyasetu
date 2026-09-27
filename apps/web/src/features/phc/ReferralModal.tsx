@@ -3,6 +3,7 @@ import { X, Send, ShieldAlert, HeartPulse, MapPin, UserCheck, AlertTriangle, Spa
 import { apiRequest } from '../../lib/api';
 import { localDb } from '../../lib/db';
 import { useAuth } from '../../context/AuthContext';
+import { ModalPortal } from '../../components/ModalPortal';
 
 interface ReferralModalProps {
   isOpen: boolean;
@@ -251,32 +252,33 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl my-8 overflow-hidden">
-        {/* Modal Header */}
-        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center">
-              <HeartPulse className="w-5 h-5" />
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl my-8 overflow-hidden">
+          {/* Modal Header */}
+          <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center">
+                <HeartPulse className="w-5 h-5 text-teal-600" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Create Digital Referral</h2>
+                <p className="text-xs text-slate-500">
+                  Primary Health Centre: <span className="font-semibold text-slate-700">{user?.facility?.name || 'PHC Khed'}</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Create Digital Referral</h2>
-              <p className="text-xs text-slate-500">
-                Primary Health Centre: <span className="font-semibold text-slate-700">{user?.facility?.name || 'PHC Khed'}</span>
-              </p>
-            </div>
-          </div>
 
-          <div className="flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={loadDemoCase}
-              className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
-              title="1-Click Load Acute STEMI Demo (Ramesh Yadav)"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-rose-500" />
-              <span>Load STEMI Demo</span>
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={loadDemoCase}
+                className="px-2.5 py-1.5 bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-700 hover:text-teal-800 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer shadow-2xs"
+                title="1-Click Load Acute STEMI Demo (Ramesh Yadav)"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                <span>Load STEMI Demo</span>
+              </button>
             <button
               type="button"
               onClick={() => { resetForm(); onClose(); }}
@@ -521,5 +523,6 @@ export const ReferralModal: React.FC<ReferralModalProps> = ({
         </form>
       </div>
     </div>
+  </ModalPortal>
   );
 };

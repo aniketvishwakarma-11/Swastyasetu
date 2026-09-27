@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { ModalPortal } from '../../components/ModalPortal';
 
 export interface DischargeMedicationItem {
   name: string;
@@ -284,7 +285,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
     }
 
     if (!isSigned) {
-      setErrorMsg('Attending clinician verification and sign-off is mandatory under Clinical Rule 3.');
+      setErrorMsg('Attending clinician verification and sign-off is mandatory before dispatching discharge summary.');
       return;
     }
 
@@ -360,22 +361,23 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 bg-linear-to-r from-teal-900 via-teal-800 to-slate-900 text-white flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700">
               <FileText className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold">Standardized Clinical Discharge Summary</h2>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                  CLOSING THE LOOP
+                <h2 className="text-base font-bold text-slate-900">Standardized Clinical Discharge Summary</h2>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                  Closing the Loop
                 </span>
               </div>
-              <p className="text-xs text-teal-200/80">
+              <p className="text-xs text-slate-500">
                 District Hospital Specialist Handoff • Pre-populates PHC Follow-Up Task
               </p>
             </div>
@@ -384,16 +386,16 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
           <div className="flex items-center space-x-2">
             <button
               onClick={loadStemiPreset}
-              className="px-2.5 py-1 bg-teal-600/40 hover:bg-teal-600/60 border border-teal-400/40 rounded-lg text-xs font-semibold text-teal-100 flex items-center space-x-1.5 transition-colors cursor-pointer"
+              className="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-lg text-xs font-semibold text-teal-800 flex items-center space-x-1.5 transition-colors cursor-pointer"
               title="Auto-fill with STEMI clinical pathway template"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               <span>Load STEMI Preset</span>
             </button>
 
             <button
               onClick={() => window.print()}
-              className="p-1.5 text-teal-200 hover:text-white hover:bg-teal-700/50 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
               title="Print Summary"
             >
               <Printer className="w-4 h-4" />
@@ -401,7 +403,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 text-teal-200 hover:text-white hover:bg-teal-700/50 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -805,7 +807,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
               />
               <div className="text-xs">
                 <span className="font-bold text-slate-900">
-                  Attending Clinician Certification &amp; Sign-Off (Hard Rule 3 Enforced)
+                  Attending Clinician Certification &amp; Sign-Off (Mandatory Attestation)
                 </span>
                 <p className="text-slate-600 text-[11px] mt-0.5">
                   I certify that I have personally evaluated the patient, verified all take-home medication dosages, reviewed discharge vitals, and established the post-discharge village PHC care plan.
@@ -831,7 +833,7 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
         {/* Modal Footer */}
         <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
           <div className="text-[11px] text-slate-500">
-            Enforces <strong className="text-slate-700">Hard Rule 4</strong>: Generates an immutable <code className="text-teal-700 font-mono">DISCHARGE_SUMMARY_CREATED</code> audit event.
+            <span className="font-semibold text-slate-700">ABHA / DISHA Compliant</span>: Generates an immutable <code className="text-teal-700 font-mono">DISCHARGE_SUMMARY_CREATED</code> audit record.
           </div>
 
           <div className="flex items-center space-x-3">
@@ -856,5 +858,6 @@ export const DischargeSummaryModal: React.FC<DischargeSummaryModalProps> = ({
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

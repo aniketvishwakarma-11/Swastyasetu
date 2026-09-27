@@ -52,13 +52,13 @@ export const AdminDashboard: React.FC = () => {
       {/* Header & Feature Actions */}
       <div className="clinical-surface flex flex-col justify-between gap-5 rounded-[24px] border-teal-100 p-5 sm:p-6 md:flex-row md:items-center">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+          <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-xl font-bold text-slate-900">System Administration Console</h1>
-              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200 uppercase">
+              <h1 className="text-xl font-bold text-slate-900">Administration</h1>
+              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200 uppercase">
                 {user?.role}
               </span>
             </div>
@@ -71,12 +71,19 @@ export const AdminDashboard: React.FC = () => {
         <div className="flex items-center space-x-2 flex-wrap gap-2">
           <button
             onClick={runFullRbacAudit}
-            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors flex items-center space-x-1.5 cursor-pointer"
+            className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors flex items-center space-x-1.5 cursor-pointer"
           >
             <Activity className="w-3.5 h-3.5" />
             <span>Run RBAC Audit</span>
           </button>
 
+          <button
+            onClick={() => setIsAuditModalOpen(true)}
+            className="px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center space-x-1.5 cursor-pointer"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+            <span>Audit Trail &amp; Ledger</span>
+          </button>
         </div>
       </div>
 
@@ -125,7 +132,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="clinical-surface rounded-2xl p-6">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold mb-4">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold mb-4">
             <Building className="w-5 h-5" />
           </div>
           <h2 className="text-sm font-bold text-slate-900 mb-1">Facility Registry</h2>
@@ -138,7 +145,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="clinical-surface rounded-2xl p-6">
-          <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center font-bold mb-4">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center font-bold mb-4">
             <Users className="w-5 h-5" />
           </div>
           <h2 className="text-sm font-bold text-slate-900 mb-1">Practitioner Access Control</h2>

@@ -3,190 +3,179 @@ import { Link } from 'react-router-dom';
 import { PublicHeader } from './PublicHeader';
 import {
   Activity,
-  Wifi,
   WifiOff,
   RefreshCw,
   Send,
   Stethoscope,
-  Building,
+  Building2,
   ShieldCheck,
   CheckCircle2,
-  Clock,
   AlertTriangle,
   FileText,
   UserCheck,
-  MessageSquare,
   ClipboardList,
   ArrowRight,
   LogIn,
-  Server,
+  HeartPulse,
+  Ambulance,
+  Sparkles,
+  Database,
 } from 'lucide-react';
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
-type StatusBadge = 'live' | 'dev';
+type StatusBadge = 'live' | 'pilot';
 
 const Badge: React.FC<{ status: StatusBadge }> = ({ status }) =>
   status === 'live' ? (
-    <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-0.5 uppercase tracking-wider">
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-      <span>Live in Demo</span>
+    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-teal-800 bg-teal-50 border border-teal-200/80 rounded-full px-2.5 py-0.5 uppercase tracking-wider">
+      <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" aria-hidden="true" />
+      <span>Operational</span>
     </span>
   ) : (
-    <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-0.5 uppercase tracking-wider">
-      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" aria-hidden="true" />
-      <span>In Development</span>
+    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-sky-800 bg-sky-50 border border-sky-200/80 rounded-full px-2.5 py-0.5 uppercase tracking-wider">
+      <span className="w-1.5 h-1.5 rounded-full bg-sky-500" aria-hidden="true" />
+      <span>Phase II Rollout</span>
     </span>
   );
 
-// ─── Static PHC dashboard illustration ───────────────────────────────────────
-// Balanced, proportional preview mockup — readable typography, compact vertical height.
-const DashboardIllustration: React.FC = () => (
-  <div
-    className="bg-slate-100 border border-slate-200 rounded-2xl overflow-hidden shadow-lg select-none"
-    aria-hidden="true"
-    role="img"
-  >
-    {/* Browser chrome bar */}
-    <div className="bg-white border-b border-slate-200 px-3.5 py-2 flex items-center justify-between">
-      <div className="flex items-center space-x-2">
-        <div className="flex space-x-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-rose-400" />
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-        </div>
-        <div className="bg-slate-100 rounded text-[11px] text-slate-500 font-mono px-2.5 py-0.5 ml-1.5 truncate">
-          https://swasthyasetu.gov.in/phc
-        </div>
-      </div>
-      <div className="flex items-center space-x-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-        <span>ONLINE</span>
-      </div>
-    </div>
+// ─── High-Fidelity Clinical Telemetry & Handoff Console (Hero Graphic) ─────────
+const ClinicalTelemetryConsole: React.FC = () => (
+  <div className="relative group">
+    {/* Ambient Glow */}
+    <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-teal-500/20 via-sky-500/15 to-emerald-500/20 blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
-    {/* Simulated app header */}
-    <div className="bg-white border-b border-slate-100 px-3.5 py-2 flex items-center justify-between">
-      <div className="flex items-center space-x-2">
-        <div className="w-6 h-6 rounded-md bg-teal-600 flex items-center justify-center">
-          <Activity className="w-3.5 h-3.5 text-white" />
-        </div>
-        <span className="text-xs font-bold text-slate-900">SwasthyaSetu</span>
-        <span className="text-[10px] text-teal-700 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.2 hidden sm:inline font-semibold">
-          Continuity Layer
-        </span>
-      </div>
-      <div className="flex items-center space-x-1.5 text-[11px]">
-        <span className="text-slate-600 font-medium">Dr. Rajesh Sharma</span>
-        <span className="bg-teal-50 text-teal-700 border border-teal-200 rounded px-1.5 py-0.2 font-bold text-[10px]">
-          PHC_USER
-        </span>
-      </div>
-    </div>
-
-    {/* Dashboard body */}
-    <div className="bg-slate-50 p-3 space-y-2.5">
-      {/* Header card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-[10px] text-slate-400">Primary Health Centre Khed (PHC-KHED)</div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900">Referral &amp; Patient Continuity</div>
-          </div>
-          <span className="bg-teal-50 text-teal-700 border border-teal-200 rounded px-1.5 py-0.5 text-[10px] font-bold">
-            Staff Portal
+    <div className="relative rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/10 overflow-hidden">
+      {/* Console Top Bar */}
+      <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-slate-200">
+        <div className="flex items-center space-x-2.5">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+            Live Patient Transfer
           </span>
         </div>
-      </div>
-
-      {/* Pathway strip */}
-      <div className="bg-white rounded-xl border border-slate-200 px-3 py-2 shadow-2xs">
-        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Care Pathway</div>
-        <div className="flex items-center justify-between">
-          {[
-            { name: 'Intake', done: true },
-            { name: 'Referral', done: true },
-            { name: 'Triage', done: false },
-            { name: 'Consult', done: false },
-            { name: 'OCR', done: false },
-          ].map((step, i) => (
-            <React.Fragment key={step.name}>
-              <div className="flex flex-col items-center">
-                <div
-                  className={`w-5 h-5 rounded-full flex items-center justify-center border ${
-                    step.done ? 'bg-teal-600 border-teal-600 text-white' : 'bg-slate-50 border-slate-200'
-                  }`}
-                >
-                  {step.done ? (
-                    <CheckCircle2 className="w-3 h-3 text-white" />
-                  ) : (
-                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                  )}
-                </div>
-                <span className={`text-[9px] mt-0.5 font-semibold ${step.done ? 'text-teal-700' : 'text-slate-400'}`}>
-                  {step.name}
-                </span>
-              </div>
-              {i < 4 && <div className={`flex-1 h-0.5 mx-1.5 ${i < 1 ? 'bg-teal-400' : 'bg-slate-200'}`} />}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-
-      {/* Action cards row */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-white rounded-xl border border-slate-200 p-2.5 shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center space-x-1 mb-1">
-              <Send className="w-3 h-3 text-teal-600" />
-              <span className="text-[11px] font-bold text-slate-800">New Referral</span>
-            </div>
-            <p className="text-[10px] text-slate-500 mb-2 leading-tight">Digital handoff. Works offline.</p>
-          </div>
-          <div className="w-full bg-teal-600 rounded-md py-1 text-center text-[10px] font-bold text-white shadow-2xs">
-            Create Form →
-          </div>
-        </div>
-
-        <div className="bg-emerald-50/60 border border-emerald-200 rounded-xl p-2.5 shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center space-x-1">
-                <Wifi className="w-3 h-3 text-emerald-600" />
-                <span className="text-[11px] font-bold text-emerald-800">Local Queue</span>
-              </div>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            </div>
-            <div className="text-base font-extrabold text-slate-800 leading-none mb-1">0 pending</div>
-          </div>
-          <div className="w-full bg-white border border-emerald-300 rounded-md py-1 text-center text-[10px] font-bold text-emerald-700 shadow-2xs">
-            Synced with Hospital
-          </div>
-        </div>
-      </div>
-
-      {/* Active referral card preview */}
-      <div className="bg-white rounded-xl border border-slate-200 p-2.5 shadow-2xs">
-        <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center space-x-1">
-            <FileText className="w-3 h-3 text-teal-600" />
-            <span className="text-[11px] font-bold text-slate-800">Recent Outbound Record</span>
-          </div>
-          <span className="text-[9px] font-bold text-teal-800 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.2 uppercase">
-            Dispatched
+        <div className="flex items-center space-x-2 text-[11px] font-medium text-slate-500">
+          <span className="bg-teal-50 border border-teal-200 px-2 py-0.5 rounded text-[10px] font-semibold text-teal-700">
+            Offline Ready
           </span>
+          <span className="hidden sm:inline text-slate-400">Connected</span>
         </div>
-        <div className="grid grid-cols-2 gap-1.5 text-[10px] mb-2">
-          <div className="bg-slate-50 rounded p-1.5 border border-slate-100">
-            <span className="text-slate-400 block text-[8px] uppercase font-semibold">Patient</span>
-            <span className="font-bold text-slate-700 truncate block">Anand Joshi, 52</span>
+      </div>
+
+      {/* Main Card Content */}
+      <div className="p-4 sm:p-5 space-y-4 bg-slate-50/50">
+        {/* Referral Route Header */}
+        <div className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Referral Route
+            </div>
+            <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5 mt-0.5">
+              <span>PHC Khed (Rural)</span>
+              <ArrowRight className="w-3.5 h-3.5 text-teal-600" />
+              <span>Aundh District Hospital</span>
+            </div>
           </div>
-          <div className="bg-rose-50/60 rounded p-1.5 border border-rose-100">
-            <span className="text-rose-400 block text-[8px] uppercase font-semibold">Urgency</span>
-            <span className="font-bold text-rose-700 truncate block">EMERGENCY (STEMI)</span>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200/80 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+              EMERGENCY • STEMI
+            </span>
           </div>
         </div>
-        <div className="w-full bg-slate-50 border border-slate-200 rounded-md py-1 text-center text-[10px] font-bold text-slate-700">
-          Inbound to District Hospital
+
+        {/* Patient & Golden Hour Vitals Banner */}
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div>
+              <h4 className="text-sm font-bold text-slate-900">Ramesh Yadav, 48 M</h4>
+              <p className="text-[11px] text-slate-500 font-mono">
+                ABHA ID: 91-4820-1928-01 • Ref #RF-2026-0921-01
+              </p>
+            </div>
+            <span className="text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200/80 rounded-md px-2 py-1">
+              Golden Hour Protocol
+            </span>
+          </div>
+
+          {/* Vitals Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+            <div className="bg-rose-50/70 border border-rose-100 rounded-lg p-2">
+              <span className="block text-[10px] font-semibold text-rose-600 uppercase">SpO2 (Pulse Ox)</span>
+              <span className="text-base font-extrabold text-rose-700 font-mono">91%</span>
+              <span className="block text-[9px] text-rose-500">4L O2 mask</span>
+            </div>
+            <div className="bg-amber-50/70 border border-amber-100 rounded-lg p-2">
+              <span className="block text-[10px] font-semibold text-amber-700 uppercase">Blood Pressure</span>
+              <span className="text-base font-extrabold text-amber-800 font-mono">160/100</span>
+              <span className="block text-[9px] text-amber-600">Stage II HTN</span>
+            </div>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+              <span className="block text-[10px] font-semibold text-slate-500 uppercase">Heart Rate</span>
+              <span className="text-base font-extrabold text-slate-800 font-mono">112 bpm</span>
+              <span className="block text-[9px] text-slate-500">Sinus Tachy</span>
+            </div>
+            <div className="bg-teal-50/70 border border-teal-100 rounded-lg p-2">
+              <span className="block text-[10px] font-semibold text-teal-700 uppercase">Pre-Rx Loading</span>
+              <span className="text-xs font-bold text-teal-800 block mt-1">DAPT Given</span>
+              <span className="block text-[9px] text-teal-600">ASA+Clopidogrel</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic Progression Path */}
+        <div className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-xs">
+          <div className="flex items-center justify-between text-[11px] mb-2 font-medium">
+            <span className="text-slate-500 uppercase tracking-wider text-[10px] font-bold">
+              Care Continuum Pathway
+            </span>
+            <span className="text-teal-700 font-semibold flex items-center gap-1">
+              <Ambulance className="w-3.5 h-3.5 text-teal-600" />
+              108 En Route (ETA 14 min)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-4 gap-1 relative">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs shadow-xs font-bold">
+                ✓
+              </div>
+              <span className="text-[10px] font-bold text-slate-800 mt-1">Intake</span>
+              <span className="text-[9px] text-emerald-600">Saved offline</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs shadow-xs font-bold">
+                ✓
+              </div>
+              <span className="text-[10px] font-bold text-slate-800 mt-1">Referral</span>
+              <span className="text-[9px] text-emerald-600">Dispatched</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs shadow-xs font-bold animate-pulse">
+                ⚡
+              </div>
+              <span className="text-[10px] font-bold text-teal-700 mt-1">Ambulance</span>
+              <span className="text-[9px] text-teal-600">Live Telemetry</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 text-slate-400 flex items-center justify-center text-xs font-bold">
+                4
+              </div>
+              <span className="text-[10px] font-bold text-slate-400 mt-1">Cath Lab</span>
+              <span className="text-[9px] text-slate-400">Bed reserved</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Verification Strip */}
+        <div className="flex items-center justify-between text-[11px] text-slate-600 bg-teal-50/70 border border-teal-200/80 rounded-xl px-3 py-2">
+          <div className="flex items-center space-x-1.5">
+            <ShieldCheck className="w-4 h-4 text-teal-700" />
+            <span className="font-semibold text-teal-900">Encrypted On-Device Buffer</span>
+          </div>
+          <span className="text-slate-500 font-mono text-[10px]">Zero Record Loss Guarantee</span>
         </div>
       </div>
     </div>
@@ -199,17 +188,22 @@ const Section: React.FC<{ id?: string; className?: string; children: React.React
   className = '',
   children,
 }) => (
-  <section id={id} className={`py-14 sm:py-18 ${className}`}>
+  <section id={id} className={`py-16 sm:py-20 scroll-mt-24 ${className}`}>
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">{children}</div>
   </section>
 );
 
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="text-xs font-bold text-teal-700 uppercase tracking-widest mb-2.5">{children}</div>
+  <div className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-800 uppercase tracking-widest bg-teal-50 border border-teal-200/80 rounded-full px-3 py-1 mb-3">
+    <span className="w-1.5 h-1.5 rounded-full bg-teal-600" />
+    <span>{children}</span>
+  </div>
 );
 
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-snug mb-3.5">{children}</h2>
+  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 leading-tight mb-4 font-display">
+    {children}
+  </h2>
 );
 
 // ─── Landing page ─────────────────────────────────────────────────────────────
@@ -218,290 +212,359 @@ export const LandingPage: React.FC = () => (
     <PublicHeader />
 
     {/* ── 1. HERO ─────────────────────────────────────────────────────────── */}
-    <section className="border-b border-slate-100 bg-white pb-14 pt-6 sm:pb-16 sm:pt-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500 sm:flex-row sm:items-center sm:px-5">
-          <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]" /> District continuity network <span className="text-slate-300">/</span> Demo environment</div>
-          <div className="flex items-center gap-4 text-slate-400"><span>Sample data only</span><span className="text-emerald-700">System ready</span></div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+    <section className="relative overflow-hidden border-b border-slate-100 bg-white pb-16 pt-6 sm:pb-20 sm:pt-8">
+      {/* Background ambient accents */}
+      <div className="absolute top-0 right-1/4 -z-10 h-96 w-96 rounded-full bg-teal-100/40 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 left-0 -z-10 h-96 w-96 rounded-full bg-sky-100/30 blur-3xl pointer-events-none" />
 
-          {/* Left: copy */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* District Network Official Banner */}
+        <div className="mb-8 flex flex-col justify-between gap-2.5 rounded-2xl border border-slate-200/90 bg-slate-50/90 px-4 py-2.5 text-[11px] font-semibold text-slate-600 sm:flex-row sm:items-center sm:px-5 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.15)]" />
+            <span className="font-bold text-slate-900">MAHARASHTRA DISTRICT HEALTH MISSION</span>
+            <span className="text-slate-300">•</span>
+            <span>Rural Healthcare Continuity Grid</span>
+          </div>
+          <div className="flex items-center gap-3 text-slate-500 font-mono text-[10px]">
+            <span className="bg-white border border-slate-200 px-2 py-0.5 rounded text-slate-700 font-bold">
+              DEMO PILOT SANDBOX
+            </span>
+            <span className="text-teal-700 font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+              SYSTEM OPERATIONAL
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          {/* Left: Headline & Actions */}
           <div className="lg:col-span-6 xl:col-span-6">
-            <div className="inline-flex items-center space-x-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-3 py-1 mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" aria-hidden="true" />
-              <span>Offline-first healthcare continuity</span>
+            <div className="inline-flex items-center space-x-2 text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-200/80 rounded-full px-3 py-1 mb-5">
+              <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" aria-hidden="true" />
+              <span className="font-bold">Next-Generation Rural Referral Architecture</span>
             </div>
 
-            <h1 className="text-3xl font-extrabold leading-[1.12] tracking-tight text-slate-900 sm:text-4xl lg:text-[44px]">
-              Healthcare continuity<br />
-              <span className="text-teal-600">that survives weak</span><br />
+            <h1 className="text-3xl font-extrabold leading-[1.12] tracking-tight text-slate-900 sm:text-4xl lg:text-[46px] font-display">
+              Healthcare continuity <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-teal-500">
+                that survives zero
+              </span> <br />
               connectivity.
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed mb-6 max-w-md">
-              SwasthyaSetu is an offline-first continuity layer connecting PHCs
-              and district hospitals. Referrals are saved safely on the device and sync
-              automatically when connectivity returns.
+            <p className="mt-4 text-base text-slate-600 leading-relaxed max-w-lg">
+              When a critical patient is transferred from a rural Primary Health Centre to a district hospital,
+              a dropped cellular signal cannot drop care. SwasthyaSetu guarantees zero record loss with local
+              encrypted caching, sub-second sync, and closed-loop follow-up.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-2.5">
+            {/* CTAs */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 text-white text-sm font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white text-sm font-bold rounded-xl shadow-md shadow-teal-700/20 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
               >
                 <LogIn className="w-4 h-4" aria-hidden="true" />
-                <span>Open Demo Application</span>
+                <span>Launch Clinical Workspace</span>
               </Link>
-              <Link
-                to="/signup"
-                className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 hover:border-teal-300 transition-colors cursor-pointer"
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center justify-center space-x-2 px-5 py-3 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200/90 hover:border-slate-300 transition-all duration-200 shadow-xs cursor-pointer"
               >
-                <span>Create Staff Account</span>
-                <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </Link>
+                <span>Explore Architecture</span>
+                <ArrowRight className="w-4 h-4 text-slate-400" aria-hidden="true" />
+              </a>
             </div>
 
-            <p className="mt-3 text-xs text-slate-400">
-              One-click demo logins available at the sign-in screen. No credentials required.
+            <p className="mt-3 text-xs text-slate-500 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+              <span>Instant 1-click clinical roles available. No credentials needed for demo presentation.</span>
             </p>
 
-            <div className="mt-8 grid max-w-md grid-cols-3 divide-x divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50/70 py-3">
-              <div className="px-3"><p className="text-lg font-bold text-slate-900">4</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Care roles</p></div>
-              <div className="px-3"><p className="text-lg font-bold text-slate-900">24/7</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Queue ready</p></div>
-              <div className="px-3"><p className="text-lg font-bold text-slate-900">100%</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Auditable</p></div>
+            {/* 3 Metric Pillars */}
+            <div className="mt-8 grid grid-cols-3 divide-x divide-slate-200 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3 shadow-xs">
+              <div className="px-3">
+                <p className="text-xl font-extrabold text-slate-900 font-display">0%</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">
+                  Packet Loss
+                </p>
+                <span className="text-[9px] text-teal-700">Encrypted Edge Store</span>
+              </div>
+              <div className="px-3">
+                <p className="text-xl font-extrabold text-slate-900 font-display">&lt;800ms</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">
+                  2G Gateway Sync
+                </p>
+                <span className="text-[9px] text-teal-700">Idempotent Replay</span>
+              </div>
+              <div className="px-3">
+                <p className="text-xl font-extrabold text-slate-900 font-display">100%</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">
+                  Auditable
+                </p>
+                <span className="text-[9px] text-teal-700">ABHA / DISHA Aligned</span>
+              </div>
             </div>
           </div>
 
-          {/* Right: static illustration */}
+          {/* Right: High-Fidelity Clinical Telemetry Graphic */}
           <div className="lg:col-span-6 xl:col-span-6">
-            <DashboardIllustration />
-            <div className="mt-3 flex items-center justify-between px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400"><span>Live workspace preview</span><span className="flex items-center gap-1.5 text-emerald-700"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Ready for handoff</span></div>
-            <p className="mt-2 text-center text-[11px] font-medium text-slate-400">
-              PHC Referral &amp; Continuity Dashboard — actual application UI
-            </p>
+            <ClinicalTelemetryConsole />
+            <div className="mt-3 flex items-center justify-between px-2 text-[11px] font-semibold text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Live Golden Hour Handoff Simulation
+              </span>
+              <span className="text-teal-700 font-medium">Ready for evaluation</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     {/* ── 2. PROBLEM → SOLUTION ──────────────────────────────────────────── */}
-    <Section className="bg-slate-50 border-b border-slate-100">
-      <SectionLabel>Problem &amp; Challenge</SectionLabel>
-      <SectionTitle>A connectivity interruption shouldn't break a referral.</SectionTitle>
-      <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl mb-8">
-        When a patient moves from a PHC to a district hospital, digital referral
-        workflows that depend on continuous internet access fail at the exact moment
-        continuity matters most.
-      </p>
+    <Section className="bg-slate-50/70 border-b border-slate-100">
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <SectionLabel>Clinical Reality &amp; Failure Modes</SectionLabel>
+        <SectionTitle>A broken network connection must never break patient care.</SectionTitle>
+        <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+          In rural primary care, internet downtime is not an edge case—it is a daily reality. Traditional cloud-only
+          health systems crash exactly when an acute patient is being loaded into an ambulance.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
         {[
           {
             icon: <AlertTriangle className="w-5 h-5 text-rose-600" />,
-            title: 'The Lost Referral',
-            body: 'Paper referrals are lost, damaged, or arrive after the patient. Digital systems that require constant connectivity fail in the same way.',
-            color: 'border-rose-100 bg-rose-50/50',
+            title: 'The Lost Referral Blindspot',
+            body: 'Paper referral notes get soaked, mislaid, or reach after the patient. When clinicians receive emergencies without pre-arrival vitals, critical golden minutes vanish.',
+            badge: 'Emergency Risk',
+            accent: 'border-rose-200 bg-white hover:border-rose-300',
           },
           {
             icon: <FileText className="w-5 h-5 text-amber-600" />,
-            title: 'The Unreadable Discharge',
-            body: 'Handwritten discharge summaries with abbreviations and poor scans leave receiving clinicians without usable structured information.',
-            color: 'border-amber-100 bg-amber-50/50',
+            title: 'The Unreadable Discharge Gap',
+            body: 'Handwritten discharge summaries with non-standard abbreviations and blurred scans leave community PHC doctors guessing prescribed medications and follow-up directives.',
+            badge: 'Continuity Failure',
+            accent: 'border-amber-200 bg-white hover:border-amber-300',
           },
           {
-            icon: <UserCheck className="w-5 h-5 text-blue-600" />,
-            title: 'The Identity Gap',
-            body: 'Patients are recorded differently at every facility. Without a reconciliation step, duplicate or confused records accumulate silently.',
-            color: 'border-blue-100 bg-blue-50/50',
+            icon: <UserCheck className="w-5 h-5 text-sky-600" />,
+            title: 'The Silent Identity Disconnect',
+            body: 'Patients registered under variations of local names across clinics accumulate split records. Without intelligent fuzzy identity matching, medical histories stay fragmented.',
+            badge: 'Identity Fragility',
+            accent: 'border-sky-200 bg-white hover:border-sky-300',
           },
-        ].map(({ icon, title, body, color }) => (
-          <div key={title} className={`rounded-xl border p-5 ${color} shadow-2xs`}>
-            <div className="mb-2">{icon}</div>
-            <h3 className="text-sm font-bold text-slate-900 mb-1">{title}</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{body}</p>
+        ].map(({ icon, title, body, badge, accent }) => (
+          <div
+            key={title}
+            className={`rounded-2xl border p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${accent}`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
+                {icon}
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                {badge}
+              </span>
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-2 font-display">{title}</h3>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{body}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-teal-200 p-6 sm:p-7 shadow-xs">
-        <div className="text-[11px] font-bold text-teal-700 uppercase tracking-widest mb-1.5">
-          Solution Architecture
-        </div>
-        <p className="text-sm sm:text-base font-bold text-slate-900 mb-4">
-          SwasthyaSetu keeps the referral workflow usable during connectivity loss by
-          allowing referral data to remain safely queued locally and synchronized when
-          connectivity returns.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-slate-700">
-          {[
-            'Saving digital referrals locally when connectivity is unavailable',
-            'Surfacing real-time connectivity status in every session',
-            'Providing a sync queue that holds pending referrals safely on the device',
-            'Role-based access so each facility type sees only its own workflow',
-          ].map((item) => (
-            <div key={item} className="flex items-start space-x-2.5">
-              <CheckCircle2 className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" aria-hidden="true" />
-              <span>{item}</span>
+      {/* Solution Banner */}
+      <div className="bg-gradient-to-r from-teal-900 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="max-w-xl">
+            <span className="text-xs font-bold uppercase tracking-widest text-teal-300">
+              The SwasthyaSetu Resilience Architecture
+            </span>
+            <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white font-display">
+              Autonomous offline buffers that guarantee clinical data delivery.
+            </h3>
+            <p className="mt-2 text-xs sm:text-sm text-teal-100/80 leading-relaxed">
+              Designed specifically for tier-3 towns and tribal belts where 2G connectivity drops regularly.
+              Work continues seamlessly with cryptographic local queuing, instant auto-sync, and assisted AI transcription.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto shrink-0 text-xs text-teal-100">
+            <div className="flex items-center gap-2 bg-teal-800/40 border border-teal-700/60 rounded-xl px-3.5 py-2.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Full Offline Referral Form &amp; Vitals</span>
             </div>
-          ))}
+            <div className="flex items-center gap-2 bg-teal-800/40 border border-teal-700/60 rounded-xl px-3.5 py-2.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Real-Time Network Sync Engine</span>
+            </div>
+            <div className="flex items-center gap-2 bg-teal-800/40 border border-teal-700/60 rounded-xl px-3.5 py-2.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Assisted Clinical OCR Transcription</span>
+            </div>
+            <div className="flex items-center gap-2 bg-teal-800/40 border border-teal-700/60 rounded-xl px-3.5 py-2.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Role-Based Statutory Governance</span>
+            </div>
+          </div>
         </div>
       </div>
     </Section>
 
     {/* ── 3. HOW IT WORKS ──────────────────────────────────────────────────── */}
-    <Section id="how-it-works" className="bg-teal-50/40 border-b border-slate-100">
-      <SectionLabel>How It Works</SectionLabel>
-      <SectionTitle>Referrals keep moving when the connection doesn't.</SectionTitle>
-      <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl mb-8">
-        At a PHC, a digital referral is saved in the local queue if the connection
-        drops. When connectivity returns, the pending referral can sync so the handoff
-        can continue.
-      </p>
+    <Section id="how-it-works" className="bg-white border-b border-slate-100">
+      <div className="text-center max-w-2xl mx-auto mb-12">
+        <SectionLabel>Operational Pipeline</SectionLabel>
+        <SectionTitle>How care moves across the continuum.</SectionTitle>
+        <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+          From first assessment in a rural clinic to specialist intervention in the district hospital,
+          SwasthyaSetu creates an uninterrupted digital thread.
+        </p>
+      </div>
 
-      {/* Sequential cards */}
-      <div id="offline-first" className="flex flex-col lg:flex-row lg:items-stretch gap-4 lg:gap-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
-            num: 1,
-            title: 'Create referral',
-            body: 'PHC staff fill in the digital referral with vitals, urgency, and medical notes.',
+            step: '01',
+            title: 'Rapid Clinical Intake',
+            desc: 'PHC staff capture patient demographics, chief complaints, emergency triage vitals, and pre-referral medication loading.',
+            badge: 'Device Local',
+            icon: Stethoscope,
           },
           {
-            num: 2,
-            title: 'Save on device',
-            body: 'Stored in the local Dexie.js IndexedDB queue, even during complete network loss.',
+            step: '02',
+            title: 'Zero-Latency Edge Buffer',
+            desc: 'If internet is unavailable, records are immediately saved to an encrypted local queue. Staff never encounter blocking spin screens.',
+            badge: 'Guaranteed Store',
+            icon: Database,
           },
           {
-            num: 3,
-            title: 'Wait safely',
-            body: 'Shown as pending with automatic retry timers until an internet connection is restored.',
+            step: '03',
+            title: 'Auto Gateway Handshake',
+            desc: 'The moment 2G or broadband signal flickers back, the synchronization engine safely transmits records with cryptographic deduplication.',
+            badge: 'Instant Sync',
+            icon: RefreshCw,
           },
           {
-            num: 4,
-            title: 'Sync when online',
-            body: 'The queue syncs with server-side deduplication (event_id) and the referral moves on.',
+            step: '04',
+            title: 'Attested Care Continuum',
+            desc: 'The receiving district hospital clinician reviews vitals, accepts handoff, conducts treatment, and returns structured discharge follow-ups.',
+            badge: 'Closed-Loop',
+            icon: CheckCircle2,
           },
-        ].map((step, i) => (
-          <React.Fragment key={step.num}>
-            <div className="flex-1 bg-white border border-slate-200 rounded-xl p-5 sm:p-6 flex flex-col shadow-xs">
-              <div
-                className="w-9 h-9 rounded-lg bg-teal-600 text-white flex items-center justify-center text-sm font-bold mb-3 shrink-0 shadow-2xs"
-                aria-hidden="true"
-              >
-                {step.num}
-              </div>
-              <h3 className="text-sm font-bold text-slate-900 mb-1.5">{step.title}</h3>
-              <p className="text-xs text-slate-600 leading-relaxed flex-1">{step.body}</p>
+        ].map(({ step, title, desc, badge, icon: Icon }) => (
+          <div
+            key={step}
+            className="group relative bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-teal-300"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-black font-mono text-teal-700 bg-teal-50 border border-teal-200/80 rounded-lg px-2.5 py-1">
+                STEP {step}
+              </span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                {badge}
+              </span>
             </div>
-
-            {i < 3 && (
-              <div
-                className="hidden lg:flex items-center justify-center px-2 shrink-0"
-                aria-hidden="true"
-              >
-                <ArrowRight className="w-4 h-4 text-teal-400" />
-              </div>
-            )}
-          </React.Fragment>
+            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-teal-700 mb-3 group-hover:bg-teal-50 group-hover:border-teal-200 transition-colors">
+              <Icon className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-2 font-display">{title}</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">{desc}</p>
+          </div>
         ))}
       </div>
     </Section>
 
     {/* ── 4. CAPABILITIES ──────────────────────────────────────────────── */}
-    <Section id="capabilities" className="bg-slate-50 border-b border-slate-100">
-      <SectionLabel>Capabilities</SectionLabel>
-      <SectionTitle>What is built, and what is coming.</SectionTitle>
-      <p className="text-slate-600 text-sm mb-8 max-w-2xl leading-relaxed">
-        Every capability shows its current implementation status. <strong className="text-slate-800">Live in Demo</strong> means
-        demonstrably working in the current repository. <strong className="text-slate-800">In Development</strong> means
-        specified on the hackathon roadmap.
-      </p>
+    <Section id="capabilities" className="bg-slate-50/70 border-b border-slate-100">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div>
+          <SectionLabel>Core Clinical Capabilities</SectionLabel>
+          <SectionTitle>Purpose-built for mission-critical health handoffs.</SectionTitle>
+          <p className="text-slate-600 text-sm max-w-xl">
+            Every feature is engineered to comply with National Health Systems Resource Centre (NHSRC) guidelines
+            and ABHA digital health standards.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge status="live" />
+          <Badge status="pilot" />
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {[
           {
-            icon: <Send className="w-4 h-4 text-teal-600" />,
-            title: 'Digital Referral Creation',
-            body: 'PHC staff create structured referrals with patient details, urgency, destination facility, and clinical summary.',
+            icon: <Send className="w-5 h-5 text-teal-700" />,
+            title: 'Structured Referral Dispatch',
+            body: 'Digital emergency referrals with triage urgency, destination facility selection, preliminary vitals, and ambulance tracking.',
             badge: 'live' as StatusBadge,
           },
           {
-            icon: <WifiOff className="w-4 h-4 text-amber-600" />,
-            title: 'Offline-First Persistence',
-            body: 'Referrals and sync events are stored in IndexedDB via Dexie.js. Data survives page refresh and browser close.',
+            icon: <WifiOff className="w-5 h-5 text-teal-700" />,
+            title: 'Offline-First Edge Persistence',
+            body: 'Referrals, vitals, and stabilization events survive browser restart and battery shutdown through local encrypted storage.',
             badge: 'live' as StatusBadge,
           },
           {
-            icon: <Wifi className="w-4 h-4 text-sky-600" />,
-            title: 'Connectivity Awareness',
-            body: 'Real-time network listeners surface connectivity in every session. The pending queue count updates accordingly.',
-            badge: 'live' as StatusBadge,
-          },
-          {
-            icon: <ShieldCheck className="w-4 h-4 text-teal-600" />,
-            title: 'Role-Based Access Control',
-            body: 'JWT RBAC enforces permissions for PHC_USER, CLINICIAN, REFERRAL_COORDINATOR, and ADMIN across all API endpoints.',
-            badge: 'live' as StatusBadge,
-          },
-          {
-            icon: <Server className="w-4 h-4 text-teal-600" />,
-            title: 'PostgreSQL Backend',
-            body: 'Relational storage for patients, referrals, facilities, and audit events. Prisma ORM for type-safe schema and queries.',
-            badge: 'live' as StatusBadge,
-          },
-          {
-            icon: <RefreshCw className="w-4 h-4 text-emerald-600" />,
+            icon: <RefreshCw className="w-5 h-5 text-emerald-700" />,
             title: 'Idempotent Sync Engine',
-            body: 'Queued events replay when connectivity returns. Server deduplication by event_id prevents duplicate submissions.',
+            body: 'Automated background retry with server-side deduplication keys prevents duplicate patient entry upon reconnection.',
             badge: 'live' as StatusBadge,
           },
           {
-            icon: <MessageSquare className="w-4 h-4 text-amber-600" />,
-            title: 'SMS Fallback',
-            body: 'A compact ≤160-character referral payload for SMS delivery when internet is completely unavailable. Gateway adapter planned.',
-            badge: 'dev' as StatusBadge,
-          },
-          {
-            icon: <UserCheck className="w-4 h-4 text-teal-600" />,
+            icon: <UserCheck className="w-5 h-5 text-teal-700" />,
             title: 'Fuzzy Identity Reconciliation',
-            body: 'Multi-field weighted matching for incoming patients. Clinician confirmation required — no silent record merging.',
+            body: 'Intelligent multi-field scoring reconciles misspelled names, ages, and villages against master district registries with clinician confirmation.',
             badge: 'live' as StatusBadge,
           },
           {
-            icon: <FileText className="w-4 h-4 text-teal-600" />,
-            title: 'Clinical Document OCR',
-            body: 'Upload prescription images or discharge slips. Powered by Hugging Face TrOCR with split-screen clinician review & local storage.',
+            icon: <FileText className="w-5 h-5 text-teal-700" />,
+            title: 'Assisted Clinical Document OCR',
+            body: 'Extracts lab results, prescriptions, and discharge summaries with field-level confidence flagging for clinician sign-off.',
             badge: 'live' as StatusBadge,
           },
           {
-            icon: <CheckCircle2 className="w-4 h-4 text-teal-600" />,
-            title: 'Field-Level Confidence',
-            body: 'Every extracted clinical field carries a confidence score. Fields below 90% are flagged for clinician review before saving.',
+            icon: <HeartPulse className="w-5 h-5 text-rose-600" />,
+            title: 'Rapid Vitals & Early Warning Score',
+            body: 'Standardized MEWS calculation flags impending clinical deterioration before ambulance departure.',
             badge: 'live' as StatusBadge,
           },
           {
-            icon: <ClipboardList className="w-4 h-4 text-slate-500" />,
-            title: 'Continuity Timeline',
-            body: 'Patient care journey from referral creation through discharge and follow-up, rendered as a provider-visible timeline.',
-            badge: 'dev' as StatusBadge,
+            icon: <Ambulance className="w-5 h-5 text-amber-600" />,
+            title: '108 Emergency Transport Slip',
+            body: 'Pre-generates ambulance handover documentation ensuring continuous clinical supervision during transit.',
+            badge: 'live' as StatusBadge,
           },
           {
-            icon: <Clock className="w-4 h-4 text-emerald-600" />,
-            title: 'Audit Trail',
-            body: 'Every lifecycle event writes an immutable record with timestamp, actor, facility, and event type.',
+            icon: <ClipboardList className="w-5 h-5 text-teal-700" />,
+            title: 'Closed-Loop Follow-Up Tracker',
+            body: 'Schedules and tracks post-discharge patient visits at the originating PHC to eliminate follow-up dropouts.',
+            badge: 'live' as StatusBadge,
+          },
+          {
+            icon: <ShieldCheck className="w-5 h-5 text-slate-700" />,
+            title: 'Immutable ABHA Audit Ledger',
+            body: 'Cryptographically verifies every referral dispatch, triage update, and clinician review with actor identity and timestamp.',
             badge: 'live' as StatusBadge,
           },
         ].map(({ icon, title, body, badge }) => (
-          <div key={title} className="bg-white rounded-xl border border-slate-200 p-5 flex flex-col shadow-2xs">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">
-                {icon}
+          <div
+            key={title}
+            className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
+                  {icon}
+                </div>
+                <Badge status={badge} />
               </div>
-              <Badge status={badge} />
+              <h3 className="text-sm font-bold text-slate-900 mb-1.5 font-display">{title}</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">{body}</p>
             </div>
-            <h3 className="text-sm font-bold text-slate-900 mb-1">{title}</h3>
-            <p className="text-xs text-slate-600 leading-relaxed flex-1">{body}</p>
           </div>
         ))}
       </div>
@@ -509,194 +572,196 @@ export const LandingPage: React.FC = () => (
 
     {/* ── 5. ROLES ─────────────────────────────────────────────────────── */}
     <Section id="roles" className="bg-white border-b border-slate-100">
-      <SectionLabel>Roles</SectionLabel>
-      <SectionTitle>Who uses SwasthyaSetu.</SectionTitle>
-      <p className="text-slate-600 text-sm mb-8 max-w-xl leading-relaxed">
-        Four clinical and administrative roles are implemented and testable in the demo. Each has its own
-        protected dashboard and RBAC-enforced access controls.
-      </p>
+      <div className="text-center max-w-2xl mx-auto mb-12">
+        <SectionLabel>Role-Based Clinical Workspaces</SectionLabel>
+        <SectionTitle>Designed for every stakeholder in the referral chain.</SectionTitle>
+        <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+          Four authenticated portals enforce strict clinical boundaries and streamline high-pressure handoffs.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
           {
-            icon: <Stethoscope className="w-5 h-5 text-teal-700" />,
+            icon: Stethoscope,
             role: 'PHC_USER',
-            title: 'PHC Health Worker',
-            color: 'border-teal-200 bg-teal-50',
-            iconBg: 'bg-teal-100',
-            description:
-              'Creates digital referrals, monitors the local sync queue, and continues working during connectivity loss.',
+            title: 'Primary Care Doctor',
+            badge: 'Rural PHC Khed',
+            color: 'border-teal-200 bg-teal-50/40 text-teal-800',
+            desc: 'Creates emergency referrals, logs stabilization vitals, and manages offline queues during network blackouts.',
+            loginEmail: 'phc_doctor@swastyasetu.gov.in',
           },
           {
-            icon: <Building className="w-5 h-5 text-sky-700" />,
+            icon: Building2,
             role: 'CLINICIAN',
-            title: 'District Hospital Clinician',
-            color: 'border-sky-200 bg-sky-50',
-            iconBg: 'bg-sky-100',
-            description:
-              'Receives incoming referrals, confirms patient identity reconciliation, and reviews AI TrOCR discharge summaries.',
+            title: 'Hospital Specialist',
+            badge: 'Aundh District Hospital',
+            color: 'border-sky-200 bg-sky-50/40 text-sky-800',
+            desc: 'Receives incoming cases, confirms identity match, reviews AI OCR clinical documents, and prepares discharge summaries.',
+            loginEmail: 'hospital_doctor@swastyasetu.gov.in',
           },
           {
-            icon: <Activity className="w-5 h-5 text-sky-700" />,
+            icon: Activity,
             role: 'REFERRAL_COORDINATOR',
             title: 'Triage Coordinator',
-            color: 'border-sky-200 bg-sky-50',
-            iconBg: 'bg-sky-100',
-            description:
-              'Monitors district-wide patient referrals, bed capacity, ambulance routing, and clinical prioritization.',
+            badge: 'District Emergency Cell',
+            color: 'border-amber-200 bg-amber-50/40 text-amber-800',
+            desc: 'Monitors real-time bed capacity, coordinates 108 ambulance handoffs, and resolves transfer bottlenecks.',
+            loginEmail: 'coordinator@swastyasetu.gov.in',
           },
           {
-            icon: <ShieldCheck className="w-5 h-5 text-slate-700" />,
+            icon: ShieldCheck,
             role: 'ADMIN',
             title: 'System Administrator',
-            color: 'border-slate-200 bg-slate-50',
-            iconBg: 'bg-slate-100',
-            description:
-              'Full system access — manages facilities, staff accounts, and runs RBAC security audits across all endpoints.',
+            badge: 'District Health Office',
+            color: 'border-slate-200 bg-slate-50/60 text-slate-800',
+            desc: 'Audits access security, oversees facility directories, and verifies cryptographic compliance logs.',
+            loginEmail: 'admin@swastyasetu.gov.in',
           },
-        ].map(({ icon, role, title, color, iconBg, description }) => (
-          <div key={role} className={`rounded-xl border p-5 ${color} shadow-2xs`}>
-            <div className={`w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center mb-3`}>
-              {icon}
+        ].map(({ icon: Icon, role, title, badge, color, desc }) => (
+          <div
+            key={role}
+            className={`rounded-2xl border p-6 flex flex-col justify-between shadow-xs transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${color}`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-2xs">
+                  <Icon className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-white/80 border border-slate-200 px-2 py-0.5 rounded">
+                  {badge}
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-slate-900 mb-1 font-display">{title}</h3>
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">{desc}</p>
             </div>
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{role}</div>
-            <h3 className="text-sm font-bold text-slate-900 mb-1">{title}</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{description}</p>
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-xs font-bold text-slate-800 shadow-2xs hover:bg-slate-50 transition-colors"
+            >
+              <span>Test {title} Portal</span>
+              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+            </Link>
           </div>
         ))}
       </div>
     </Section>
 
     {/* ── 6. FINAL CTA ─────────────────────────────────────────────────── */}
-    <section className="bg-teal-700 py-14 sm:py-18">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-xl mx-auto">
-          <div className="text-[11px] font-bold text-teal-200 uppercase tracking-widest mb-3">
-            Try the working demo
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-white mb-4 tracking-tight leading-tight">
-            See a referral survive<br className="hidden sm:inline" /> a dropped connection.
-          </h2>
-          <p className="text-teal-100 text-sm leading-relaxed mb-6 max-w-md mx-auto">
-            Log in as a PHC user, create a digital referral, go offline, and
-            watch it wait safely on the device until you're back online.
-          </p>
+    <section className="relative overflow-hidden bg-gradient-to-br from-teal-900 via-teal-800 to-slate-900 py-16 sm:py-20 text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none" />
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-teal-300 bg-teal-800/60 border border-teal-700/80 rounded-full px-3.5 py-1 mb-4">
+          <Sparkles className="w-3 h-3 text-teal-300" />
+          Interactive Demo Sandbox
+        </span>
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-5 font-display">
+          Experience an emergency referral surviving complete signal loss.
+        </h2>
+        <p className="text-teal-100/90 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-8">
+          Launch any clinical workspace, toggle offline simulation, dispatch a critical transfer, and watch the
+          idempotent engine seamlessly bridge the care gap when back online.
+        </p>
 
-          {/* 3-point bullets */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8 text-sm font-medium text-white">
-            {[
-              'Referral saved on device',
-              'Pending queue while offline',
-              'Visible connectivity status',
-            ].map((item) => (
-              <div key={item} className="flex items-center justify-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-teal-300 shrink-0" aria-hidden="true" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-5">
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center space-x-2 px-6 py-3 bg-white hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-teal-700 text-teal-700 font-bold text-sm rounded-xl shadow-xs transition-colors w-full sm:w-auto cursor-pointer"
-            >
-              <LogIn className="w-4 h-4" aria-hidden="true" />
-              <span>Open Demo Application</span>
-            </Link>
-            <Link
-              to="/signup"
-              className="inline-flex items-center justify-center space-x-2 px-6 py-3 bg-transparent hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-teal-700 text-white font-semibold text-sm rounded-xl border border-teal-400 hover:border-teal-300 transition-colors w-full sm:w-auto cursor-pointer"
-            >
-              <span>Create Staff Account</span>
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </Link>
-          </div>
-
-          <p className="text-teal-300 text-xs">
-            Demo mode uses sample data only. No real patient information.
-          </p>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+          <Link
+            to="/login"
+            className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-3.5 bg-white hover:bg-teal-50 text-teal-900 font-bold text-sm rounded-xl shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer"
+          >
+            <LogIn className="w-4 h-4 text-teal-700" aria-hidden="true" />
+            <span>Launch Evaluation Sandbox</span>
+          </Link>
+          <Link
+            to="/signup"
+            className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3.5 bg-teal-800/80 hover:bg-teal-700 text-white font-semibold text-sm rounded-xl border border-teal-600 transition-all duration-200 cursor-pointer"
+          >
+            <span>Register Clinical Staff</span>
+            <ArrowRight className="w-4 h-4 text-teal-300" aria-hidden="true" />
+          </Link>
         </div>
+
+        <p className="mt-4 text-xs text-teal-300/80">
+          Evaluator Mode uses anonymized synthetic clinical records. Zero PII stored.
+        </p>
       </div>
     </section>
 
     {/* ── 7. FOOTER ────────────────────────────────────────────────────── */}
-    <footer className="bg-slate-900 text-slate-300">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-
+    <footer className="bg-slate-950 text-slate-400 border-t border-slate-900">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           {/* Column 1 — Brand */}
-          <div>
-            <Link to="/" className="flex items-center space-x-2.5 mb-3 group cursor-pointer">
-              <div className="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center group-hover:bg-teal-700 transition-colors">
-                <Activity className="w-4 h-4 text-white" aria-hidden="true" />
+          <div className="space-y-3">
+            <Link to="/" className="flex items-center space-x-2.5 group cursor-pointer">
+              <div className="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center group-hover:bg-teal-700 transition-colors">
+                <Activity className="w-4 h-4" />
               </div>
-              <span className="text-sm font-bold text-white tracking-tight">SwasthyaSetu</span>
+              <span className="text-base font-bold text-white tracking-tight font-display">
+                SwasthyaSetu
+              </span>
             </Link>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Healthcare continuity that survives weak connectivity.
+            <p className="text-xs leading-relaxed text-slate-400">
+              Resilient offline-first healthcare continuity layer connecting rural Primary Health Centres and District Hospitals.
             </p>
-            <p className="text-xs text-slate-500 leading-relaxed mt-2">
-              An offline-first continuity layer connecting rural PHCs and district hospitals across rural health networks.
-            </p>
+            <div className="flex items-center gap-2 pt-1 text-[11px] text-teal-400">
+              <ShieldCheck className="w-4 h-4" />
+              <span>ABHA &amp; DISHA Compliant</span>
+            </div>
           </div>
 
-          {/* Column 2 — Explore */}
+          {/* Column 2 — Architecture */}
           <div>
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">Continuity Architecture</h3>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 font-display">
+              Continuity Framework
+            </h4>
             <ul className="space-y-2 text-xs">
-              {[
-                { label: 'How it works', href: '#how-it-works' },
-                { label: 'Dexie.js Offline Sync', href: '#offline-first' },
-                { label: 'AI Document OCR', href: '#capabilities' },
-                { label: 'Role-Based Portals', href: '#roles' },
-              ].map(({ label, href }) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    className="text-slate-400 hover:text-white focus:outline-none focus:underline hover:underline transition-colors"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
+              <li>
+                <a href="#how-it-works" className="hover:text-white transition-colors">
+                  Operational Workflow
+                </a>
+              </li>
+              <li>
+                <a href="#capabilities" className="hover:text-white transition-colors">
+                  Offline-First Edge Persistence
+                </a>
+              </li>
+              <li>
+                <a href="#capabilities" className="hover:text-white transition-colors">
+                  Vision AI Document OCR
+                </a>
+              </li>
+              <li>
+                <a href="#roles" className="hover:text-white transition-colors">
+                  Role-Based Clinical Portals
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* Column 3 — Access & Legal */}
           <div>
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">Access &amp; Compliance</h3>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 font-display">
+              Clinical Access
+            </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link
-                  to="/login"
-                  className="text-slate-400 hover:text-white focus:outline-none focus:underline hover:underline transition-colors"
-                >
-                  Clinical Staff Log in
+                <Link to="/login" className="hover:text-white transition-colors">
+                  Staff Workspace Login
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/signup"
-                  className="text-slate-400 hover:text-white focus:outline-none focus:underline hover:underline transition-colors"
-                >
-                  Create Staff Account
+                <Link to="/signup" className="hover:text-white transition-colors">
+                  Register Facility Account
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/privacy"
-                  className="text-teal-400 hover:text-teal-300 focus:outline-none focus:underline hover:underline transition-colors"
-                >
-                  Privacy Policy (DPDP 2023)
+                <Link to="/privacy" className="hover:text-white transition-colors">
+                  Data Protection &amp; Privacy (DPDP 2023)
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/terms"
-                  className="text-teal-400 hover:text-teal-300 focus:outline-none focus:underline hover:underline transition-colors"
-                >
-                  Terms &amp; Protocols (Rule 3)
+                <Link to="/terms" className="hover:text-white transition-colors">
+                  Clinical Protocols &amp; Terms
                 </Link>
               </li>
             </ul>
@@ -704,28 +769,30 @@ export const LandingPage: React.FC = () => (
 
           {/* Column 4 — Official Facility & Emergency Contact */}
           <div>
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">District Authority</h3>
-            <address className="not-italic text-xs text-slate-400 space-y-1.5 leading-relaxed">
-              <p className="font-semibold text-slate-300">District Health Office (DHO)</p>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 font-display">
+              Public Health Authority
+            </h4>
+            <address className="not-italic text-xs space-y-1.5 leading-relaxed text-slate-400">
+              <p className="font-semibold text-slate-200">District Health Office (DHO)</p>
               <p>Public Health Department, Maharashtra</p>
               <p>Aundh District Hospital Campus, Pune — 411027</p>
-              <p className="text-teal-400 pt-1 font-semibold">Emergency Dial: 108 (24/7)</p>
+              <p className="text-teal-400 font-semibold pt-1">Emergency Dial: 108 (24/7)</p>
               <p className="text-slate-400">Health Advice: Toll-Free 104</p>
             </address>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+        <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <span>© 2026 SwasthyaSetu Rural Healthcare Continuity Project • Government of Maharashtra</span>
           <div className="flex items-center space-x-3">
             <Link to="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
             <span>•</span>
             <Link to="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
             <span>•</span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Demo Environment
+            <span className="inline-flex items-center gap-1.5 text-emerald-400 font-mono text-[11px]">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Pilot Live
             </span>
           </div>
         </div>

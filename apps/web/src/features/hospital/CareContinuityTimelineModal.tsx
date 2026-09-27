@@ -14,6 +14,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { ModalPortal } from '../../components/ModalPortal';
 
 interface TimelineEvent {
   id: string;
@@ -136,7 +137,8 @@ export const CareContinuityTimelineModal: React.FC<CareContinuityTimelineModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header */}
@@ -307,7 +309,7 @@ export const CareContinuityTimelineModal: React.FC<CareContinuityTimelineModalPr
                               <div className="mt-3 p-3 bg-slate-950 text-slate-300 rounded-lg font-mono text-[11px] space-y-2 border border-slate-800 overflow-x-auto">
                                 <div className="text-[10px] text-slate-500 font-bold border-b border-slate-800 pb-1 mb-1 flex items-center justify-between">
                                   <span>IMMUTABLE SCHEMATIC DATA (AUDIT)</span>
-                                  <span>RULE 4 VERIFIED</span>
+                                  <span className="text-teal-400">ABHA VERIFIED RECORD</span>
                                 </div>
                                 {evt.metadata.referralNumber && (
                                   <div>
@@ -388,5 +390,6 @@ export const CareContinuityTimelineModal: React.FC<CareContinuityTimelineModalPr
 
       </div>
     </div>
+  </ModalPortal>
   );
 };

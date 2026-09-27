@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { apiRequest } from '../../lib/api';
+import { ModalPortal } from '../../components/ModalPortal';
 import {
   X,
   Ambulance,
@@ -93,24 +94,25 @@ export const AmbulanceTransportSlipModal: React.FC<AmbulanceTransportSlipModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-4xl my-6 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Top Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="px-5 py-4 bg-white border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-500/20 border border-teal-400/40 text-teal-300 flex items-center justify-center">
-              <Ambulance className="w-5 h-5 text-teal-400" />
+            <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center">
+              <Ambulance className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-base tracking-tight text-white">108 EMRI Transport Slip</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase animate-pulse">
-                  Emergency Transit
+                <span className="font-bold text-sm text-slate-900">108 Transport Slip</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 uppercase">
+                  Emergency
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Government of Maharashtra • Public Health Department • Inter-Facility Transfer Handoff
+              <p className="text-[11px] text-slate-500">
+                Inter-Facility Transfer Handoff
               </p>
             </div>
           </div>
@@ -118,15 +120,15 @@ export const AmbulanceTransportSlipModal: React.FC<AmbulanceTransportSlipModalPr
           <div className="flex items-center space-x-2">
             <button
               onClick={handlePrint}
-              className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-              title="Print Physical Transport Slip"
+              className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              title="Print Transport Slip"
             >
-              <Printer className="w-3.5 h-3.5 text-teal-400" />
-              <span>Print Slip</span>
+              <Printer className="w-3.5 h-3.5 text-slate-500" />
+              <span>Print</span>
             </button>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white transition-colors p-1.5"
+              className="text-slate-400 hover:text-slate-600 transition-colors p-1.5"
             >
               <X className="w-5 h-5" />
             </button>
@@ -339,34 +341,34 @@ export const AmbulanceTransportSlipModal: React.FC<AmbulanceTransportSlipModalPr
               </div>
 
               {/* 2G Offline SMS Handoff Payload */}
-              <div className="p-4 bg-slate-900 text-slate-200 rounded-2xl space-y-2.5">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <span className="text-xs font-bold text-teal-400">Offline 2G GSM SMS Payload</span>
+                    <span className="text-xs font-bold text-slate-700">SMS Fallback Payload</span>
                     <span className="text-[10px] font-mono text-slate-400">(&lt; 160 chars)</span>
                   </div>
                   <button
                     onClick={handleCopySms}
-                    className="inline-flex items-center space-x-1 text-xs font-bold text-teal-300 hover:text-white transition-colors cursor-pointer"
+                    className="inline-flex items-center space-x-1 text-xs font-bold text-teal-600 hover:text-teal-800 transition-colors cursor-pointer"
                   >
                     {copiedSms ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">Copied to Clipboard!</span>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-600">Copied!</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5" />
-                        <span>Copy SMS</span>
+                        <span>Copy</span>
                       </>
                     )}
                   </button>
                 </div>
-                <div className="p-3 bg-slate-950 font-mono text-[11px] text-teal-200 rounded-xl break-all select-all border border-slate-800">
+                <div className="p-3 bg-white font-mono text-[11px] text-slate-800 rounded-lg break-all select-all border border-slate-200">
                   {slipData.offlineSmsPayload}
                 </div>
                 <p className="text-[10px] text-slate-400">
-                  Copy and send via standard SMS to <strong>108 Control Room</strong> if ambulance enters zero-data ghat or forest terrain.
+                  Send via SMS to <strong>108 Control Room</strong> if network is unavailable.
                 </p>
               </div>
 
@@ -404,5 +406,6 @@ export const AmbulanceTransportSlipModal: React.FC<AmbulanceTransportSlipModalPr
 
       </div>
     </div>
+  </ModalPortal>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { ModalPortal } from '../../components/ModalPortal';
 import {
   X,
   Pill,
@@ -157,7 +158,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
       });
 
       if (res.success && res.data) {
-        setSuccessMsg(`Pre-referral stabilization checklist saved under Rule 4 audit.`);
+        setSuccessMsg(`Pre-referral stabilization checklist saved to clinical audit ledger.`);
         if (onStabilizationSaved) {
           onStabilizationSaved(res.data);
         }
@@ -178,31 +179,32 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-3xl my-6 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Top Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="px-5 py-4 bg-white border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 flex items-center justify-center">
-              <Pill className="w-5 h-5 text-emerald-400" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+              <Pill className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-base tracking-tight text-white">Pre-Referral Emergency Stabilization</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
-                  Rule 4 Audit Logged
+                <span className="font-bold text-sm text-slate-900">Pre-Referral Stabilization</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                  Audit Logged
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Frontline loading protocol checklist for patient: <strong className="text-white">{referral?.patient?.name || 'Patient'}</strong> ({referral?.referralNumber || 'Referral'})
+              <p className="text-[11px] text-slate-500">
+                Patient: <strong className="text-slate-700">{referral?.patient?.name || 'Patient'}</strong> • {referral?.referralNumber || 'Referral'}
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors p-1.5"
+            className="text-slate-400 hover:text-slate-600 transition-colors p-1.5"
           >
             <X className="w-5 h-5" />
           </button>
@@ -382,7 +384,7 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition-colors flex items-center space-x-2 cursor-pointer"
+              className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md transition-colors flex items-center space-x-2 cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Recording Audit...' : 'Save & Attach to Referral'}</span>
@@ -393,5 +395,6 @@ export const PreReferralStabilizationModal: React.FC<PreReferralStabilizationMod
 
       </div>
     </div>
+  </ModalPortal>
   );
 };

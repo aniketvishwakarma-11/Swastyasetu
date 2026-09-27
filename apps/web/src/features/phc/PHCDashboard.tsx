@@ -10,6 +10,7 @@ import { PreReferralStabilizationModal } from './PreReferralStabilizationModal';
 import { AmbulanceTransportSlipModal } from '../coordinator/AmbulanceTransportSlipModal';
 import { ReferralDetailModal } from '../referrals/ReferralDetailModal';
 import { CareContinuityTimelineModal } from '../hospital/CareContinuityTimelineModal';
+import { ModalPortal } from '../../components/ModalPortal';
 import { formatFallbackSMS } from '@swastyasetu/shared';
 import {
   Stethoscope,
@@ -30,6 +31,7 @@ import {
   Pill,
   Ambulance,
   Sparkles,
+  MoreHorizontal,
 } from 'lucide-react';
 
 export const PHCDashboard: React.FC = () => {
@@ -52,6 +54,7 @@ export const PHCDashboard: React.FC = () => {
   const [copiedSms, setCopiedSms] = useState(false);
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [timelinePatient, setTimelinePatient] = useState<{ id: string; name: string } | null>(null);
+  const [openActionId, setOpenActionId] = useState<string | null>(null);
 
   // Load merged list of referrals (Server + Local IndexedDB)
   const loadReferrals = useCallback(async () => {
@@ -91,6 +94,21 @@ export const PHCDashboard: React.FC = () => {
     loadReferrals();
   }, [loadReferrals]);
 
+  // Mobile PWA quick-action bridge
+  useEffect(() => {
+    const handleQuickAction = (e: any) => {
+      if (e.detail === 'new-referral') setIsModalOpen(true);
+      else if (e.detail === 'vitals') setIsVitalsOpen(true);
+      else if (e.detail === 'followup') setIsFollowUpOpen(true);
+      else if (e.detail === 'stabilization') {
+        setStabilizationReferral(referrals[0] || null);
+        setIsStabilizationOpen(true);
+      }
+    };
+    window.addEventListener('phc-quick-action', handleQuickAction);
+    return () => window.removeEventListener('phc-quick-action', handleQuickAction);
+  }, [referrals]);
+
   return (
     <div className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Welcome & Clinical Actions Header */}
@@ -101,13 +119,13 @@ export const PHCDashboard: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-xl font-bold text-slate-900">PHC Referral Portal</h1>
+              <h1 className="text-xl font-bold text-slate-900">PHC Dashboard</h1>
               <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200 uppercase">
-                {user?.role}
+                PHC
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Facility: <span className="font-semibold text-slate-700">{user?.facility?.name || 'Primary Health Centre Khed'}</span> • Doctor: {user?.name}
+              {user?.facility?.name || 'Primary Health Centre'} • {user?.name?.startsWith('Dr.') ? user?.name : `Dr. ${user?.name || 'Practitioner'}`}
             </p>
           </div>
         </div>
@@ -119,7 +137,7 @@ export const PHCDashboard: React.FC = () => {
             className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>+ Create Digital Referral</span>
+            <span>Create Digital Referral</span>
           </button>
 
           <button
@@ -136,24 +154,24 @@ export const PHCDashboard: React.FC = () => {
               });
               setIsModalOpen(true);
             }}
-            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-teal-800 border border-teal-200 hover:bg-teal-50 hover:border-teal-300 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
             title="1-Click Load Acute STEMI Demo (Ramesh Yadav)"
           >
-            <Sparkles className="w-4 h-4 text-rose-600" />
+            <Sparkles className="w-4 h-4 text-teal-600" />
             <span>Load Ramesh Yadav STEMI Demo</span>
           </button>
 
           <button
             onClick={() => setIsVitalsOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-teal-300 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
-            <HeartPulse className="w-4 h-4 text-rose-500" />
+            <HeartPulse className="w-4 h-4 text-teal-600" />
             <span>Rapid Vitals &amp; EWS</span>
           </button>
 
           <button
             onClick={() => setIsFollowUpOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-teal-300 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
             <CalendarCheck className="w-4 h-4 text-teal-600" />
             <span>Follow-Up Tracker</span>
@@ -164,9 +182,9 @@ export const PHCDashboard: React.FC = () => {
               setStabilizationReferral(referrals[0] || null);
               setIsStabilizationOpen(true);
             }}
-            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-800 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
-            <Pill className="w-4 h-4 text-emerald-600" />
+            <Pill className="w-4 h-4 text-teal-600" />
             <span>Pre-Referral Stabilization</span>
           </button>
 
@@ -177,10 +195,10 @@ export const PHCDashboard: React.FC = () => {
                 loadReferrals();
               }}
               disabled={isSyncing}
-              className="inline-flex items-center space-x-1.5 px-3 py-2 bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              className="inline-flex items-center space-x-1.5 px-3 py-2 bg-white text-teal-800 border border-teal-300 hover:bg-teal-50 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
               title="Synchronize offline-created records to cloud database"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-teal-600 ${isSyncing ? 'animate-spin' : ''}`} />
               <span>Sync Pending ({pendingCount})</span>
             </button>
           )}
@@ -203,12 +221,12 @@ export const PHCDashboard: React.FC = () => {
         <div className="clinical-surface rounded-2xl p-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Emergency Referrals</p>
-            <p className="text-2xl font-bold text-rose-600 mt-1">
+            <p className="text-2xl font-bold text-slate-900 mt-1">
               {referrals.filter((r) => r.urgency === 'EMERGENCY').length}
             </p>
-            <p className="text-[11px] text-rose-600/80 mt-0.5 font-medium">Critical acute transfers</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Critical acute transfers</p>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
+          <div className="h-11 w-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700">
             <ShieldAlert className="w-5 h-5" />
           </div>
         </div>
@@ -216,12 +234,12 @@ export const PHCDashboard: React.FC = () => {
         <div className="clinical-surface rounded-2xl p-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Urgent / Routine</p>
-            <p className="text-2xl font-bold text-amber-700 mt-1">
+            <p className="text-2xl font-bold text-slate-900 mt-1">
               {referrals.filter((r) => r.urgency === 'URGENT' || r.urgency === 'ROUTINE').length}
             </p>
             <p className="text-[11px] text-slate-400 mt-0.5">Secondary care queue</p>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700">
+          <div className="h-11 w-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700">
             <Clock className="w-5 h-5" />
           </div>
         </div>
@@ -229,10 +247,10 @@ export const PHCDashboard: React.FC = () => {
         <div className="clinical-surface rounded-2xl p-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cloud Ledger Status</p>
-            <p className="text-2xl font-bold text-emerald-700 mt-1">
+            <p className="text-2xl font-bold text-slate-900 mt-1">
               {referrals.filter((r) => r.syncStatus === 'SYNCED').length}
             </p>
-            <p className="text-[11px] text-emerald-600/80 mt-0.5 font-medium">
+            <p className="text-[11px] text-slate-400 mt-0.5">
               {failedCount > 0
                 ? `${failedCount} failed — retry sync`
                 : pendingCount > 0
@@ -240,7 +258,7 @@ export const PHCDashboard: React.FC = () => {
                 : 'All records synchronized'}
             </p>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700">
+          <div className="h-11 w-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700">
             <CheckCircle2 className="w-5 h-5" />
           </div>
         </div>
@@ -271,156 +289,258 @@ export const PHCDashboard: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-700 uppercase tracking-wider font-semibold border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-3">Ref ID</th>
-                  <th className="px-6 py-3">Patient</th>
-                  <th className="px-6 py-3">Destination Facility</th>
-                  <th className="px-6 py-3">Clinical Complaint</th>
-                  <th className="px-6 py-3">Urgency</th>
-                  <th className="px-6 py-3">Sync Status</th>
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {referrals.map((ref) => {
-                  const isEmergency = ref.urgency === 'EMERGENCY';
-                  const isUrgent = ref.urgency === 'URGENT';
-                  const isSynced = ref.syncStatus === 'SYNCED';
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-600">
+                <thead className="bg-slate-50 text-slate-700 uppercase tracking-wider font-semibold border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-3">Ref ID</th>
+                    <th className="px-6 py-3">Patient</th>
+                    <th className="px-6 py-3">Destination Facility</th>
+                    <th className="px-6 py-3">Clinical Complaint</th>
+                    <th className="px-6 py-3">Urgency</th>
+                    <th className="px-6 py-3">Sync Status</th>
+                    <th className="px-6 py-3">Date</th>
+                    <th className="px-6 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {referrals.map((ref) => {
+                    const isEmergency = ref.urgency === 'EMERGENCY';
+                    const isUrgent = ref.urgency === 'URGENT';
+                    const isSynced = ref.syncStatus === 'SYNCED';
 
-                  return (
-                    <tr key={ref.localId || ref.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-6 py-4 font-mono font-bold text-slate-900">
-                        {ref.referralNumber}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-900">{ref.patient?.name || 'Unknown'}</div>
-                        <div className="text-[11px] text-slate-400">
-                          {ref.patient?.age} yrs, {ref.patient?.gender} • {ref.patient?.village}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-slate-700 font-medium">
-                        {ref.destinationFacility?.name || ref.destinationFacilityId || 'District Hospital'}
-                      </td>
-                      <td className="px-6 py-4 max-w-xs truncate text-slate-800" title={ref.reason}>
-                        {ref.reason}
-                      </td>
-                      <td className="px-6 py-4">
+                    return (
+                      <tr key={ref.localId || ref.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="px-6 py-4 font-mono font-bold text-slate-900">
+                          {ref.referralNumber}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-slate-900">{ref.patient?.name || 'Unknown'}</div>
+                          <div className="text-[11px] text-slate-400">
+                            {ref.patient?.age} yrs, {ref.patient?.gender} • {ref.patient?.village}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-slate-700 font-medium">
+                          {ref.destinationFacility?.name || ref.destinationFacilityId || 'District Hospital'}
+                        </td>
+                        <td className="px-6 py-4 max-w-xs truncate text-slate-800" title={ref.reason}>
+                          {ref.reason}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] border font-bold ${
+                              isEmergency
+                                ? 'bg-teal-50 text-teal-800 border-teal-300'
+                                : isUrgent
+                                ? 'bg-slate-100 text-slate-800 border-slate-300'
+                                : 'bg-slate-100 text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            {isEmergency && <ShieldAlert className="w-3 h-3 text-teal-700" />}
+                            <span>{ref.urgency}</span>
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {ref.status === 'RECEIVED' ? (
+                            <span
+                              className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-300 shadow-2xs"
+                              title="Destination hospital acknowledged emergency alert and is preparing triage bay"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                              <span>BED READY</span>
+                            </span>
+                          ) : (
+                            <span
+                              className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] border font-semibold bg-slate-50 text-slate-700 border-slate-200"
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  isSynced ? 'bg-teal-500' : 'bg-amber-500 animate-pulse'
+                                }`}
+                              />
+                              <span>{ref.syncStatus || ref.status}</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-slate-400 text-[11px] whitespace-nowrap">
+                          <span className="flex items-center space-x-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{new Date(ref.createdAt).toLocaleDateString()}</span>
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="relative inline-flex items-center space-x-1.5">
+                            <button
+                              onClick={() => {
+                                setSelectedDetailReferral(ref);
+                                setIsDetailModalOpen(true);
+                              }}
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                              title="View Clinical Summary & Patient Details"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-slate-500" />
+                              <span>Details</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setStabilizationReferral(ref);
+                                setIsStabilizationOpen(true);
+                              }}
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                              title="Record Emergency Stabilization Loading Protocol"
+                            >
+                              <Pill className="w-3.5 h-3.5 text-teal-700" />
+                              <span>Stabilize</span>
+                            </button>
+
+                            {/* Overflow Menu Button */}
+                            <div className="relative">
+                              <button
+                                onClick={() => setOpenActionId(openActionId === ref.id ? null : ref.id)}
+                                className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-slate-200"
+                                title="More Clinical Actions"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </button>
+
+                              {openActionId === ref.id && (
+                                <div
+                                  className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1 text-left animate-in fade-in zoom-in-95 duration-100"
+                                  onClick={() => setOpenActionId(null)}
+                                >
+                                  <button
+                                    onClick={() => {
+                                      setTransportSlipReferral(ref);
+                                      setIsTransportSlipOpen(true);
+                                    }}
+                                    className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 cursor-pointer font-medium"
+                                  >
+                                    <Ambulance className="w-3.5 h-3.5 text-teal-600" />
+                                    <span>108 Transport Slip</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => {
+                                      const pid = ref.patientId || ref.patient?.id || ref.id;
+                                      const pname = ref.patient?.name || ref.patientName || 'Patient';
+                                      setTimelinePatient({ id: pid, name: pname });
+                                      setIsTimelineOpen(true);
+                                    }}
+                                    className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 cursor-pointer font-medium"
+                                  >
+                                    <Activity className="w-3.5 h-3.5 text-teal-600" />
+                                    <span>Continuity Timeline</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => setSelectedSmsReferral(ref)}
+                                    className="w-full px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center space-x-2 cursor-pointer font-medium border-t border-slate-100"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5 text-teal-600" />
+                                    <span>2G SMS Fallback</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View: Cards */}
+            <div className="block md:hidden divide-y divide-slate-100">
+              {referrals.map((ref) => {
+                const isEmergency = ref.urgency === 'EMERGENCY';
+                const isUrgent = ref.urgency === 'URGENT';
+                const isSynced = ref.syncStatus === 'SYNCED';
+
+                return (
+                  <div key={ref.localId || ref.id} className="p-4 space-y-3 bg-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-mono font-bold text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
+                          {ref.referralNumber}
+                        </span>
                         <span
-                          className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] border font-bold ${
+                          className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] border font-bold ${
                             isEmergency
-                              ? 'bg-rose-50 text-rose-700 border-rose-300'
+                              ? 'bg-teal-50 text-teal-800 border-teal-300'
                               : isUrgent
-                              ? 'bg-amber-50 text-amber-800 border-amber-300'
-                              : 'bg-slate-100 text-slate-700 border-slate-200'
+                              ? 'bg-slate-100 text-slate-800 border-slate-300'
+                              : 'bg-slate-50 text-slate-600 border-slate-200'
                           }`}
                         >
-                          {isEmergency && <ShieldAlert className="w-3 h-3 text-rose-600" />}
+                          {isEmergency && <ShieldAlert className="w-3 h-3 text-teal-700" />}
                           <span>{ref.urgency}</span>
                         </span>
-                      </td>
-                      <td className="px-6 py-4">
+                      </div>
+                      <span className="text-[11px] text-slate-400">
+                        {new Date(ref.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="font-semibold text-sm text-slate-900">{ref.patient?.name || 'Unknown Patient'}</div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        {ref.patient?.age} yrs, {ref.patient?.gender} • {ref.patient?.village}
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                      <div className="text-[10px] uppercase font-bold text-slate-400">Destination Facility</div>
+                      <div className="font-medium text-slate-800">{ref.destinationFacility?.name || ref.destinationFacilityId || 'District Hospital'}</div>
+                      <div className="text-[10px] uppercase font-bold text-slate-400 mt-1.5">Clinical Complaint</div>
+                      <div className="line-clamp-2 text-slate-700">{ref.reason}</div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <div>
                         {ref.status === 'RECEIVED' ? (
-                          <span
-                            className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-300 shadow-2xs"
-                            title="Destination hospital acknowledged emergency alert and is preparing triage bay"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-300">
+                            <CheckCircle2 className="w-3 h-3 text-teal-600" />
                             <span>BED READY</span>
                           </span>
                         ) : (
-                          <span
-                            className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] border font-semibold ${
-                              isSynced
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : 'bg-amber-50 text-amber-800 border-amber-200'
-                            }`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                isSynced ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
-                              }`}
-                            />
+                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] border font-semibold bg-slate-50 text-slate-700 border-slate-200">
+                            <span className={`w-1.5 h-1.5 rounded-full ${isSynced ? 'bg-teal-500' : 'bg-amber-500'}`} />
                             <span>{ref.syncStatus || ref.status}</span>
                           </span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 text-slate-400 text-[11px] whitespace-nowrap">
-                        <span className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{new Date(ref.createdAt).toLocaleDateString()}</span>
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end space-x-1.5 flex-wrap gap-1">
-                          <button
-                            onClick={() => {
-                              setSelectedDetailReferral(ref);
-                              setIsDetailModalOpen(true);
-                            }}
-                            className="inline-flex items-center space-x-1 px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
-                            title="View Clinical Summary & Patient Details"
-                          >
-                            <FileText className="w-3 h-3 text-slate-500" />
-                            <span>Details</span>
-                          </button>
+                      </div>
 
-                          <button
-                            onClick={() => {
-                              setStabilizationReferral(ref);
-                              setIsStabilizationOpen(true);
-                            }}
-                            className="inline-flex items-center space-x-1 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
-                            title="Record Emergency Stabilization Loading Protocol"
-                          >
-                            <Pill className="w-3 h-3 text-emerald-600" />
-                            <span>Stabilize</span>
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setTransportSlipReferral(ref);
-                              setIsTransportSlipOpen(true);
-                            }}
-                            className="inline-flex items-center space-x-1 px-2 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
-                            title="Generate 108 Ambulance Digital Transport Slip"
-                          >
-                            <Ambulance className="w-3 h-3 text-teal-600" />
-                            <span>108 Slip</span>
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              const pid = ref.patientId || ref.patient?.id || ref.id;
-                              const pname = ref.patient?.name || ref.patientName || 'Patient';
-                              setTimelinePatient({ id: pid, name: pname });
-                              setIsTimelineOpen(true);
-                            }}
-                            className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
-                            title="View Longitudinal Care Continuity Timeline"
-                          >
-                            <Activity className="w-3 h-3 text-teal-600" />
-                            <span>Timeline</span>
-                          </button>
-                          <button
-                            onClick={() => setSelectedSmsReferral(ref)}
-                            className="inline-flex items-center space-x-1 px-2 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-300 text-slate-700 border border-slate-200 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
-                            title="View 2G Cellular SMS Fallback Payload"
-                          >
-                            <MessageSquare className="w-3 h-3 text-teal-600" />
-                            <span>SMS</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => {
+                            setSelectedDetailReferral(ref);
+                            setIsDetailModalOpen(true);
+                          }}
+                          className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold cursor-pointer"
+                        >
+                          Details
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStabilizationReferral(ref);
+                            setIsStabilizationOpen(true);
+                          }}
+                          className="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-lg text-xs font-semibold cursor-pointer"
+                        >
+                          Stabilize
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
@@ -495,78 +615,80 @@ export const PHCDashboard: React.FC = () => {
 
       {/* SMS Fallback Modal (<160 chars) */}
       {selectedSmsReferral && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center">
-                  <MessageSquare className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">SMS Fallback Dispatch</h3>
-                  <p className="text-[11px] text-slate-500">GSM 160-character compact emergency dispatch</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setSelectedSmsReferral(null);
-                  setCopiedSms(false);
-                }}
-                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4">
-              <p className="text-xs text-slate-600 leading-relaxed">
-                When internet connectivity drops to zero, frontline clinicians and ASHA workers can transmit this compressed referral string via ordinary 2G cellular SMS to the district triage phone.
-              </p>
-
-              {(() => {
-                const smsText = formatFallbackSMS({
-                  referralNumber: selectedSmsReferral.referralNumber,
-                  patientName: selectedSmsReferral.patient?.name || 'PATIENT',
-                  age: selectedSmsReferral.patient?.age || 0,
-                  gender: selectedSmsReferral.patient?.gender || 'M',
-                  sourceFacilityCode: user?.facility?.code || 'PHC-KHED',
-                  destinationFacilityCode: selectedSmsReferral.destinationFacility?.code || 'DIST-HOSP',
-                  urgency: selectedSmsReferral.urgency || 'ROUT',
-                  reason: selectedSmsReferral.reason,
-                });
-
-                return (
-                  <div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold mb-1">
-                      <span>COMPACT PAYLOAD</span>
-                      <span className={smsText.length <= 160 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold'}>
-                        {smsText.length} / 160 characters
-                      </span>
-                    </div>
-                    <div className="p-3 bg-slate-900 text-emerald-400 font-mono text-xs rounded-xl break-all select-all">
-                      {smsText}
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400">Standard GSM SMS Compatible</span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(smsText);
-                          setCopiedSms(true);
-                          setTimeout(() => setCopiedSms(false), 2000);
-                        }}
-                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
-                      >
-                        {copiedSms ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedSms ? 'Copied to Clipboard' : 'Copy Payload'}</span>
-                      </button>
-                    </div>
+        <ModalPortal>
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden">
+              <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center">
+                    <MessageSquare className="w-4 h-4" />
                   </div>
-                );
-              })()}
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">SMS Fallback Dispatch</h3>
+                    <p className="text-[11px] text-slate-500">GSM 160-character compact emergency dispatch</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedSmsReferral(null);
+                    setCopiedSms(false);
+                  }}
+                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  When internet connectivity drops to zero, frontline clinicians and ASHA workers can transmit this compressed referral string via ordinary 2G cellular SMS to the district triage phone.
+                </p>
+
+                {(() => {
+                  const smsText = formatFallbackSMS({
+                    referralNumber: selectedSmsReferral.referralNumber,
+                    patientName: selectedSmsReferral.patient?.name || 'PATIENT',
+                    age: selectedSmsReferral.patient?.age || 0,
+                    gender: selectedSmsReferral.patient?.gender || 'M',
+                    sourceFacilityCode: user?.facility?.code || 'PHC-KHED',
+                    destinationFacilityCode: selectedSmsReferral.destinationFacility?.code || 'DIST-HOSP',
+                    urgency: selectedSmsReferral.urgency || 'ROUT',
+                    reason: selectedSmsReferral.reason,
+                  });
+
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold mb-1">
+                        <span>COMPACT PAYLOAD</span>
+                        <span className={smsText.length <= 160 ? 'text-teal-700 font-bold' : 'text-slate-700 font-bold'}>
+                          {smsText.length} / 160 characters
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-50 font-mono text-xs text-slate-800 rounded-lg break-all select-all border border-slate-200">
+                        {smsText}
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-[11px] text-slate-400">Standard GSM SMS Compatible</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(smsText);
+                            setCopiedSms(true);
+                            setTimeout(() => setCopiedSms(false), 2000);
+                          }}
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+                        >
+                          {copiedSms ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedSms ? 'Copied to Clipboard' : 'Copy Payload'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Pre-Referral Emergency Stabilization Modal */}

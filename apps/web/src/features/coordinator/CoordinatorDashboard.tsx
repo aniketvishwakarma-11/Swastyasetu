@@ -36,6 +36,9 @@ export const CoordinatorDashboard: React.FC = () => {
   const [isTransportSlipOpen, setIsTransportSlipOpen] = useState(false);
   const [transportSlipReferral, setTransportSlipReferral] = useState<any | null>(null);
 
+  // Mobile column tab state for mobile responsiveness (< md screens)
+  const [activeMobileTab, setActiveMobileTab] = useState<'AWAITING' | 'IN_TRANSIT' | 'COMPLETED'>('AWAITING');
+
   const loadReferrals = useCallback(async () => {
     setLoading(true);
     try {
@@ -106,13 +109,13 @@ export const CoordinatorDashboard: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-xl font-bold text-slate-900">Inter-Facility Referral Board</h1>
+              <h1 className="text-xl font-bold text-slate-900">Referral Coordination</h1>
               <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200 uppercase">
-                {user?.role}
+                Coordinator
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Triage &amp; Coordination Staff: <span className="font-semibold text-slate-700">{user?.name}</span>
+              Triage Staff: <span className="font-semibold text-slate-700">{user?.name}</span>
             </p>
           </div>
         </div>
@@ -130,7 +133,7 @@ export const CoordinatorDashboard: React.FC = () => {
             onClick={() => setIsRadarOpen(true)}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
-            <Building2 className="w-3.5 h-3.5 text-blue-600" />
+            <Building2 className="w-3.5 h-3.5 text-teal-600" />
             <span>Bed &amp; ICU Readiness</span>
           </button>
 
@@ -163,16 +166,50 @@ export const CoordinatorDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Mobile Column Tab Switcher */}
+      <div className="flex md:hidden bg-slate-100 p-1 rounded-xl gap-1 text-xs font-semibold">
+        <button
+          onClick={() => setActiveMobileTab('AWAITING')}
+          className={`flex-1 py-2 px-1 rounded-lg text-center transition-all ${
+            activeMobileTab === 'AWAITING'
+              ? 'bg-white text-slate-900 shadow-xs font-bold'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          Awaiting ({awaitingDispatch.length})
+        </button>
+        <button
+          onClick={() => setActiveMobileTab('IN_TRANSIT')}
+          className={`flex-1 py-2 px-1 rounded-lg text-center transition-all ${
+            activeMobileTab === 'IN_TRANSIT'
+              ? 'bg-white text-slate-900 shadow-xs font-bold'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          In-Transit ({inTransit.length})
+        </button>
+        <button
+          onClick={() => setActiveMobileTab('COMPLETED')}
+          className={`flex-1 py-2 px-1 rounded-lg text-center transition-all ${
+            activeMobileTab === 'COMPLETED'
+              ? 'bg-white text-slate-900 shadow-xs font-bold'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          Completed ({completedHandoffs.length})
+        </button>
+      </div>
+
       {/* Live Kanban Pipeline Columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Column 1: Awaiting Ambulance */}
-        <div className="clinical-surface rounded-2xl p-5 flex flex-col h-full">
+        <div className={`clinical-surface rounded-2xl p-5 flex-col h-full ${activeMobileTab === 'AWAITING' ? 'flex' : 'hidden md:flex'}`}>
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
             <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-amber-600" />
+              <Clock className="w-4 h-4 text-teal-600" />
               <span>Awaiting Ambulance</span>
             </h2>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900">
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200">
               {awaitingDispatch.length}
             </span>
           </div>
@@ -198,8 +235,8 @@ export const CoordinatorDashboard: React.FC = () => {
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                           isEmergency
-                            ? 'bg-rose-50 text-rose-700 border-rose-300'
-                            : 'bg-amber-50 text-amber-800 border-amber-300'
+                            ? 'bg-teal-50 text-teal-800 border-teal-300'
+                            : 'bg-slate-100 text-slate-800 border-slate-200'
                         }`}
                       >
                         {ref.urgency}
@@ -259,13 +296,13 @@ export const CoordinatorDashboard: React.FC = () => {
         </div>
 
         {/* Column 2: In-Transit Active Transfers */}
-        <div className="clinical-surface rounded-2xl p-5 flex flex-col h-full">
+        <div className={`clinical-surface rounded-2xl p-5 flex-col h-full ${activeMobileTab === 'IN_TRANSIT' ? 'flex' : 'hidden md:flex'}`}>
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
             <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-              <ArrowRightLeft className="w-4 h-4 text-blue-600" />
+              <ArrowRightLeft className="w-4 h-4 text-teal-600" />
               <span>In-Transit Active Transfers</span>
             </h2>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-900">
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200">
               {inTransit.length}
             </span>
           </div>
@@ -282,11 +319,11 @@ export const CoordinatorDashboard: React.FC = () => {
               inTransit.map((ref) => (
                 <div
                     key={ref.id}
-                    className="p-3.5 bg-blue-50/40 border border-blue-200 rounded-xl shadow-xs hover:border-blue-300 transition-all space-y-2.5"
+                    className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs hover:border-teal-300 transition-all space-y-2.5"
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-xs font-bold text-slate-900">{ref.referralNumber}</span>
-                      <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 border border-blue-300 animate-pulse">
+                      <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-300">
                         <Ambulance className="w-3 h-3" />
                         <span>EN-ROUTE</span>
                       </span>
@@ -299,7 +336,7 @@ export const CoordinatorDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-blue-100 flex items-center justify-between gap-2">
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => {
@@ -317,17 +354,17 @@ export const CoordinatorDashboard: React.FC = () => {
                             setTransportSlipReferral(ref);
                             setIsTransportSlipOpen(true);
                           }}
-                          className="text-[11px] font-semibold text-blue-700 hover:text-blue-900 flex items-center space-x-1 cursor-pointer"
+                          className="text-[11px] font-semibold text-teal-700 hover:text-teal-900 flex items-center space-x-1 cursor-pointer"
                           title="View 108 Ambulance Transport Slip"
                         >
-                          <FileSpreadsheet className="w-3 h-3 text-blue-600" />
+                          <FileSpreadsheet className="w-3 h-3 text-teal-600" />
                           <span>108 Slip</span>
                         </button>
                       </div>
 
                       <button
                         onClick={() => handleTransitStatus(ref.id, 'RECEIVED', 'Arrived at Destination ER')}
-                        className="inline-flex items-center space-x-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-[11px] font-semibold transition-colors cursor-pointer"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-md text-[11px] font-semibold transition-colors cursor-pointer"
                       >
                         <CheckCircle2 className="w-3 h-3" />
                         <span>Confirm ER Arrival</span>
@@ -340,13 +377,13 @@ export const CoordinatorDashboard: React.FC = () => {
         </div>
 
         {/* Column 3: Completed Handoffs */}
-        <div className="clinical-surface rounded-2xl p-5 flex flex-col h-full">
+        <div className={`clinical-surface rounded-2xl p-5 flex-col h-full ${activeMobileTab === 'COMPLETED' ? 'flex' : 'hidden md:flex'}`}>
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
             <h2 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <CheckCircle2 className="w-4 h-4 text-teal-600" />
               <span>Completed Handoffs</span>
             </h2>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900">
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200">
               {completedHandoffs.length}
             </span>
           </div>
@@ -367,7 +404,7 @@ export const CoordinatorDashboard: React.FC = () => {
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-xs font-bold text-slate-800">{ref.referralNumber}</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200 uppercase">
                       {ref.status.replace('_', ' ')}
                     </span>
                   </div>

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
 import { usePWA } from '../hooks/usePWA';
 import { Download, X, Share, PlusSquare } from 'lucide-react';
 
@@ -7,16 +6,11 @@ const DISMISS_KEY = 'swasthya_pwa_banner_dismissed_v1';
 
 export const PWAInstallBanner: React.FC = () => {
   const { isInstallable, isInstalled, isIOS, installApp } = usePWA();
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
 
-  // Session-level dismiss: resets whenever the user visits or refreshes the homepage
-  const [sessionDismissed, setSessionDismissed] = useState<boolean>(false);
-
-  // Persistent dismiss for non-homepage views
-  const [persistedDismissed, setPersistedDismissed] = useState<boolean>(() => {
+  // Persistent dismissal
+  const [dismissed, setDismissed] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(DISMISS_KEY) === 'true';
+      return sessionStorage.getItem(DISMISS_KEY) === 'true' || localStorage.getItem(DISMISS_KEY) === 'true';
     } catch {
       return false;
     }
@@ -25,41 +19,23 @@ export const PWAInstallBanner: React.FC = () => {
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [showDesktopInstructions, setShowDesktopInstructions] = useState(false);
 
-  // Reset session dismissal when navigating to the homepage so it displays every time
-  useEffect(() => {
-    if (isHomePage) {
-      setSessionDismissed(false);
-    }
-  }, [location.pathname, isHomePage]);
-
-  // If already installed, never show the banner
-  if (isInstalled) {
+  // If already installed or dismissed, never show the banner
+  if (isInstalled || dismissed) {
     return null;
   }
 
-  // On homepage: show every time (unless dismissed during current page view)
-  // On other pages: respect persistent dismiss or non-installable state
-  if (isHomePage) {
-    if (sessionDismissed) {
-      return null;
-    }
-  } else {
-    if (persistedDismissed || (!isInstallable && !isIOS)) {
-      return null;
-    }
+  // Only show if installable or iOS Safari
+  if (!isInstallable && !isIOS) {
+    return null;
   }
 
   const handleDismiss = () => {
-    if (isHomePage) {
-      // On homepage, dismiss is temporary for this view; refreshing will show it again
-      setSessionDismissed(true);
-    } else {
-      setPersistedDismissed(true);
-      try {
-        localStorage.setItem(DISMISS_KEY, 'true');
-      } catch {
-        // ignore storage error
-      }
+    setDismissed(true);
+    try {
+      sessionStorage.setItem(DISMISS_KEY, 'true');
+      localStorage.setItem(DISMISS_KEY, 'true');
+    } catch {
+      // ignore storage error
     }
   };
 

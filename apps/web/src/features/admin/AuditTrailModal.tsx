@@ -13,6 +13,7 @@ import {
   Hash,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { ModalPortal } from '../../components/ModalPortal';
 
 export interface AuditEventItem {
   id: string;
@@ -126,23 +127,24 @@ export const AuditTrailModal: React.FC<AuditTrailModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="relative w-full max-w-5xl rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 bg-linear-to-r from-slate-900 via-slate-800 to-teal-950 text-white flex items-center justify-between shrink-0">
+        <div className="px-5 py-4 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-400">
+            <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold">Immutable Clinical Audit Trail Explorer</h2>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-400/30">
-                  RULE 4 ENFORCED
+                <h2 className="text-sm font-bold text-slate-900">Audit Trail</h2>
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-200 uppercase">
+                  Verified
                 </span>
               </div>
-              <p className="text-xs text-slate-300">
-                Cryptographically Sealed SHA-256 Append-Only Clinical Ledger • Zero Tampering Permitted
+              <p className="text-[11px] text-slate-500">
+                Append-only clinical event ledger
               </p>
             </div>
           </div>
@@ -151,23 +153,23 @@ export const AuditTrailModal: React.FC<AuditTrailModalProps> = ({ isOpen, onClos
             <button
               onClick={handleVerifyLedger}
               disabled={verifying}
-              className="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-xs transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition-colors cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span>{verifying ? 'Verifying Hashes...' : 'Verify Cryptographic Integrity'}</span>
+              <span>{verifying ? 'Verifying...' : 'Verify Integrity'}</span>
             </button>
 
             <button
               onClick={loadAuditEvents}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
-              title="Refresh ledger"
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              title="Refresh"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
 
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -332,21 +334,21 @@ export const AuditTrailModal: React.FC<AuditTrailModalProps> = ({ isOpen, onClos
                   {isExpanded && (
                     <div className="px-4 pb-4 pt-2 border-t border-slate-100 bg-slate-50/70 space-y-3 text-xs">
                       {/* Cryptographic Linkage Block */}
-                      <div className="p-3 bg-slate-900 text-slate-200 rounded-lg font-mono text-[10px] space-y-1 overflow-x-auto shadow-inner">
-                        <div className="flex items-center justify-between text-teal-400 font-bold border-b border-slate-700 pb-1">
+                      <div className="p-3 bg-white border border-slate-200 rounded-lg font-mono text-[10px] space-y-1 overflow-x-auto">
+                        <div className="flex items-center justify-between text-teal-700 font-bold border-b border-slate-100 pb-1">
                           <span className="flex items-center space-x-1">
                             <Hash className="w-3 h-3" />
-                            <span>CRYPTOGRAPHIC MERKLE BLOCK LINK</span>
+                            <span>Hash Chain</span>
                           </span>
-                          <span className="text-emerald-400">SEALED APPEND-ONLY</span>
+                          <span className="text-emerald-600 text-[9px]">SEALED</span>
                         </div>
                         <div className="pt-1">
-                          <span className="text-slate-400">Previous Block Hash (Parent):</span>
-                          <p className="text-slate-300 break-all">{ev.prevHash}</p>
+                          <span className="text-slate-400">Previous Hash:</span>
+                          <p className="text-slate-600 break-all">{ev.prevHash}</p>
                         </div>
                         <div>
-                          <span className="text-teal-400 font-semibold">Current Block Hash (SHA-256):</span>
-                          <p className="text-emerald-300 font-bold break-all">{ev.hash}</p>
+                          <span className="text-teal-600 font-semibold">Current Hash:</span>
+                          <p className="text-slate-800 font-bold break-all">{ev.hash}</p>
                         </div>
                       </div>
 
@@ -374,12 +376,13 @@ export const AuditTrailModal: React.FC<AuditTrailModalProps> = ({ isOpen, onClos
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold cursor-pointer"
+            className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold cursor-pointer"
           >
-            Close Explorer
+            Close
           </button>
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

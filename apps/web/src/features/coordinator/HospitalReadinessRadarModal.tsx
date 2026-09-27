@@ -12,6 +12,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { apiRequest } from '../../lib/api';
+import { ModalPortal } from '../../components/ModalPortal';
 
 interface SpecialistRosterItem {
   id: string;
@@ -149,7 +150,8 @@ export const HospitalReadinessRadarModal: React.FC<HospitalReadinessRadarModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl my-8 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header */}
@@ -375,5 +377,6 @@ export const HospitalReadinessRadarModal: React.FC<HospitalReadinessRadarModalPr
 
       </div>
     </div>
+  </ModalPortal>
   );
 };
